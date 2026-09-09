@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Arabic, Cairo } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { BRAND } from "@/lib/constants";
+import { appUrl } from "@/lib/app-url";
 
 // خطوط مستضافة ذاتياً: لا طلب خارجي، ولا انزلاق تخطيط عند التحميل.
 const bodyFont = IBM_Plex_Sans_Arabic({
@@ -19,10 +20,10 @@ const displayFont = Cairo({
   display: "swap",
 });
 
-const appUrl = process.env.APP_URL || "http://localhost:3000";
+
 
 export const metadata: Metadata = {
-  metadataBase: new URL(appUrl),
+  metadataBase: new URL(appUrl()),
   title: {
     default: `${BRAND.name} — ${BRAND.tagline}`,
     template: `%s | ${BRAND.name}`,

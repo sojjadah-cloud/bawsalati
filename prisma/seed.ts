@@ -287,8 +287,29 @@ async function seedTopics() {
   console.log(`  ✔ مواضيع الاستشارة: ${TOPICS.length}`);
 }
 
-/** حسابات التطوير فقط. في الإنتاج تُنشأ الحسابات من لوحة المدير. */
-const DEV_PASSWORD = process.env.SEED_PASSWORD || "Bawsalati@2026";
+/**
+ * كلمة مرور الحسابات الأولى.
+ * في الإنتاج لا قيمة افتراضية: يجب ضبط SEED_PASSWORD صراحةً حتى لا تُنشر
+ * المنصة بكلمة مرور معروفة. تُستخدم عند إنشاء الحساب فقط، ولا تُعيد ضبط
+ * كلمة مرور حساب قائم.
+ */
+function seedPassword(): string {
+  const fromEnv = process.env.SEED_PASSWORD?.trim();
+  if (fromEnv) {
+    if (fromEnv.length < 10) {
+      throw new Error("SEED_PASSWORD يجب أن تكون 10 محارف على الأقل");
+    }
+    return fromEnv;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "SEED_PASSWORD غير مضبوط. اضبطه قبل التهيئة في الإنتاج حتى لا تُنشأ حسابات بكلمة مرور معروفة."
+    );
+  }
+  return "Bawsalati@2026";
+}
+
+const DEV_PASSWORD = seedPassword();
 
 async function seedUsers() {
   const passwordHash = await bcrypt.hash(DEV_PASSWORD, 12);
@@ -350,7 +371,11 @@ async function seedUsers() {
     });
   }
 
-  console.log(`  ✔ الحسابات: مدير + مختص (كلمة المرور: ${DEV_PASSWORD})`);
+  console.log(
+    process.env.NODE_ENV === "production"
+      ? "  ✔ الحسابات: مدير + مختص (كلمة المرور من SEED_PASSWORD)"
+      : `  ✔ الحسابات: مدير + مختص (كلمة المرور: ${DEV_PASSWORD})`
+  );
   return profile.id;
 }
 

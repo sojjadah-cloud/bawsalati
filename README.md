@@ -57,6 +57,12 @@ npm run guide:import -- ../StudentGuide2025.pdf "دليل الطالب 2025"   #
 | `npm run migrate:deploy` | تطبيق الترحيلات في الإنتاج |
 | `npm run seed` | بيانات المقياس والتصنيفات والمواضيع |
 
+## النشر
+
+`render.yaml` في الجذر ينشئ التطبيق وقاعدة البيانات على Render دفعة واحدة:
+**New → Blueprint**، ثم اختر المستودع وفرع `main`، واضبط `SEED_PASSWORD` عند الطلب.
+التفاصيل والقيود في [`docs/07-deployment.md`](docs/07-deployment.md).
+
 ## بنية المشروع
 
 ```
@@ -102,3 +108,4 @@ scripts/                 قاعدة التطوير، الترحيل، استير
 | [`docs/04-api.md`](docs/04-api.md) | عقد الواجهات البرمجية |
 | [`docs/05-security-privacy.md`](docs/05-security-privacy.md) | الأمن والخصوصية والصلاحيات |
 | [`docs/06-testing.md`](docs/06-testing.md) | التغطية وما يجب فحصه يدوياً |
+| [`docs/07-deployment.md`](docs/07-deployment.md) | النشر على Render وقائمة ما قبل الإطلاق |

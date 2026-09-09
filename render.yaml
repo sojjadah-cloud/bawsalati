@@ -1,0 +1,71 @@
+# مخطّط نشر بوصلتي على Render
+# https://render.com/docs/blueprint-spec
+#
+# ينشئ خدمتين: تطبيق Next.js وقاعدة PostgreSQL مربوطة به تلقائياً.
+# البناء يطبّق الترحيلات ثم يهيّئ بيانات المقياس، وكلاهما آمن عند التكرار.
+
+databases:
+  - name: bawsalati-db
+    databaseName: bawsalati
+    user: bawsalati
+    plan: free
+    region: frankfurt
+
+services:
+  - type: web
+    name: bawsalati
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    healthCheckPath: /
+    buildCommand: >-
+      npm ci &&
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run seed &&
+      npm run build
+    startCommand: npm run start
+
+    # ملاحظة التخزين:
+    # ملفات المكتبة ودليل الطالب تُكتب على القرص. قرص خدمات الخطة المجانية
+    # مؤقّت، فتختفي الملفات المرفوعة عند كل نشر جديد. عند الترقية إلى خطة
+    # مدفوعة أزل التعليق عن الكتلة التالية واضبط STORAGE_DIR على /var/data.
+    # disk:
+    #   name: bawsalati-storage
+    #   mountPath: /var/data
+    #   sizeGB: 5
+
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+
+      # يُربط تلقائياً بقاعدة البيانات أعلاه
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bawsalati-db
+          property: connectionString
+
+      # مفتاح توقيع الجلسات — تولّده Render ولا يظهر في المستودع
+      - key: JWT_SECRET
+        generateValue: true
+
+      # كلمة مرور الحسابين الأوّلين (مدير + مختص).
+      # تطلبها Render منك عند إنشاء المخطّط، ولا تُقرأ من المستودع.
+      # تُستخدم عند إنشاء الحساب فقط، ولا تُعيد ضبط كلمة مرور حساب قائم.
+      - key: SEED_PASSWORD
+        sync: false
+
+      - key: STORAGE_DIR
+        value: ./storage
+
+      # مزوّد الإشعارات: console يسجّل محلياً بدل الإرسال.
+      # غيّره إلى whatsapp أو sms بعد ضبط بيانات المزوّد أدناه.
+      - key: NOTIFY_PROVIDER
+        value: console
+      - key: NOTIFY_API_URL
+        sync: false
+      - key: NOTIFY_API_TOKEN
+        sync: false
+      - key: NOTIFY_SENDER_ID
+        sync: false
