@@ -1,0 +1,126 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ChevronLeft, Download } from "lucide-react";
+import { getPublicResource } from "@/features/library/service";
+import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
+import { ResourceViewer } from "@/components/library/ResourceViewer";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const resource = await getPublicResource(id);
+  if (!resource) return { title: "المورد غير موجود" };
+  return {
+    title: resource.title,
+    description: resource.description.slice(0, 160) || undefined,
+  };
+}
+
+export default async function ResourcePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const resource = await getPublicResource(id);
+  if (!resource) notFound();
+
+  const meta = [
+    resource.author ? { label: "المؤلف", value: resource.author } : null,
+    resource.publisher ? { label: "الناشر", value: resource.publisher } : null,
+    resource.publishedYear ? { label: "سنة النشر", value: String(resource.publishedYear) } : null,
+    { label: "النوع", value: RESOURCE_TYPE_LABELS[resource.type] },
+    { label: "اللغة", value: resource.language === "ar" ? "العربية" : resource.language },
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  const downloadKind = resource.hasAudio ? "audio" : "file";
+  const canDownload = resource.downloadable && (resource.hasFile || resource.hasAudio);
+
+  return (
+    <div className="container-x py-10 sm:py-14">
+      <nav aria-label="مسار التنقّل" className="mb-4">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-[var(--color-muted)]">
+          <li>
+            <Link href="/library" className="transition-colors hover:text-brand-700">
+              المكتبة الرقمية
+            </Link>
+          </li>
+          <li aria-hidden="true">
+            <ChevronLeft className="h-4 w-4" />
+          </li>
+          <li>
+            <Link
+              href={`/library/${resource.category.slug}`}
+              className="transition-colors hover:text-brand-700"
+            >
+              {resource.category.name}
+            </Link>
+          </li>
+        </ol>
+      </nav>
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            {resource.title}
+          </h1>
+          {resource.author ? (
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{resource.author}</p>
+          ) : null}
+
+          {resource.description ? (
+            <div className="prose-ar mt-5 text-base">
+              {resource.description.split("\n").filter(Boolean).map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="mt-8">
+            <ResourceViewer
+              resourceId={resource.id}
+              title={resource.title}
+              hasFile={resource.hasFile}
+              hasAudio={resource.hasAudio}
+              externalUrl={resource.externalUrl}
+            />
+          </div>
+        </div>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="card card-pad">
+            <h2 className="text-sm font-bold text-slate-900">معلومات المورد</h2>
+            <dl className="mt-4 space-y-3 text-sm">
+              {meta.map((m) => (
+                <div key={m.label} className="flex justify-between gap-3">
+                  <dt className="text-[var(--color-muted)]">{m.label}</dt>
+                  <dd className="text-left font-semibold text-slate-800">{m.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {canDownload ? (
+              <a
+                href={`/api/files/library/${resource.id}?kind=${downloadKind}&mode=download`}
+                className="btn-outline btn-block mt-5"
+              >
+                <Download className="h-5 w-5" aria-hidden="true" />
+                تنزيل الملف
+              </a>
+            ) : (
+              <p className="mt-5 rounded-[var(--radius-md)] bg-slate-50 p-3 text-xs text-[var(--color-muted)]">
+                هذا المورد متاح للقراءة داخل المنصة فقط.
+              </p>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}

@@ -1,26 +1,54 @@
 {
-  "name": "bouslati-next",
-  "version": "0.1.0",
+  "name": "bawsalati",
+  "version": "2.0.0",
   "private": true,
+  "description": "بوصلتي — منصة التوجيه المهني المستقلة: اختبار الميول، المكتبة الرقمية، حجز المواعيد، دليل الطالب",
   "scripts": {
+    "db": "node scripts/pg-dev.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prisma:generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:legacy": "tsx scripts/migrate-legacy.ts",
+    "seed": "tsx prisma/seed.ts",
+    "guide:import": "tsx scripts/import-guide.ts",
+    "db:setup": "prisma migrate deploy && tsx prisma/seed.ts",
+    "verify": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@types/pg": "^8.20.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^5.9.6",
+    "lucide-react": "^1.23.0",
     "next": "16.2.10",
+    "pg": "^8.22.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^24.13.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
+    "embedded-postgres": "18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^5.0.0"
   }
 }

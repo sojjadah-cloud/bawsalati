@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# القالب بلا أسرار — يُرفع عمداً
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# مخلّفات البوّابة القديمة قبل الاستقلال — تُحذف بعد اعتماد الإصدار الجديد
+/_removed-portal
+
+# ملفات المكتبة ودليل الطالب — خارج المجلد العام عمداً
+/storage
+
+# عنقود PostgreSQL المحلي
+/.pgdata
+
+# رفعة تجريبية قديمة — التخزين الفعلي خارج public/
+/public/uploads

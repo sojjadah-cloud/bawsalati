@@ -1,0 +1,635 @@
+// ═══════════════════════════════════════════════════════════════════
+// بوصلتي — Bawsalati
+// منصة التوجيه المهني — PostgreSQL (Prisma)
+//
+// المنصة مستقلة تماماً. لا تحتوي على أي نموذج يخص منصات أخرى.
+// ═══════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────── Enums ───────────────────────────
+
+/// مستويان فقط لهما حساب: مدير النظام ومختص التوجيه المهني.
+/// الطالب لا يحتاج حساباً لاستخدام المنصة.
+enum Role {
+  ADMIN
+  SPECIALIST
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  SUBMITTED
+  ABANDONED
+}
+
+enum ResourceType {
+  READABLE // كتاب مقروء
+  AUDIO // كتاب مسموع
+  LINK // رابط تعليمي خارجي
+  OTHER // مورد آخر
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum FileKind {
+  LIBRARY
+  AUDIO
+  COVER
+  GUIDE
+}
+
+// ─────────────────────────── الحسابات ───────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(SPECIALIST)
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  specialistProfile SpecialistProfile?
+  uploadedFiles     StoredFile[]           @relation("UploadedBy")
+  createdResources  LibraryResource[]      @relation("ResourceAuthor")
+  guideDocuments    GuideDocument[]        @relation("GuideAuthor")
+  statusChanges     AppointmentHistory[]   @relation("ChangedBy")
+  scoringRuleSets   ScoringRuleSet[]       @relation("RuleSetAuthor")
+
+  @@index([role, active])
+  @@map("users")
+}
+
+/// بيانات المختص المهنية. رقم الإشعار خاص ولا يُعرض للطلاب أبداً.
+model SpecialistProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  title       String   @default("مختص التوجيه المهني")
+  bio         String   @default("")
+  photoUrl    String?
+  /// رقم التواصل الذي يصله إشعار الحجز (خاص — لا يُرسل للواجهة العامة)
+  notifyPhone String?
+  /// يقبل حجوزات جديدة
+  bookable    Boolean  @default(true)
+  slotMinutes Int      @default(30)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability SpecialistAvailability[]
+  blockedDates SpecialistBlockedDate[]
+  appointments Appointment[]
+
+  @@index([bookable])
+  @@map("specialists")
+}
+
+// ─────────────────────────── محرّك القياس ───────────────────────────
+
+/// تعريف المقياس. الأسئلة والمجموعات والخيارات كلها من قاعدة البيانات.
+model Assessment {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  title             String
+  description       String   @default("")
+  /// نص المقدّمة الذي يقرؤه الطالب قبل البدء
+  introduction      String   @default("")
+  version           Int      @default(1)
+  active            Boolean  @default(true)
+  groupCount        Int      @default(9)
+  questionsPerGroup Int      @default(6)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  groups     AssessmentGroup[]
+  dimensions AssessmentDimension[]
+  questions  AssessmentQuestion[]
+  options    AssessmentOption[]
+  ruleSets   ScoringRuleSet[]
+  sessions   AssessmentSession[]
+
+  @@index([active])
+  @@map("assessment_definitions")
+}
+
+/// المجموعة = دفعة أسئلة تُعرض للطالب. 9 مجموعات × 6 أسئلة = 54 سؤالاً.
+model AssessmentGroup {
+  id           String @id @default(cuid())
+  assessmentId String
+  number       Int
+  title        String
+  displayOrder Int
+
+  assessment Assessment           @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questions  AssessmentQuestion[]
+
+  @@unique([assessmentId, number])
+  @@index([assessmentId, displayOrder])
+  @@map("assessment_groups")
+}
+
+/// البُعد = محور نتيجة. لكل بُعد جدول نتيجة 3×3 (9 عبارات).
+model AssessmentDimension {
+  id           String   @id @default(cuid())
+  assessmentId String
+  code         String
+  label        String
+  description  String   @default("")
+  color        String   @default("#059669")
+  /// مجالات البرامج الدراسية الموصى بها لهذا البُعد
+  fields       String[] @default([])
+  displayOrder Int
+
+  assessment Assessment           @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questions  AssessmentQuestion[]
+  rules      ScoringRule[]
+
+  @@unique([assessmentId, code])
+  @@index([assessmentId, displayOrder])
+  @@map("assessment_dimensions")
+}
+
+model AssessmentQuestion {
+  id           String  @id @default(cuid())
+  assessmentId String
+  groupId      String
+  dimensionId  String
+  /// رقم السؤال الظاهر للطالب: 1..54
+  number       Int
+  text         String
+  /// الترتيب داخل المجموعة
+  displayOrder Int
+  active       Boolean @default(true)
+
+  assessment Assessment          @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  group      AssessmentGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  dimension  AssessmentDimension @relation(fields: [dimensionId], references: [id], onDelete: Restrict)
+  answers    AssessmentAnswer[]
+
+  @@unique([assessmentId, number])
+  @@unique([groupId, displayOrder])
+  @@index([assessmentId, active])
+  @@map("assessment_questions")
+}
+
+/// سلّم الإجابة المشترك للمقياس (مثلاً: تنطبق / لا تنطبق).
+model AssessmentOption {
+  id           String @id @default(cuid())
+  assessmentId String
+  value        Int
+  label        String
+  displayOrder Int
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, value])
+  @@map("assessment_options")
+}
+
+// ─────────────────────────── قواعد التصحيح ───────────────────────────
+
+/// مجموعة قواعد تصحيح مُصدَّرة. النتائج القديمة تبقى مربوطة بإصدارها،
+/// فتغيير القواعد مستقبلاً لا يغيّر نتائج طلاب سابقين.
+model ScoringRuleSet {
+  id           String   @id @default(cuid())
+  assessmentId String
+  version      Int
+  /// طريقة الحساب — تُنفَّذها الخدمة المقابلة في الخادم
+  method       String   @default("SUM_THEN_PERCENTILE")
+  notes        String   @default("")
+  active       Boolean  @default(false)
+  createdById  String?
+  createdAt    DateTime @default(now())
+
+  assessment Assessment          @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  createdBy  User?               @relation("RuleSetAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  rules      ScoringRule[]
+  sessions   AssessmentSession[]
+  results    AssessmentResult[]
+
+  @@unique([assessmentId, version])
+  @@index([assessmentId, active])
+  @@map("scoring_rule_sets")
+}
+
+/// خلية واحدة من جدول التحويل: (بُعد، فئة الصف، درجة خام) ← رتبة مئوية.
+model ScoringRule {
+  id          String @id @default(cuid())
+  ruleSetId   String
+  dimensionId String
+  /// فئة الصف الدراسي التي ينطبق عليها التحويل
+  gradeBand   String
+  rawScore    Int
+  percentile  Int
+
+  ruleSet   ScoringRuleSet      @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+  dimension AssessmentDimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleSetId, dimensionId, gradeBand, rawScore])
+  @@index([ruleSetId, gradeBand])
+  @@map("scoring_rules")
+}
+
+// ─────────────────────────── جلسات الطلاب ───────────────────────────
+
+model AssessmentSession {
+  id           String        @id @default(cuid())
+  assessmentId String
+  ruleSetId    String?
+  studentName  String
+  grade        String
+  phone        String
+  /// وقت موافقة الطالب على إشعار الخصوصية
+  consentAt    DateTime
+  status       SessionStatus @default(IN_PROGRESS)
+  /// SHA-256 لرمز الوصول للنتيجة — الرمز نفسه لا يُخزَّن
+  tokenHash    String        @unique
+  tokenExpires DateTime
+  startedAt    DateTime      @default(now())
+  submittedAt  DateTime?
+  updatedAt    DateTime      @updatedAt
+
+  assessment Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Restrict)
+  ruleSet    ScoringRuleSet?    @relation(fields: [ruleSetId], references: [id], onDelete: SetNull)
+  answers    AssessmentAnswer[]
+  result     AssessmentResult?
+
+  @@index([status, submittedAt])
+  @@index([grade])
+  @@index([studentName])
+  @@map("assessment_sessions")
+}
+
+model AssessmentAnswer {
+  id         String   @id @default(cuid())
+  sessionId  String
+  questionId String
+  value      Int
+  answeredAt DateTime @default(now())
+
+  session  AssessmentSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, questionId])
+  @@index([sessionId])
+  @@map("assessment_answers")
+}
+
+/// لقطة مجمّدة للنتيجة وقت التسليم.
+model AssessmentResult {
+  id                String   @id @default(cuid())
+  sessionId         String   @unique
+  ruleSetId         String
+  assessmentVersion Int
+  /// رموز الأبعاد الثلاثة الأعلى بالترتيب
+  topDimensions     String[] @default([])
+  recommendedFields String[] @default([])
+  createdAt         DateTime @default(now())
+
+  session  AssessmentSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  ruleSet  ScoringRuleSet          @relation(fields: [ruleSetId], references: [id], onDelete: Restrict)
+  sections AssessmentResultSection[]
+  analysis AssessmentAnalysis?
+
+  @@map("assessment_results")
+}
+
+/// جدول نتيجة واحد (3 أعمدة × 3 صفوف) لبُعد واحد.
+model AssessmentResultSection {
+  id             String @id @default(cuid())
+  resultId       String
+  dimensionCode  String
+  dimensionLabel String
+  displayOrder   Int
+  rawScore       Int
+  percentile     Int
+  /// شبكة 3×3 مجمّدة: صفوف من خلايا { questionNumber, value, text }
+  cells          Json
+
+  result AssessmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@unique([resultId, dimensionCode])
+  @@index([resultId, displayOrder])
+  @@map("assessment_result_sections")
+}
+
+/// جدول التحليل النهائي — صف لكل بُعد + الملخّص.
+model AssessmentAnalysis {
+  id       String @id @default(cuid())
+  resultId String @unique
+  /// صفوف الجدول: { code, label, rawScore, percentile, rank }
+  rows     Json
+  summary  String @default("")
+
+  result AssessmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@map("assessment_analysis")
+}
+
+/// البرامج الدراسية المستخدمة في التوصيات (من دليل الطالب).
+model Program {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  field        String
+  institution  String?
+  country      String?
+  type         String?
+  requirements String?
+  link         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([field])
+  @@map("programs")
+}
+
+// ─────────────────────────── المكتبة الرقمية ───────────────────────────
+
+model LibraryCategory {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  description  String   @default("")
+  displayOrder Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  resources LibraryResource[]
+
+  @@index([active, displayOrder])
+  @@map("library_categories")
+}
+
+model LibraryResource {
+  id            String       @id @default(cuid())
+  categoryId    String
+  title         String
+  description   String       @default("")
+  type          ResourceType @default(READABLE)
+  author        String       @default("")
+  publisher     String?
+  publishedYear Int?
+  language      String       @default("ar")
+  coverUrl      String?
+  /// الملف الرئيسي (PDF/مستند) — يُقدَّم عبر مسار مُصرَّح، لا عبر مسار تخزين مكشوف
+  fileId        String?
+  /// ملف صوتي للكتب المسموعة
+  audioFileId   String?
+  externalUrl   String?
+  downloadable  Boolean      @default(false)
+  featured      Boolean      @default(false)
+  published     Boolean      @default(true)
+  archivedAt    DateTime?
+  viewCount     Int          @default(0)
+  createdById   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  category  LibraryCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  file      StoredFile?     @relation("ResourceFile", fields: [fileId], references: [id], onDelete: SetNull)
+  audioFile StoredFile?     @relation("ResourceAudio", fields: [audioFileId], references: [id], onDelete: SetNull)
+  createdBy User?           @relation("ResourceAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([categoryId, published, archivedAt])
+  @@index([type])
+  @@index([featured])
+  @@map("library_resources")
+}
+
+/// ملف مخزَّن خارج المجلد العام. المفتاح داخلي ولا يُعرض للمتصفح.
+model StoredFile {
+  id           String   @id @default(cuid())
+  storageKey   String   @unique
+  originalName String
+  mimeType     String
+  size         Int
+  checksum     String
+  kind         FileKind
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  uploadedBy       User?             @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  resourcesAsFile  LibraryResource[] @relation("ResourceFile")
+  resourcesAsAudio LibraryResource[] @relation("ResourceAudio")
+  guideDocuments   GuideDocument[]
+
+  @@index([kind])
+  @@map("stored_files")
+}
+
+// ─────────────────────────── دليل الطالب ───────────────────────────
+
+model GuideDocument {
+  id           String    @id @default(cuid())
+  title        String
+  description  String    @default("")
+  fileId       String?
+  externalUrl  String?
+  downloadable Boolean   @default(true)
+  version      Int       @default(1)
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+  createdById  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  file      StoredFile? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  createdBy User?       @relation("GuideAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([published, version])
+  @@map("student_guide")
+}
+
+// ─────────────────────────── الحجوزات ───────────────────────────
+
+model ConsultationTopic {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  /// «أخرى» تطلب تفاصيل إضافية من الطالب
+  requiresDetails Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  appointments Appointment[]
+
+  @@index([active, displayOrder])
+  @@map("consultation_topics")
+}
+
+/// نافذة دوام أسبوعية متكرّرة للمختص.
+model SpecialistAvailability {
+  id           String   @id @default(cuid())
+  specialistId String
+  /// 0 = الأحد … 6 = السبت
+  weekday      Int
+  startTime    String
+  endTime      String
+  slotMinutes  Int      @default(30)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  specialist SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  @@unique([specialistId, weekday, startTime])
+  @@index([specialistId, active])
+  @@map("specialist_availability")
+}
+
+/// إجازة أو فترة غير متاحة.
+model SpecialistBlockedDate {
+  id           String   @id @default(cuid())
+  specialistId String
+  date         DateTime @db.Date
+  fullDay      Boolean  @default(true)
+  startTime    String?
+  endTime      String?
+  reason       String   @default("")
+  createdAt    DateTime @default(now())
+
+  specialist SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  @@index([specialistId, date])
+  @@map("specialist_blocked_dates")
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  specialistId    String
+  studentName     String
+  grade           String
+  phone           String
+  topicId         String
+  topicDetails    String?
+  scheduledDate   DateTime          @db.Date
+  startTime       String
+  endTime         String
+  status          AppointmentStatus @default(PENDING)
+  specialistNotes String?
+  cancelReason    String?
+  consentAt       DateTime
+  /// رمز يتيح للطالب متابعة حجزه دون حساب (SHA-256)
+  tokenHash       String            @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  specialist   SpecialistProfile      @relation(fields: [specialistId], references: [id], onDelete: Restrict)
+  topic        ConsultationTopic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  history      AppointmentHistory[]
+  deliveries   NotificationDelivery[]
+
+  /// منع الحجز المزدوج على مستوى قاعدة البيانات — لا يعتمد على شيفرة التطبيق وحدها
+  @@unique([specialistId, scheduledDate, startTime])
+  @@index([specialistId, scheduledDate])
+  @@index([status, scheduledDate])
+  @@index([phone])
+  @@map("appointments")
+}
+
+model AppointmentHistory {
+  id            String            @id @default(cuid())
+  appointmentId String
+  fromStatus    AppointmentStatus?
+  toStatus      AppointmentStatus
+  note          String            @default("")
+  changedById   String?
+  createdAt     DateTime          @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  changedBy   User?       @relation("ChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([appointmentId, createdAt])
+  @@map("appointment_status_history")
+}
+
+// ─────────────────────────── الإشعارات ───────────────────────────
+
+/// سجل تسليم مستقل — فشل الإشعار لا يلغي حجزاً صحيحاً.
+model NotificationDelivery {
+  id                String         @id @default(cuid())
+  channel           String
+  provider          String
+  /// رقم المستلم مقنّعاً جزئياً — لا يُخزَّن كاملاً في السجل
+  recipientMasked   String
+  template          String
+  status            DeliveryStatus @default(PENDING)
+  attempts          Int            @default(0)
+  lastError         String?
+  providerMessageId String?
+  appointmentId     String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([appointmentId])
+  @@map("notification_deliveries")
+}
+
+/// تنبيهات داخل لوحة المختص.
+model InAppNotification {
+  id           String   @id @default(cuid())
+  /// معرّف المختص المستهدف، أو null لكل المختصين
+  specialistId String?
+  type         String
+  title        String
+  body         String   @default("")
+  link         String?
+  read         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([specialistId, read])
+  @@map("in_app_notifications")
+}
+
+// ─────────────────────────── الحوكمة والإعدادات ───────────────────────────
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+/// سجل غير قابل للتعديل. لا توجد واجهة تحديث أو حذف له بالتصميم.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actorName String?
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
