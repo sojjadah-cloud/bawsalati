@@ -4,6 +4,7 @@ import { Download, FileText } from "lucide-react";
 import { getPublishedGuide } from "@/features/guide/service";
 import { EmptyState } from "@/components/ui/primitives";
 import { GuideReader } from "@/components/library/GuideReader";
+import { PageHero } from "@/components/public/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -39,23 +40,21 @@ export default async function GuidePage() {
   const hasContent = !!guide.file || !!guide.externalUrl;
 
   return (
-    <div className="container-x py-10 sm:py-14">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="section-kicker">المرجع الرسمي</p>
-          <h1 className="section-title">{guide.title}</h1>
-          {guide.description ? <p className="section-lead">{guide.description}</p> : null}
-        </div>
+    <>
+      <PageHero
+        title={guide.title}
+        description={guide.description || undefined}
+        action={
+          guide.downloadable && guide.file ? (
+            <a href="/api/files/guide?mode=download" className="btn-secondary">
+              <Download className="h-5 w-5" aria-hidden="true" />
+              تنزيل الدليل
+            </a>
+          ) : undefined
+        }
+      />
 
-        {guide.downloadable && guide.file ? (
-          <a href="/api/files/guide?mode=download" className="btn-outline shrink-0">
-            <Download className="h-5 w-5" aria-hidden="true" />
-            تنزيل الدليل
-          </a>
-        ) : null}
-      </div>
-
-      <div className="mt-8">
+      <div className="container-x py-10 sm:py-14">
         {hasContent ? (
           <GuideReader
             hasFile={!!guide.file}
@@ -69,14 +68,14 @@ export default async function GuidePage() {
             description="سيُرفع الدليل قريباً من قِبل إدارة المنصة."
           />
         )}
-      </div>
 
-      <p className="mt-6 text-xs text-[var(--color-faint)]">
-        الإصدار {guide.version}
-        {guide.publishedAt
-          ? ` · نُشر في ${guide.publishedAt.toISOString().slice(0, 10)}`
-          : null}
-      </p>
-    </div>
+        <p className="mt-6 text-xs text-[var(--color-faint)]">
+          الإصدار {guide.version}
+          {guide.publishedAt
+            ? ` · نُشر في ${guide.publishedAt.toISOString().slice(0, 10)}`
+            : null}
+        </p>
+      </div>
+    </>
   );
 }

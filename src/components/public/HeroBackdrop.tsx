@@ -1,8 +1,14 @@
 /**
- * خلفية الواجهة: أشكال هندسية ساكنة مرسومة بـ SVG.
+ * خلفية الترويسات: أشكال هندسية ساكنة مرسومة بـ SVG.
  * لا صور ولا حركة — لا وزن إضافي على التحميل، ولا إزعاج لمن يفضّل تقليل الحركة.
+ *
+ * `compact` للصفحات الفرعية: الأشكال نفسها بمقاس أصغر وحدّة أقل،
+ * فلا تزاحم عنواناً في شريط منخفض.
  */
-export function HeroBackdrop() {
+export function HeroBackdrop({ compact = false }: { compact?: boolean }) {
+  const scale = compact ? 0.55 : 1;
+  const r = (value: number) => Math.round(value * scale);
+
   return (
     <svg
       aria-hidden="true"
@@ -15,7 +21,11 @@ export function HeroBackdrop() {
           <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.10)" />
         </pattern>
         <radialGradient id="hero-glow" cx="50%" cy="0%" r="70%">
-          <stop offset="0%" stopColor="var(--color-brand-600)" stopOpacity="0.55" />
+          <stop
+            offset="0%"
+            stopColor="var(--color-brand-600)"
+            stopOpacity={compact ? "0.4" : "0.55"}
+          />
           <stop offset="100%" stopColor="var(--color-brand-600)" stopOpacity="0" />
         </radialGradient>
       </defs>
@@ -24,17 +34,17 @@ export function HeroBackdrop() {
       <rect width="100%" height="100%" fill="url(#hero-dots)" />
 
       {/* دوائر كبيرة تكسر المساحة الصلبة */}
-      <circle cx="12%" cy="88%" r="190" fill="var(--color-brand-700)" opacity="0.55" />
-      <circle cx="88%" cy="18%" r="150" fill="var(--color-brand-600)" opacity="0.35" />
+      <circle cx="12%" cy="88%" r={r(190)} fill="var(--color-brand-700)" opacity="0.55" />
+      <circle cx="88%" cy="18%" r={r(150)} fill="var(--color-brand-600)" opacity="0.35" />
 
       {/* لمسة كهرمانية واحدة */}
-      <circle cx="80%" cy="84%" r="64" fill="var(--color-accent-500)" opacity="0.16" />
+      <circle cx="80%" cy="84%" r={r(64)} fill="var(--color-accent-500)" opacity="0.16" />
 
       {/* أقواس رفيعة توحي بالبوصلة */}
       <circle
         cx="88%"
         cy="18%"
-        r="112"
+        r={r(112)}
         fill="none"
         stroke="rgba(255,255,255,0.16)"
         strokeWidth="1.5"
@@ -42,7 +52,7 @@ export function HeroBackdrop() {
       <circle
         cx="12%"
         cy="88%"
-        r="240"
+        r={r(240)}
         fill="none"
         stroke="rgba(255,255,255,0.10)"
         strokeWidth="1.5"

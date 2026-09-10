@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BRAND } from "@/lib/constants";
+import { PageHero } from "@/components/public/PageHero";
 
 export const metadata: Metadata = {
   title: "إشعار الخصوصية",
@@ -50,35 +51,37 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <div className="container-narrow py-10 sm:py-14">
-      <h1 className="section-title">إشعار الخصوصية</h1>
-      <p className="section-lead">
-        هذه المنصة تتعامل مع بيانات طلاب، ولذلك نوضّح بدقة ما نجمعه ولماذا.
-      </p>
+    <>
+      <PageHero
+        title="إشعار الخصوصية"
+        description="هذه المنصة تتعامل مع بيانات طلاب، ولذلك نوضّح بدقة ما نجمعه ولماذا."
+      />
 
-      <div className="mt-10 space-y-10">
-        {SECTIONS.map((s) => (
-          <section key={s.title}>
-            <h2 className="text-lg font-bold text-slate-900">{s.title}</h2>
-            <div className="prose-ar mt-3 text-sm">
-              {s.body.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+      <div className="container-narrow py-10 sm:py-14">
+        <div className="space-y-10">
+          {SECTIONS.map((s) => (
+            <section key={s.title}>
+              <h2 className="text-lg font-bold text-slate-900">{s.title}</h2>
+              <div className="prose-ar mt-3 text-sm">
+                {s.body.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
 
-      <div className="card card-pad mt-10">
-        <h2 className="text-base font-bold text-slate-900">للاستفسار</h2>
-        <p className="mt-2 text-sm text-[var(--color-muted)]">
-          راسلنا على{" "}
-          <a href={`mailto:${BRAND.email}`} className="font-bold text-brand-700 underline">
-            {BRAND.email}
-          </a>
-          .
-        </p>
+        <div className="card card-pad mt-10">
+          <h2 className="text-base font-bold text-slate-900">للاستفسار</h2>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            راسلنا على{" "}
+            <a href={`mailto:${BRAND.email}`} className="font-bold text-brand-700 underline">
+              {BRAND.email}
+            </a>
+            .
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { listActiveTopics, listBookableSpecialists } from "@/features/appointments/service";
 import { BookingWizard } from "@/components/booking/BookingWizard";
+import { PageHero } from "@/components/public/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +18,13 @@ export default async function BookingPage() {
   ]);
 
   return (
-    <div className="container-narrow py-10 sm:py-14">
-      <h1 className="section-title">حجز موعد</h1>
-      <p className="section-lead">
-        اختر مختصاً ووقتاً متاحاً وموضوع الاستشارة. لا يحتاج حساباً.
-      </p>
+    <>
+      <PageHero
+        title="حجز موعد"
+        description="اختر مختصاً ووقتاً متاحاً وموضوع الاستشارة. لا يحتاج حساباً."
+      />
 
-      <div className="mt-8">
+      <div className="container-narrow py-10 sm:py-14">
         <BookingWizard
           specialists={specialists.map((s) => ({
             id: s.id,
@@ -38,6 +39,6 @@ export default async function BookingPage() {
           }))}
         />
       </div>
-    </div>
+    </>
   );
 }

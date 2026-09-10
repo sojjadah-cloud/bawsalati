@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpenText, Library } from "lucide-react";
 import { listCategories, listPublicResources } from "@/features/library/service";
 import { EmptyState } from "@/components/ui/primitives";
 import { ResourceCard } from "@/components/library/ResourceCard";
+import { PageHero } from "@/components/public/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +23,13 @@ export default async function LibraryPage() {
   const totalResources = categories.reduce((n, c) => n + c.resourceCount, 0);
 
   return (
-    <div className="container-x py-10 sm:py-14">
-      <h1 className="section-title">المكتبة الرقمية</h1>
-      <p className="section-lead">اقرأ أو استمع مباشرة داخل المنصة.</p>
+    <>
+      <PageHero
+        title="المكتبة الرقمية"
+        description="كتب مقروءة ومسموعة وموارد تعليمية، اقرأها أو استمع إليها مباشرة داخل المنصة."
+      />
 
+      <div className="container-x py-10 sm:py-14">
       {totalResources === 0 ? (
         <div className="mt-8">
           <EmptyState
@@ -88,6 +92,7 @@ export default async function LibraryPage() {
           ) : null}
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -8,6 +8,7 @@ import { listPublicResources } from "@/features/library/service";
 import { EmptyState } from "@/components/ui/primitives";
 import { ResourceCard } from "@/components/library/ResourceCard";
 import { LibraryFilters } from "@/components/library/LibraryFilters";
+import { HeroBreadcrumb, PageHero } from "@/components/public/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -73,27 +74,27 @@ export default async function CategoryPage({
   };
 
   return (
-    <div className="container-x py-10 sm:py-14">
-      <nav aria-label="مسار التنقّل" className="mb-4">
-        <ol className="flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
-          <li>
-            <Link href="/library" className="transition-colors hover:text-brand-700">
-              المكتبة الرقمية
-            </Link>
-          </li>
-          <li aria-hidden="true">
-            <ChevronLeft className="h-4 w-4" />
-          </li>
-          <li className="font-semibold text-slate-700">{category.name}</li>
-        </ol>
-      </nav>
+    <>
+      <PageHero
+        title={category.name}
+        description={category.description || undefined}
+        breadcrumb={
+          <HeroBreadcrumb>
+            <li>
+              <Link href="/library" className="transition-colors hover:text-white">
+                المكتبة الرقمية
+              </Link>
+            </li>
+            <li aria-hidden="true">
+              <ChevronLeft className="h-4 w-4" />
+            </li>
+            <li className="font-semibold text-white">{category.name}</li>
+          </HeroBreadcrumb>
+        }
+      />
 
-      <h1 className="section-title">{category.name}</h1>
-      {category.description ? <p className="section-lead">{category.description}</p> : null}
-
-      <div className="mt-6">
+      <div className="container-x py-10 sm:py-14">
         <LibraryFilters />
-      </div>
 
       <p className="mt-5 text-sm text-[var(--color-muted)]" aria-live="polite">
         {total === 0 ? "لا توجد نتائج" : `${total} مورداً`}
@@ -147,6 +148,7 @@ export default async function CategoryPage({
           ) : null}
         </nav>
       ) : null}
-    </div>
+      </div>
+    </>
   );
 }

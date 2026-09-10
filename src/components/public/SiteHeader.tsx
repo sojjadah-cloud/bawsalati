@@ -25,8 +25,9 @@ export function SiteHeader() {
       <div className="container-x">
         {/* ثلاثة أعمدة متساوية الطرفين: اسم المنصة يبقى في المنتصف تماماً */}
         <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3">
-          {/* الطرف الأول: التنقّل على الشاشات الكبيرة، وزرّ القائمة على الجوال */}
-          <div className="flex items-center justify-self-start">
+          {/* الطرف الأول: التنقّل على الشاشات الكبيرة، وزرّ القائمة على الجوال.
+              محتوى الطرفين موسّط داخل عموده فيتجمّع محتوى الترويسة نحو المنتصف. */}
+          <div className="flex items-center justify-self-center">
             <nav aria-label="التنقّل الرئيسي" className="hidden lg:block">
               <ul className="flex items-center gap-1">
                 {NAV.map((item) => (
@@ -75,7 +76,7 @@ export function SiteHeader() {
           </Link>
 
           {/* الطرف الثاني: دخول المختصين، ثانوي بصرياً */}
-          <div className="justify-self-end">
+          <div className="justify-self-center">
             <Link href="/login" className="btn-ghost btn-sm hidden lg:inline-flex">
               دخول المختصين
             </Link>
