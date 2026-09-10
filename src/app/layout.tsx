@@ -1,22 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Arabic, Cairo } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { BRAND } from "@/lib/constants";
 import { appUrl } from "@/lib/app-url";
 
-// خطوط مستضافة ذاتياً: لا طلب خارجي، ولا انزلاق تخطيط عند التحميل.
+// خط واحد مستضاف ذاتياً: لا طلب خارجي، ولا انزلاق تخطيط، ووزن واحد للعناوين والنصوص.
 const bodyFont = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
-  display: "swap",
-});
-
-const displayFont = Cairo({
-  subsets: ["arabic"],
-  weight: ["600", "700", "800"],
-  variable: "--font-heading",
   display: "swap",
 });
 
@@ -64,7 +57,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" className={`${bodyFont.variable} ${displayFont.variable}`}>
+    <html lang="ar" dir="rtl" className={bodyFont.variable}>
       <body>
         <ToastProvider>{children}</ToastProvider>
       </body>

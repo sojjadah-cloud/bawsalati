@@ -7,8 +7,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @theme {
+  /* عائلة واحدة للنصوص والعناوين واسم المنصة — لا اختلاف في الخط بين عنصر وآخر */
   --font-sans: var(--font-body), "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-heading), "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
 
   /* الهوية الأساسية — أخضر مزرقّ */
   --color-brand-50: #f0fdfa;

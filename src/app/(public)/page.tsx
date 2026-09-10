@@ -6,6 +6,7 @@ import {
   ClipboardList,
   FileText,
 } from "lucide-react";
+import { HeroBackdrop } from "@/components/public/HeroBackdrop";
 
 export const dynamic = "force-static";
 
@@ -40,36 +41,22 @@ const SERVICES = [
   },
 ];
 
-const STEPS = [
-  { n: "1", title: "أجب على الاختبار", text: "عشر دقائق، وإجاباتك تُحفظ أولاً بأول." },
-  { n: "2", title: "اطّلع على نتيجتك", text: "ستة جداول لمحاور ميولك، يليها جدول تحليل." },
-  { n: "3", title: "ناقشها مع مختص", text: "احجز موعداً لاختيار التخصص المناسب لك." },
-];
-
 export default function HomePage() {
   return (
     <>
-      {/* الواجهة */}
-      <section className="border-b border-[var(--color-line)] bg-white">
-        <div className="container-x py-16 sm:py-24">
-          {/* الواجهة موسّطة؛ بقية الأقسام تبقى بمحاذاة النص الطبيعية للقراءة */}
-          <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-3xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-4xl lg:text-5xl">
+      {/* قسم تعريفي — بلا أزرار. المداخل الفعلية في بطاقات الخدمات تحته. */}
+      <section className="relative isolate overflow-hidden bg-brand-800 text-white">
+        <HeroBackdrop />
+
+        <div className="container-x relative py-20 text-center sm:py-28">
+          <div className="mx-auto max-w-2xl">
+            <h1 className="text-3xl leading-tight font-bold text-balance sm:text-4xl lg:text-5xl">
               اعرف ميولك، واختر تخصصك عن وعي
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-pretty text-[var(--color-muted)] sm:text-lg">
-              منصة التوجيه المهني لطلاب المدرسة: اختبار ميول، مكتبة رقمية، دليل
-              الطالب، وموعد مع مختص.
+            <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-pretty text-brand-100 sm:text-lg">
+              بوصلتي منصة التوجيه المهني في المدرسة. تساعدك على فهم ميولك، وتضع
+              بين يديك المراجع والدليل الرسمي ومختصاً تناقشه.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/assessment" className="btn-primary btn-lg">
-                ابدأ الاختبار
-                <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-              </Link>
-              <Link href="/booking" className="btn-outline btn-lg">
-                احجز موعداً
-              </Link>
-            </div>
           </div>
         </div>
       </section>
@@ -102,28 +89,6 @@ export default function HomePage() {
             </li>
           ))}
         </ul>
-      </section>
-
-      {/* ثلاث خطوات */}
-      <section className="border-t border-[var(--color-line)] bg-white">
-        <div className="container-x py-12">
-          <h2 className="text-lg font-bold text-slate-900">كيف تعمل بوصلتي</h2>
-          <ol className="mt-6 grid gap-6 sm:grid-cols-3">
-            {STEPS.map((step) => (
-              <li key={step.n} className="flex gap-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-extrabold text-white">
-                  {step.n}
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-bold text-slate-900">{step.title}</span>
-                  <span className="mt-1 block text-sm leading-relaxed text-[var(--color-muted)]">
-                    {step.text}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
       </section>
     </>
   );
