@@ -13,6 +13,7 @@ import {
   type AnalysisRowData,
   type ResultSectionData,
 } from "@/components/assessment/ResultView";
+import { ProvisionalNotice } from "@/components/assessment/ProvisionalNotice";
 
 // نتيجة طالب — لا تُفهرس ولا تُخزَّن.
 export const metadata: Metadata = {
@@ -63,6 +64,12 @@ export default async function ResultPage({
           ناقش نتيجتك مع مختص
         </Link>
       </header>
+
+      {result.ruleSet.provisional ? (
+        <div className="mt-6">
+          <ProvisionalNotice audience="student" />
+        </div>
+      ) : null}
 
       <div className="mt-6 no-print">
         <Alert tone="info" title="كيف تقرأ نتيجتك">

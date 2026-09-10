@@ -56,6 +56,8 @@ npm run guide:import -- ../StudentGuide2025.pdf "دليل الطالب 2025"   #
 | `npm run migrate` | إنشاء وتطبيق ترحيل جديد |
 | `npm run migrate:deploy` | تطبيق الترحيلات في الإنتاج |
 | `npm run seed` | بيانات المقياس والتصنيفات والمواضيع |
+| `npm run norms:provisional` | جدول تحويل مؤقّت للتجربة (يظهر تحذير على كل نتيجة) |
+| `npm run norms:import` | استيراد الجداول المعيارية الرسمية |
 
 ## النشر
 

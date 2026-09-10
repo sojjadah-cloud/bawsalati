@@ -49,7 +49,12 @@ export default async function AdminHome() {
     prisma.appointment.count(),
     prisma.scoringRuleSet.findFirst({
       where: { active: true, assessmentId: activeAssessment?.id },
-      select: { version: true, method: true, _count: { select: { rules: true } } },
+      select: {
+        version: true,
+        method: true,
+        provisional: true,
+        _count: { select: { rules: true } },
+      },
     }),
     prisma.guideDocument.findFirst({ where: { published: true }, select: { version: true } }),
   ]);
@@ -59,7 +64,11 @@ export default async function AdminHome() {
   if (!activeAssessment) warnings.push("لا يوجد مقياس فعّال — شغّل تهيئة قاعدة البيانات.");
   if (!activeRuleSet || activeRuleSet._count.rules === 0) {
     warnings.push(
-      "لم تُدخل الجداول المعيارية بعد. لن تُحتسب أي نتيجة قبل استيرادها بالأمر npm run norms:import."
+      "لم تُدخل جداول التحويل بعد. لن تُحتسب أي نتيجة قبل استيرادها بالأمر npm run norms:import."
+    );
+  } else if (activeRuleSet.provisional) {
+    warnings.push(
+      "جدول التحويل الفعّال مؤقّت وليس الجدول المعياري الرسمي. الرتب المئينية غير معتمدة، وتظهر تحذيرات على كل نتيجة."
     );
   }
   if (activeQuestions !== 54) {
@@ -141,7 +150,10 @@ export default async function AdminHome() {
             <dl className="grid gap-3 sm:grid-cols-3">
               <div>
                 <dt className="text-xs text-[var(--color-muted)]">الإصدار الفعّال</dt>
-                <dd className="mt-0.5 font-bold text-slate-900">v{activeRuleSet.version}</dd>
+                <dd className="mt-0.5 font-bold text-slate-900">
+                  v{activeRuleSet.version}
+                  {activeRuleSet.provisional ? " — مؤقّت" : " — رسمي"}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-[var(--color-muted)]">طريقة الحساب</dt>

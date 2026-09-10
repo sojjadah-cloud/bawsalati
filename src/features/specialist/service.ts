@@ -131,7 +131,7 @@ export async function getSubmissionDetail(sessionId: string) {
         include: {
           sections: { orderBy: { displayOrder: "asc" } },
           analysis: true,
-          ruleSet: { select: { version: true, method: true } },
+          ruleSet: { select: { version: true, method: true, provisional: true } },
           approvedBy: { select: { name: true } },
         },
       },

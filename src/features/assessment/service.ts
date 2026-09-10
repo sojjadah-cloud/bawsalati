@@ -319,7 +319,7 @@ export async function getResultBySessionId(sessionId: string) {
         include: {
           sections: { orderBy: { displayOrder: "asc" } },
           analysis: true,
-          ruleSet: { select: { version: true } },
+          ruleSet: { select: { version: true, provisional: true } },
         },
       },
     },

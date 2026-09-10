@@ -228,6 +228,9 @@ model ScoringRuleSet {
   method       String   @default("SUM_THEN_PERCENTILE")
   notes        String   @default("")
   active       Boolean  @default(false)
+  /// جدول مؤقت للتجربة، ليس الجدول المعياري الرسمي.
+  /// النتائج المحسوبة به تُعرض مصحوبة بتحذير ظاهر.
+  provisional  Boolean  @default(false)
   createdById  String?
   createdAt    DateTime @default(now())
 

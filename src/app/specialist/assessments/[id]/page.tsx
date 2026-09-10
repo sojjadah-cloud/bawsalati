@@ -14,6 +14,7 @@ import {
   type ResultSectionData,
 } from "@/components/assessment/ResultView";
 import { SpecialistAnalysis } from "@/components/assessment/SpecialistAnalysis";
+import { ProvisionalNotice } from "@/components/assessment/ProvisionalNotice";
 
 export const metadata: Metadata = {
   title: "تفاصيل الاختبار",
@@ -57,6 +58,12 @@ export default async function AssessmentDetailPage({
         {session.studentName}
       </h1>
 
+      {result.ruleSet.provisional ? (
+        <div className="mt-5">
+          <ProvisionalNotice audience="specialist" />
+        </div>
+      ) : null}
+
       {/* بيانات الطالب */}
       <dl className="card card-pad mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
@@ -69,7 +76,7 @@ export default async function AssessmentDetailPage({
           },
           {
             label: "إصدار قواعد التصحيح",
-            value: `v${result.ruleSet.version} · ${result.assessmentVersion}`,
+            value: `v${result.ruleSet.version}${result.ruleSet.provisional ? " (مؤقّت)" : ""}`,
           },
         ].map((row) => (
           <div key={row.label}>
