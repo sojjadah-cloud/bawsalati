@@ -23,7 +23,10 @@
     "db:setup": "prisma migrate deploy && tsx prisma/seed.ts",
     "verify": "npm run typecheck && npm run lint && npm run test",
     "norms:import": "tsx scripts/import-norms.ts",
-    "norms:provisional": "tsx scripts/provisional-norms.ts"
+    "norms:provisional": "tsx scripts/provisional-norms.ts",
+    "audit:pages": "node scripts/audit/pages.js",
+    "audit:api": "node scripts/audit/api.js",
+    "audit:data": "tsx scripts/audit/data.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

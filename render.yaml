@@ -59,6 +59,11 @@ services:
       - key: STORAGE_DIR
         value: ./storage
 
+      # موازن حِمل واحد أمام الخدمة، فيُقرأ عنوان العميل من آخر مدخل
+      # في X-Forwarded-For بدل أول مدخل يتحكّم به المتصل.
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+
       # مزوّد الإشعارات: console يسجّل محلياً بدل الإرسال.
       # غيّره إلى whatsapp أو sms بعد ضبط بيانات المزوّد أدناه.
       - key: NOTIFY_PROVIDER

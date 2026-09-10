@@ -57,20 +57,9 @@ export const resourceSchema = z
         message: "الرابط مطلوب لهذا النوع",
       });
     }
-    if (v.type === "READABLE" && !v.fileId && !v.externalUrl) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["fileId"],
-        message: "ارفع ملفاً أو أضف رابطاً للمورد",
-      });
-    }
-    if (v.type === "AUDIO" && !v.audioFileId && !v.externalUrl) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["audioFileId"],
-        message: "ارفع ملفاً صوتياً أو أضف رابطاً",
-      });
-    }
+    // المقروء والمسموع يجوز تسجيلهما في الفهرس قبل توفّر النسخة:
+    // صفحة المورد تعرض حينها «مُدرَج في الفهرس» وتدعو الطالب لسؤال المختص.
+    // أما المورد من نوع رابط فلا معنى له بلا رابط، ولذلك بقي شرطه أعلاه.
   });
 
 export type ResourceInput = z.infer<typeof resourceSchema>;

@@ -29,10 +29,41 @@ export async function audit(action: string, entity: string, opts: AuditOpts = {}
   }
 }
 
+/**
+ * عدد الوسطاء الموثوقين أمام التطبيق.
+ * ترويسة X-Forwarded-For يكتبها العميل ويُلحق بها كل وسيط عنوان من استقبل منه،
+ * فأقصى اليسار قيمة يتحكّم بها المهاجم. القيمة الموثوقة هي التي كتبها آخر وسيط
+ * لنا، أي الترتيب من اليمين بعدد الوسطاء. صفر يعني لا وسيط، فتُتجاهل الترويسة
+ * كلياً وإلا أمكن تجاوز حدود المعدّل بترويسة مزوّرة.
+ */
+function trustedProxyHops(): number {
+  const raw = process.env.TRUSTED_PROXY_HOPS;
+  if (raw !== undefined && raw !== "") {
+    const n = Number(raw);
+    if (Number.isInteger(n) && n >= 0) return n;
+  }
+  // على منصات الاستضافة يقف موازن حِمل واحد أمام التطبيق افتراضياً.
+  return process.env.NODE_ENV === "production" ? 1 : 0;
+}
+
 export function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "local";
+  const hops = trustedProxyHops();
+  if (hops > 0) {
+    const fwd = req.headers.get("x-forwarded-for");
+    if (fwd) {
+      const parts = fwd
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
+      // العنوان الذي كتبه أول وسيط موثوق لنا، لا ما أرسله العميل
+      const ip = parts[parts.length - hops];
+      if (ip) return ip;
+      if (parts.length > 0) return parts[0];
+    }
+    const real = req.headers.get("x-real-ip");
+    if (real) return real.trim();
+  }
+  return "local";
 }
 
 /** إخفاء وسط رقم الهاتف قبل أي تسجيل. */

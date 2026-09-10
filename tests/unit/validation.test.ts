@@ -92,16 +92,18 @@ describe("موارد المكتبة", () => {
     type: "READABLE" as const,
   };
 
-  it("يشترط ملفاً أو رابطاً للمورد المقروء", () => {
-    expect(resourceSchema.safeParse(base).success).toBe(false);
+  it("يقبل تسجيل عنوان في الفهرس قبل إرفاق نسخته", () => {
+    // المكتبة فهرس أولاً: يسجّل المختص العنوان ثم يرفع الملف لاحقاً.
+    expect(resourceSchema.safeParse(base).success).toBe(true);
     expect(resourceSchema.safeParse({ ...base, fileId: "file-1" }).success).toBe(true);
-  });
-
-  it("يشترط ملفاً صوتياً للكتاب المسموع", () => {
-    expect(resourceSchema.safeParse({ ...base, type: "AUDIO" }).success).toBe(false);
+    expect(resourceSchema.safeParse({ ...base, type: "AUDIO" }).success).toBe(true);
     expect(
       resourceSchema.safeParse({ ...base, type: "AUDIO", audioFileId: "audio-1" }).success
     ).toBe(true);
+  });
+
+  it("يشترط رابطاً لمورد من نوع رابط", () => {
+    expect(resourceSchema.safeParse({ ...base, type: "LINK" }).success).toBe(false);
   });
 
   it("يرفض الروابط غير الآمنة", () => {

@@ -27,9 +27,12 @@ const GRADES = ["9", "10", "11", "12"];
 const GENDERS: Gender[] = ["MALE", "FEMALE"];
 const MAX_RAW = 9;
 
-/** تحويل خطّي معلن — لا يدّعي أنه توزيع معياري. */
+/**
+ * تحويل خطّي معلن — لا يدّعي أنه توزيع معياري.
+ * الحدّ الأدنى 1 لأن الرتبة المئينية تبدأ من 1 اصطلاحاً، و«صفر» بلا معنى.
+ */
 function provisionalPercentile(rawScore: number): number {
-  return Math.round((rawScore / MAX_RAW) * 99);
+  return Math.max(1, Math.round((rawScore / MAX_RAW) * 99));
 }
 
 async function main() {
