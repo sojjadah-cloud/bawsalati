@@ -22,10 +22,10 @@ export const GRADES = [
   { value: "12", label: "الصف الثاني عشر" },
 ] as const;
 
-/** الجنس مطلوب لأن الجداول المعيارية تختلف بين البنين والبنات. */
+/** الجنس مطلوب لأن الجداول المعيارية تختلف بين الذكور والإناث. */
 export const GENDERS = [
-  { value: "MALE", label: "ولد" },
-  { value: "FEMALE", label: "بنت" },
+  { value: "MALE", label: "ذكر" },
+  { value: "FEMALE", label: "أنثى" },
 ] as const;
 
 export const GENDER_LABELS: Record<string, string> = Object.fromEntries(

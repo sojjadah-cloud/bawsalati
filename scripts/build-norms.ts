@@ -88,7 +88,7 @@ async function main() {
 
   const byGrade = new Map<string, number>();
   for (const g of groups) {
-    const key = `${g.gradeBand}/${g.gender === "MALE" ? "ولد" : "بنت"}`;
+    const key = `${g.gradeBand}/${g.gender === "MALE" ? "ذكر" : "أنثى"}`;
     byGrade.set(key, Math.max(byGrade.get(key) ?? 0, g.sample));
   }
   console.log("\n  حجم العيّنة لكل مجموعة مرجعية:");

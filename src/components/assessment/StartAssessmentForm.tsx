@@ -97,7 +97,7 @@ export function StartAssessmentForm() {
             options={GRADES.map((g) => ({ value: g.value, label: g.label }))}
           />
 
-          {/* الجنس مطلوب لأن جدول تحويل الدرجات يختلف بين البنين والبنات */}
+          {/* الجنس مطلوب لأن جدول تحويل الدرجات يختلف بين الذكور والإناث */}
           <SelectField
             label="الجنس"
             required
