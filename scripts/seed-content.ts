@@ -45,14 +45,36 @@ async function seedSpecialists() {
     });
 
     // ملف فارغ عمداً: يملؤه المختص بنفسه من لوحته.
-    await prisma.specialistProfile.upsert({
+    const profile = await prisma.specialistProfile.upsert({
       where: { userId: user.id },
       update: {},
       create: { userId: user.id, title: "مختص التوجيه المهني", bio: "" },
+      select: { id: true },
     });
+
+    await seedAvailability(profile.id);
   }
 
   console.log(`  ✔ المختصون: ${SPECIALISTS.length} بملفات فارغة`);
+}
+
+/* ───────────────────────── أوقات الاستقبال ───────────────────────── */
+
+/** أيام الدراسة: الأحد إلى الخميس. 0 = الأحد. */
+const SCHOOL_DAYS = [0, 1, 2, 3, 4];
+const SCHOOL_HOURS = { startTime: "08:00", endTime: "12:00", slotMinutes: 30 };
+
+/**
+ * يوم دراسي كامل لكل مختص كي يجد الطالب وقتاً متاحاً من أول يوم.
+ * لا يُمسّ من ضبط أوقاته بنفسه: وجود أي سطر يعني أن المختص تولّى الأمر.
+ */
+async function seedAvailability(specialistId: string) {
+  const existing = await prisma.specialistAvailability.count({ where: { specialistId } });
+  if (existing > 0) return;
+
+  await prisma.specialistAvailability.createMany({
+    data: SCHOOL_DAYS.map((weekday) => ({ specialistId, weekday, ...SCHOOL_HOURS, active: true })),
+  });
 }
 
 /* ───────────────────────── فهرس المكتبة ───────────────────────── */
