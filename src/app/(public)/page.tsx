@@ -52,15 +52,16 @@ export default function HomePage() {
       {/* الواجهة */}
       <section className="border-b border-[var(--color-line)] bg-white">
         <div className="container-x py-16 sm:py-24">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+          {/* الواجهة موسّطة؛ بقية الأقسام تبقى بمحاذاة النص الطبيعية للقراءة */}
+          <div className="mx-auto max-w-2xl text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-4xl lg:text-5xl">
               اعرف ميولك، واختر تخصصك عن وعي
             </h1>
-            <p className="mt-5 text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
+            <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-pretty text-[var(--color-muted)] sm:text-lg">
               منصة التوجيه المهني لطلاب المدرسة: اختبار ميول، مكتبة رقمية، دليل
               الطالب، وموعد مع مختص.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/assessment" className="btn-primary btn-lg">
                 ابدأ الاختبار
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
