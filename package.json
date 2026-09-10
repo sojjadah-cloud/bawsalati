@@ -28,7 +28,8 @@
     "audit:api": "node scripts/audit/api.js",
     "audit:data": "tsx scripts/audit/data.ts",
     "faq:guide": "tsx scripts/import-guide-faq.ts",
-    "faq:build": "tsx scripts/build-guide-faq.ts"
+    "faq:build": "tsx scripts/build-guide-faq.ts",
+    "library:files": "tsx scripts/import-library-files.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
