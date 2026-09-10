@@ -25,6 +25,7 @@ services:
       npx prisma migrate deploy &&
       npm run seed &&
       npm run seed:content &&
+      npm run guide:import content/StudentGuide2026.pdf "دليل الطالب 2026" &&
       npm run faq:guide &&
       npm run build
     startCommand: npm run start

@@ -18,7 +18,9 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const [pathArg, titleArg] = process.argv.slice(2);
+  // العنوان يُجمع من بقية الوسائط: npm يزيل الاقتباس فيصل مقسّماً على المسافات
+  const [pathArg, ...titleParts] = process.argv.slice(2);
+  const titleArg = titleParts.join(" ").trim();
   if (!pathArg) {
     console.error("الاستخدام: npx tsx scripts/import-guide.ts <مسار الملف> [العنوان]");
     process.exit(1);
@@ -31,6 +33,19 @@ async function main() {
   // يمرّ الملف بالفحص نفسه الذي يمرّ به أي رفع من الواجهة.
   const file = new File([new Uint8Array(buffer)], "guide.pdf", { type: "application/pdf" });
   const detected = await inspectUpload(file, "GUIDE", ["application/pdf"]);
+
+  // آمن عند التكرار: النسخة نفسها لا تُنشر مرتين ولا تُكتب مرتين على القرص،
+  // فيصلح استدعاء السكربت في كل عملية نشر.
+  const already = await prisma.storedFile.findFirst({
+    where: { checksum: detected.checksum, kind: "GUIDE" },
+    select: { id: true, guideDocuments: { select: { id: true, published: true, version: true } } },
+  });
+  if (already?.guideDocuments.some((g) => g.published)) {
+    const v = already.guideDocuments.find((g) => g.published)?.version;
+    console.log(`↩︎ الإصدار ${v} منشور بالفعل بالملف نفسه — لا تغيير.`);
+    return;
+  }
+
   const storageKey = await saveFile(detected, "GUIDE");
 
   const stored = await prisma.storedFile.create({
