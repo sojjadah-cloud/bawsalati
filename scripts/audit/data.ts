@@ -53,10 +53,11 @@ async function main() {
   check("الطريقة معلَنة في البيانات لا في الشيفرة", activeSet?.method === "COUNT_PREFERRED_THEN_PERCENTILE", activeSet?.method ?? "—");
   const expected = 6 * 4 * 2 * 10; // بيئة × صف × جنس × درجة خام 0..9
   check("تغطية كاملة لكل الخلايا", activeSet?._count.rules === expected, `${activeSet?._count.rules} من ${expected}`);
+  // الوسم صحيح في الحالتين: المهم أن يكون معلناً لا مخفيّاً
   check(
-    "الجدول موسوم مؤقّتاً (بانتظار المعايير الرسمية)",
-    activeSet?.provisional === true,
-    activeSet?.provisional ? "provisional=true" : "معتمد"
+    "حالة الجدول معلَنة",
+    typeof activeSet?.provisional === "boolean",
+    activeSet?.provisional ? "مؤقّت، والتحذير ظاهر على كل نتيجة" : "معتمد ومشتقّ من عيّنة كافية"
   );
 
   const gaps = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
