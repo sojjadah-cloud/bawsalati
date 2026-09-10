@@ -132,8 +132,11 @@ async function main() {
   const specialists = await prisma.specialistProfile.count();
   check("ثلاثة مختصين", specialists === 3, specialists + "");
 
-  const emptyProfiles = await prisma.specialistProfile.count({ where: { bio: "" } });
-  check("ملفات المختصين فارغة كما طُلب", emptyProfiles === 3, emptyProfiles + " ملفاً فارغاً");
+  const withBio = await prisma.specialistProfile.count({ where: { NOT: { bio: "" } } });
+  check("لكل مختص نبذة في ملفه", withBio === 3, withBio + " من 3");
+
+  const withSlots = await prisma.specialistProfile.count({ where: { availability: { some: { active: true } } } });
+  check("لكل مختص أوقات استقبال", withSlots === 3, withSlots + " من 3");
 
   const guide = await prisma.guideDocument.count({ where: { published: true } });
   check("دليل الطالب منشور", guide >= 1, guide + "");

@@ -23,10 +23,27 @@ function readJson<T>(name: string): T {
 
 /* ───────────────────────── المختصون ───────────────────────── */
 
+/**
+ * النبذة تصف الخدمة التي يقدّمها المختص لا سيرته الشخصية.
+ * لا مؤهلات ولا سنوات خبرة ولا جهات تخرّج: تلك بيانات عن أشخاص حقيقيين
+ * لا تُكتب نيابةً عنهم. كل مختص يبدّل نبذته من لوحته متى شاء.
+ */
 const SPECIALISTS = [
-  { name: "نعيم الدبدوب", email: "naeem@bawsalati.om" },
-  { name: "محمد السريحي", email: "mohammed@bawsalati.om" },
-  { name: "محمود الدباني", email: "mahmoud@bawsalati.om" },
+  {
+    name: "نعيم الدبدوب",
+    email: "naeem@bawsalati.om",
+    bio: "يستقبل طلاب المدرسة لمناقشة نتيجة مقياس الميول المهنية وقراءتها معهم، وربط البيئات الأعلى في النتيجة بالتخصصات والمسارات المتاحة بعد الثانوية. احجز موعداً وأحضر معك رابط نتيجتك إن كنت قد أدّيت المقياس.",
+  },
+  {
+    name: "محمد السريحي",
+    email: "mohammed@bawsalati.om",
+    bio: "يساعد الطلاب على المفاضلة بين التخصصات وترتيب الرغبات، وفهم إجراءات القبول ومواعيدها كما وردت في دليل الطالب. احجز موعداً إن كنت مرتبكاً بين أكثر من خيار أو تحتاج ترتيب خطواتك القادمة.",
+  },
+  {
+    name: "محمود الدباني",
+    email: "mahmoud@bawsalati.om",
+    bio: "يناقش مع الطلاب مهارات الدراسة وتنظيم الوقت والاستعداد للاختبارات، إضافةً إلى قراءة نتيجة المقياس واختيار التخصص. احجز موعداً إن كانت درجاتك لا تعكس جهدك أو أردت خطة مذاكرة تناسبك.",
+  },
 ];
 
 async function seedSpecialists() {
@@ -44,18 +61,27 @@ async function seedSpecialists() {
       select: { id: true },
     });
 
-    // ملف فارغ عمداً: يملؤه المختص بنفسه من لوحته.
-    const profile = await prisma.specialistProfile.upsert({
+    // النبذة الافتراضية تُكتب مرة واحدة: ما كتبه المختص بنفسه لا يُستبدل.
+    const existing = await prisma.specialistProfile.findUnique({
       where: { userId: user.id },
-      update: {},
-      create: { userId: user.id, title: "مختص التوجيه المهني", bio: "" },
-      select: { id: true },
+      select: { id: true, bio: true },
     });
+
+    const profile = existing
+      ? await prisma.specialistProfile.update({
+          where: { id: existing.id },
+          data: existing.bio.trim() ? {} : { bio: s.bio },
+          select: { id: true },
+        })
+      : await prisma.specialistProfile.create({
+          data: { userId: user.id, title: "مختص التوجيه المهني", bio: s.bio },
+          select: { id: true },
+        });
 
     await seedAvailability(profile.id);
   }
 
-  console.log(`  ✔ المختصون: ${SPECIALISTS.length} بملفات فارغة`);
+  console.log(`  ✔ المختصون: ${SPECIALISTS.length} بنبذة وأوقات استقبال`);
 }
 
 /* ───────────────────────── أوقات الاستقبال ───────────────────────── */
