@@ -50,7 +50,7 @@ export default function HomePage() {
 
         <div className="container-x relative py-20 text-center sm:py-28">
           <div className="mx-auto max-w-2xl">
-            <h1 className="text-3xl leading-tight font-bold text-balance sm:text-4xl lg:text-5xl">
+            <h1 className="text-3xl leading-tight font-bold text-balance text-white sm:text-4xl lg:text-5xl">
               اعرف ميولك، واختر تخصصك عن وعي
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-pretty text-brand-100 sm:text-lg">
