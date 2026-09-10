@@ -3,6 +3,7 @@
 // عارض/مشغّل المورد. يُحمَّل الملف الثقيل فقط عند طلب المستخدم صراحةً،
 // فلا يُثقَل الجهاز ولا يُستهلك الاتصال دون داعٍ.
 import { useState } from "react";
+import Link from "next/link";
 import { BookOpen, ExternalLink, Headphones, Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/primitives";
 
@@ -124,8 +125,15 @@ export function ResourceViewer({ resourceId, title, hasFile, hasAudio, externalU
   }
 
   return (
-    <Alert tone="warning" title="المحتوى غير متاح حالياً">
-      لم يُرفق ملف بهذا المورد بعد.
-    </Alert>
+    <div className="card card-pad">
+      <h2 className="text-base font-bold text-slate-900">مُدرَج في الفهرس</h2>
+      <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
+        هذا العنوان مسجّل في المكتبة ولم تُرفق نسخته بعد. اطلبه من مختص التوجيه
+        المهني ليرفعه أو يدلّك على نسخة متاحة.
+      </p>
+      <Link href="/booking" className="btn-outline mt-4">
+        اسأل المختص عن هذا الكتاب
+      </Link>
+    </div>
   );
 }

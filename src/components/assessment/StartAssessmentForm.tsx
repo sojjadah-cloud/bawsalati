@@ -31,7 +31,7 @@ export function StartAssessmentForm() {
     const next: FieldErrors = {};
     if (studentName.trim().length < 3) next.studentName = "أدخل الاسم كاملاً";
     if (!grade) next.grade = "اختر الصف الدراسي";
-    if (!gender) next.gender = "اختر النوع";
+    if (!gender) next.gender = "اختر الجنس";
     if (!/^[79]\d{7}$/u.test(phone.trim())) {
       next.phone = "أدخل رقماً عُمانياً صحيحاً مكوّناً من 8 أرقام";
     }
@@ -97,14 +97,14 @@ export function StartAssessmentForm() {
             options={GRADES.map((g) => ({ value: g.value, label: g.label }))}
           />
 
-          {/* النوع مطلوب لأن جدول تحويل الدرجات يختلف بين الذكور والإناث */}
+          {/* الجنس مطلوب لأن جدول تحويل الدرجات يختلف بين البنين والبنات */}
           <SelectField
-            label="النوع"
+            label="الجنس"
             required
             value={gender}
             onChange={(e) => setGender(e.target.value)}
             error={errors.gender}
-            placeholder="اختر النوع"
+            placeholder="اختر الجنس"
             hint="يُستخدم لاختيار الجدول المعياري المناسب."
             options={GENDERS.map((g) => ({ value: g.value, label: g.label }))}
           />

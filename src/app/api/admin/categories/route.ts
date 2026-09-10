@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { json, errorResponse, parseBody, requireAdmin } from "@/lib/api";
+import { json, errorResponse, parseBody, requireStaff } from "@/lib/api";
 import { audit, clientIp } from "@/lib/audit";
 import { categorySchema } from "@/features/library/schemas";
 
 export async function POST(req: Request) {
   try {
-    const session = await requireAdmin();
+    const session = await requireStaff();
     const input = await parseBody(req, categorySchema);
 
     const category = await prisma.libraryCategory.create({

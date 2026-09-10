@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArchiveRestore, Eye, EyeOff } from "lucide-react";
+import { Archive, ArchiveRestore, Eye, EyeOff, Trash2 } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
 import { useToast } from "@/components/ui/Toast";
 import { ConfirmDialog } from "@/components/ui/Dialog";
@@ -22,6 +22,7 @@ export function ResourceRowActions({
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function togglePublish() {
     if (busy) return;
@@ -58,6 +59,21 @@ export function ResourceRowActions({
     }
   }
 
+  async function remove() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api.delete(`/api/specialist/library/resources/${resourceId}`);
+      toast.success("حُذف المورد نهائياً");
+      setConfirmDelete(false);
+      router.refresh();
+    } catch (e) {
+      toast.error(messageOf(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <div className="flex items-center gap-1">
@@ -82,7 +98,28 @@ export function ResourceRowActions({
         >
           {archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
         </button>
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          disabled={busy}
+          className="cursor-pointer rounded-[var(--radius-sm)] p-2 text-slate-500 transition-colors hover:bg-danger-50 hover:text-danger-700 disabled:opacity-40"
+          aria-label={`حذف ${title} نهائياً`}
+          title="حذف نهائي"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={remove}
+        title="حذف المورد نهائياً"
+        message={`سيُحذف «${title}» ولا يمكن التراجع. إن أردت إخفاءه مؤقتاً استخدم الأرشفة.`}
+        confirmLabel="حذف نهائي"
+        tone="danger"
+        loading={busy}
+      />
 
       <ConfirmDialog
         open={confirmArchive}

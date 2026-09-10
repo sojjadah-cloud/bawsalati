@@ -22,7 +22,7 @@ enum Role {
   SPECIALIST
 }
 
-/// النوع مطلوب لأن جداول التحويل المعيارية تختلف بين الذكور والإناث.
+/// الجنس مطلوب لأن جداول التحويل المعيارية تختلف بين البنين والبنات.
 enum Gender {
   MALE
   FEMALE
@@ -627,6 +627,43 @@ model InAppNotification {
 
   @@index([specialistId, read])
   @@map("in_app_notifications")
+}
+
+// ─────────────────────────── مساعد جويب ───────────────────────────
+
+/// سؤال وجوابه. المساعد لا يولّد نصاً، بل يبحث في هذه الصفوف ويعيد أقربها.
+model FaqEntry {
+  id         String   @id @default(cuid())
+  question   String
+  answer     String
+  /// صيغ أخرى للسؤال وكلمات مفتاحية تُوسّع المطابقة
+  keywords   String[] @default([])
+  topic      String   @default("")
+  active     Boolean  @default(true)
+  /// عدد المرات التي طابق فيها سؤال طالب
+  matchCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([active])
+  @@index([topic])
+  @@map("faq_entries")
+}
+
+/// سؤال لم يجد له المساعد إجابة. يراجعه المختص ليضيف جواباً.
+model UnansweredQuestion {
+  id         String   @id @default(cuid())
+  text       String
+  /// عدد مرات ورود السؤال نفسه بعد التطبيع
+  askCount   Int      @default(1)
+  /// نصّ مطبَّع يمنع تكرار السؤال الواحد كصفوف متعددة
+  normalized String   @unique
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([resolved, askCount])
+  @@map("unanswered_questions")
 }
 
 // ─────────────────────────── الحوكمة والإعدادات ───────────────────────────

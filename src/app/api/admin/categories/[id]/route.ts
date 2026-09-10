@@ -4,7 +4,7 @@ import {
   json,
   errorResponse,
   parseBody,
-  requireAdmin,
+  requireStaff,
   assertSameOrigin,
   ApiError,
 } from "@/lib/api";
@@ -22,7 +22,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireAdmin();
+    const session = await requireStaff();
     const { id } = await params;
     const input = await parseBody(req, patchSchema);
 
@@ -45,7 +45,7 @@ export async function DELETE(
 ) {
   try {
     assertSameOrigin(req);
-    const session = await requireAdmin();
+    const session = await requireStaff();
     const { id } = await params;
 
     const used = await prisma.libraryResource.count({ where: { categoryId: id } });

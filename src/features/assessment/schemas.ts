@@ -20,7 +20,7 @@ export const studentNameSchema = z
 export const startSessionSchema = z.object({
   studentName: studentNameSchema,
   grade: z.enum(gradeValues, { errorMap: () => ({ message: "اختر الصف الدراسي" }) }),
-  gender: z.enum(genderValues, { errorMap: () => ({ message: "اختر النوع" }) }),
+  gender: z.enum(genderValues, { errorMap: () => ({ message: "اختر الجنس" }) }),
   phone: phoneSchema,
 });
 export type StartSessionInput = z.infer<typeof startSessionSchema>;

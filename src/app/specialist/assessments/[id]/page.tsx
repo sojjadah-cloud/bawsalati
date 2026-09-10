@@ -68,7 +68,7 @@ export default async function AssessmentDetailPage({
       <dl className="card card-pad mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "الصف", value: GRADE_LABELS[session.grade] ?? session.grade },
-          { label: "النوع", value: GENDER_LABELS[session.gender] ?? session.gender },
+          { label: "الجنس", value: GENDER_LABELS[session.gender] ?? session.gender },
           { label: "رقم التواصل", value: session.phone, ltr: true },
           {
             label: "تاريخ الإكمال",

@@ -17,6 +17,8 @@
     "migrate:deploy": "prisma migrate deploy",
     "migrate:legacy": "tsx scripts/migrate-legacy.ts",
     "seed": "tsx prisma/seed.ts",
+    "seed:content": "tsx scripts/seed-content.ts",
+    "reset:demo": "tsx scripts/reset-demo-data.ts",
     "guide:import": "tsx scripts/import-guide.ts",
     "db:setup": "prisma migrate deploy && tsx prisma/seed.ts",
     "verify": "npm run typecheck && npm run lint && npm run test",

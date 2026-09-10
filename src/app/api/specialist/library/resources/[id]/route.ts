@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { json, errorResponse, parseBody, requireStaff, requireAdmin, assertSameOrigin } from "@/lib/api";
+import { json, errorResponse, parseBody, requireStaff, assertSameOrigin } from "@/lib/api";
 import { audit, clientIp } from "@/lib/audit";
 import { resourceSchema } from "@/features/library/schemas";
 
@@ -78,14 +78,14 @@ export async function PATCH(
   }
 }
 
-/** الحذف النهائي مقصور على مدير النظام. المختص يؤرشف فقط. */
+/** حذف نهائي. متاح للمختص والمدير معاً. */
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     assertSameOrigin(req);
-    const session = await requireAdmin();
+    const session = await requireStaff();
     const { id } = await params;
     await prisma.libraryResource.delete({ where: { id } });
     await audit("RESOURCE_DELETE", "LibraryResource", {

@@ -18,6 +18,7 @@ export const LIMITS = {
   assessmentStart: { max: 5, windowMs: 60 * 60 * 1000 },
   booking: { max: 5, windowMs: 60 * 60 * 1000 },
   answer: { max: 400, windowMs: 60 * 60 * 1000 },
+  ask: { max: 60, windowMs: 10 * 60 * 1000 },
 } as const satisfies Record<string, LimitRule>;
 
 export interface LimitResult {

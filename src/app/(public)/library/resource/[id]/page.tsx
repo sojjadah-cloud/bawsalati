@@ -5,6 +5,7 @@ import { ChevronLeft, Download } from "lucide-react";
 import { getPublicResource } from "@/features/library/service";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { ResourceViewer } from "@/components/library/ResourceViewer";
+import { CoverArt } from "@/components/library/CoverArt";
 
 export const dynamic = "force-dynamic";
 
@@ -94,7 +95,22 @@ export default async function ResourcePage({
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="card card-pad">
+          <div className="card overflow-hidden">
+            <div className="aspect-[5/7] w-full">
+              {resource.coverUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={resource.coverUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <CoverArt
+                  title={resource.title}
+                  author={resource.author}
+                  className="h-full w-full"
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="card card-pad mt-4">
             <h2 className="text-sm font-bold text-slate-900">معلومات المورد</h2>
             <dl className="mt-4 space-y-3 text-sm">
               {meta.map((m) => (
