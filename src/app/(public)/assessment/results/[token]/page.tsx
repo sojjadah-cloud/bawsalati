@@ -46,20 +46,18 @@ export default async function ResultPage({
 
   return (
     <div className="container-x py-10 sm:py-14">
-      <header className="flex flex-col gap-4 border-b border-[var(--color-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="section-kicker">نتيجة اختبار بوصلتي</p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-            {session.studentName}
-          </h1>
-          <p className="mt-2 text-sm text-[var(--color-muted)]">
-            {GRADE_LABELS[session.grade] ?? session.grade}
-            {session.submittedAt
-              ? ` · ${formatArabicDate(session.submittedAt.toISOString().slice(0, 10))}`
-              : null}
-          </p>
-        </div>
-        <Link href="/booking" className="btn-primary no-print shrink-0">
+      <header className="flex flex-col items-center border-b border-[var(--color-line)] pb-6 text-center">
+        <p className="section-kicker">نتيجة اختبار بوصلتي</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+          {session.studentName}
+        </h1>
+        <p className="mt-2 text-sm text-[var(--color-muted)]">
+          {GRADE_LABELS[session.grade] ?? session.grade}
+          {session.submittedAt
+            ? ` · ${formatArabicDate(session.submittedAt.toISOString().slice(0, 10))}`
+            : null}
+        </p>
+        <Link href="/booking" className="btn-primary no-print mt-5">
           <CalendarCheck className="h-5 w-5" aria-hidden="true" />
           ناقش نتيجتك مع مختص
         </Link>

@@ -7,7 +7,6 @@ const SERVICES = [
   { href: "/library", label: "المكتبة الرقمية" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
-  { href: "/ask", label: "جويب" },
 ];
 
 /**
@@ -18,7 +17,8 @@ const SERVICES = [
 export function SiteFooter() {
   return (
     <footer className="mt-14 border-t border-[var(--color-line)] bg-white">
-      <div className="container-x py-7">
+      {/* مساحة سفلية إضافية كي لا تغطّي أيقونة جويب العائمة آخر سطر في التذييل. */}
+      <div className="container-x pt-7 pb-24">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] bg-brand-700 text-white">

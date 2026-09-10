@@ -11,7 +11,6 @@ const NAV = [
   { href: "/library", label: "المكتبة الرقمية" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
-  { href: "/ask", label: "جويب" },
 ];
 
 export function SiteHeader() {

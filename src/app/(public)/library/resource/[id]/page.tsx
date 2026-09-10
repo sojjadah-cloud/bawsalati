@@ -46,7 +46,7 @@ export default async function ResourcePage({
   return (
     <div className="container-x py-10 sm:py-14">
       <nav aria-label="مسار التنقّل" className="mb-4">
-        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-[var(--color-muted)]">
+        <ol className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-[var(--color-muted)]">
           <li>
             <Link href="/library" className="transition-colors hover:text-brand-700">
               المكتبة الرقمية
@@ -68,11 +68,11 @@ export default async function ResourcePage({
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="min-w-0">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
             {resource.title}
           </h1>
           {resource.author ? (
-            <p className="mt-2 text-sm text-[var(--color-muted)]">{resource.author}</p>
+            <p className="mt-2 text-center text-sm text-[var(--color-muted)]">{resource.author}</p>
           ) : null}
 
           {resource.description ? (

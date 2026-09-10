@@ -23,20 +23,19 @@ export function PageHero({
       <HeroBackdrop compact />
 
       <div className="container-x relative py-10 sm:py-14">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            {breadcrumb ? <div className="mb-3">{breadcrumb}</div> : null}
-            <h1 className="text-2xl font-bold tracking-tight text-balance text-white sm:text-3xl">
-              {title}
-            </h1>
-            {description ? (
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-pretty text-brand-100 sm:text-base">
-                {description}
-              </p>
-            ) : null}
-          </div>
+        {/* عمود واحد موسّط: العنوان والوصف والإجراء كلها في منتصف الشريط. */}
+        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+          {breadcrumb ? <div className="mb-3">{breadcrumb}</div> : null}
+          <h1 className="text-2xl font-bold tracking-tight text-balance text-white sm:text-3xl">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-3 text-sm leading-relaxed text-pretty text-brand-100 sm:text-base">
+              {description}
+            </p>
+          ) : null}
 
-          {action ? <div className="shrink-0">{action}</div> : null}
+          {action ? <div className="mt-6">{action}</div> : null}
         </div>
       </div>
     </section>
@@ -47,7 +46,9 @@ export function PageHero({
 export function HeroBreadcrumb({ children }: { children: ReactNode }) {
   return (
     <nav aria-label="مسار التنقّل">
-      <ol className="flex flex-wrap items-center gap-1.5 text-sm text-brand-200">{children}</ol>
+      <ol className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-brand-200">
+        {children}
+      </ol>
     </nav>
   );
 }

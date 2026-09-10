@@ -20,7 +20,7 @@ export default async function GuidePage() {
   if (!guide) {
     return (
       <div className="container-narrow py-14">
-        <h1 className="section-title">دليل الطالب</h1>
+        <h1 className="section-title text-center">دليل الطالب</h1>
         <div className="mt-6">
           <EmptyState
             icon={<FileText className="h-6 w-6" />}

@@ -197,8 +197,8 @@ export function AssessmentRunner() {
     const missing = questions.filter((q) => answers[q.id] === undefined);
     return (
       <div className="container-narrow py-10">
-        <h1 className="section-title">مراجعة قبل الإرسال</h1>
-        <p className="section-lead">
+        <h1 className="section-title text-center">مراجعة قبل الإرسال</h1>
+        <p className="section-lead mx-auto text-center">
           أجبت على {answeredCount} من {total} عبارة.
         </p>
 
