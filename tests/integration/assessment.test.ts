@@ -2,7 +2,7 @@
  * اختبارات تكامل لمسار الاختبار الكامل عبر خدمات الخادم.
  * تنشئ جلسات اختبار مؤقّتة وتحذفها بعد الانتهاء.
  */
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -20,9 +20,55 @@ const prisma = new PrismaClient({
 const createdSessions: string[] = [];
 const MARKER = `اختبار آلي ${Date.now()}`;
 
+/**
+ * جدول معياري صناعي خاص بالاختبار الآلي.
+ * الجداول الرسمية تأتي من الدليل وتُدخل من لوحة المدير، والاختبار لا يعتمد عليها
+ * حتى يبقى مستقلاً ولا يفشل قبل إدخالها.
+ */
+const TEST_RULESET_VERSION = 9999;
+let testRuleSetId = "";
+
+beforeAll(async () => {
+  const assessment = await getActiveAssessment();
+  const dimensions = await prisma.assessmentDimension.findMany({
+    where: { assessmentId: assessment.id },
+    select: { id: true },
+  });
+
+  const ruleSet = await prisma.scoringRuleSet.create({
+    data: {
+      assessmentId: assessment.id,
+      version: TEST_RULESET_VERSION,
+      method: "COUNT_PREFERRED_THEN_PERCENTILE",
+      notes: "قيم صناعية للاختبار الآلي فقط — ليست الجداول الرسمية",
+      active: true,
+      rules: {
+        create: dimensions.flatMap((d) =>
+          ["9", "10", "11", "12"].flatMap((gradeBand) =>
+            (["MALE", "FEMALE"] as const).flatMap((gender) =>
+              Array.from({ length: 10 }, (_, rawScore) => ({
+                dimensionId: d.id,
+                gradeBand,
+                gender,
+                rawScore,
+                percentile: rawScore * 11,
+              }))
+            )
+          )
+        ),
+      },
+    },
+    select: { id: true },
+  });
+  testRuleSetId = ruleSet.id;
+});
+
 afterAll(async () => {
   if (createdSessions.length > 0) {
     await prisma.assessmentSession.deleteMany({ where: { id: { in: createdSessions } } });
+  }
+  if (testRuleSetId) {
+    await prisma.scoringRuleSet.delete({ where: { id: testRuleSetId } }).catch(() => undefined);
   }
   await prisma.$disconnect();
 });
@@ -30,7 +76,8 @@ afterAll(async () => {
 async function newSession(grade = "11") {
   const s = await startSession({
     studentName: MARKER,
-    grade: grade as "10" | "11" | "12",
+    grade,
+    gender: "MALE",
     phone: "92000001",
     consent: true,
   });
@@ -39,10 +86,10 @@ async function newSession(grade = "11") {
 }
 
 describe("بنية المقياس في قاعدة البيانات", () => {
-  it("يحتوي 54 عبارة موزّعة 9 مجموعات × 6", async () => {
+  it("يحتوي 54 عبارة موزّعة على ثلاث دفعات × 18", async () => {
     const assessment = await getActiveAssessment();
-    expect(assessment.groups).toHaveLength(9);
-    for (const g of assessment.groups) expect(g.questions).toHaveLength(6);
+    expect(assessment.groups).toHaveLength(3);
+    for (const g of assessment.groups) expect(g.questions).toHaveLength(18);
     const all = assessment.groups.flatMap((g) => g.questions);
     expect(all).toHaveLength(54);
     const numbers = all.map((q) => q.number).sort((a, b) => a - b);
@@ -51,7 +98,7 @@ describe("بنية المقياس في قاعدة البيانات", () => {
     expect(new Set(numbers).size).toBe(54);
   });
 
-  it("يعرّف ستة محاور وسلّم إجابة", async () => {
+  it("يعرّف ست بيئات وسلّم إجابة", async () => {
     const assessment = await getActiveAssessment();
     expect(assessment.dimensions).toHaveLength(6);
     expect(assessment.options.length).toBeGreaterThanOrEqual(2);

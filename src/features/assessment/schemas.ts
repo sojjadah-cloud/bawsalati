@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { GRADES } from "@/lib/constants";
+import { GENDERS, GRADES } from "@/lib/constants";
 
 const gradeValues = GRADES.map((g) => g.value) as [string, ...string[]];
+const genderValues = GENDERS.map((g) => g.value) as [string, ...string[]];
 
 /** الهاتف العُماني: 8 أرقام تبدأ بـ 7 أو 9. */
 export const phoneSchema = z
@@ -19,6 +20,7 @@ export const studentNameSchema = z
 export const startSessionSchema = z.object({
   studentName: studentNameSchema,
   grade: z.enum(gradeValues, { errorMap: () => ({ message: "اختر الصف الدراسي" }) }),
+  gender: z.enum(genderValues, { errorMap: () => ({ message: "اختر النوع" }) }),
   phone: phoneSchema,
   consent: z.literal(true, {
     errorMap: () => ({ message: "يلزم الموافقة على إشعار الخصوصية للمتابعة" }),

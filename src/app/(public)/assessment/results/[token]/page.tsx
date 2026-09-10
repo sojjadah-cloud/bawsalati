@@ -8,6 +8,7 @@ import { formatArabicDate } from "@/lib/time";
 import { Alert } from "@/components/ui/primitives";
 import {
   AnalysisTable,
+  InterestCode,
   ResultTables,
   type AnalysisRowData,
   type ResultSectionData,
@@ -65,15 +66,16 @@ export default async function ResultPage({
 
       <div className="mt-6 no-print">
         <Alert tone="info" title="كيف تقرأ نتيجتك">
-          كل جدول محور من محاور الميول بعباراته التسع، والعلامة تعني أن العبارة
-          تنطبق عليك. الرتبة المئوية تقارن درجتك بزملاء صفّك. النتيجة مؤشّر يساعدك
-          على الاختيار، لا حكم نهائي.
+          كل جدول بيئة مهنية بعباراتها التسع، والعلامة تعني أنك تفضّل ذلك النشاط.
+          الدرجة الخام عدد ما فضّلته منها، وتُحوَّل إلى رتبة مئينية تقارنك بزملاء
+          صفّك ونوعك. النتيجة مؤشّر يساعدك على الاختيار، ويعتمدها مختص التوجيه
+          المهني بعد مناقشتها معك.
         </Alert>
       </div>
 
       <section className="mt-10" aria-labelledby="tables-title">
         <h2 id="tables-title" className="section-title">
-          جداول النتيجة
+          جداول البيئات الست
         </h2>
 
         <div className="mt-5">
@@ -82,15 +84,51 @@ export default async function ResultPage({
       </section>
 
       <div className="mt-12">
+        <InterestCode interestCode={result.interestCode} rows={analysisRows} />
+      </div>
+
+      <div className="mt-12">
         <AnalysisTable rows={analysisRows} summary={result.analysis?.summary} />
       </div>
+
+      {/* تحليل الأخصائي — يظهر بعد اعتماده النتيجة فقط */}
+      {result.approvedAt && (result.specialistNotes || result.recommendation) ? (
+        <section className="mt-12" aria-labelledby="specialist-title">
+          <h2 id="specialist-title" className="section-title">
+            قراءة مختص التوجيه المهني
+          </h2>
+          <div className="card card-pad mt-5 space-y-5">
+            {result.specialistNotes ? (
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">التحليل</h3>
+                <p className="mt-2 text-sm leading-loose whitespace-pre-line text-slate-700">
+                  {result.specialistNotes}
+                </p>
+              </div>
+            ) : null}
+
+            {result.recommendation ? (
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">التوصيات والمهن المقترحة</h3>
+                <p className="mt-2 text-sm leading-loose whitespace-pre-line text-slate-700">
+                  {result.recommendation}
+                </p>
+              </div>
+            ) : null}
+
+            <p className="border-t border-[var(--color-line)] pt-4 text-xs text-[var(--color-faint)]">
+              اعتُمدت النتيجة في {result.approvedAt.toISOString().slice(0, 10)}
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       {result.recommendedFields.length > 0 ? (
         <section className="mt-12" aria-labelledby="fields-title">
           <h2 id="fields-title" className="section-title">
-            مجالات دراسية قريبة من ميولك
+            مجالات دراسية قد تناسبك
           </h2>
-          <p className="section-lead">المرتبطة بمحاورك الثلاثة الأعلى وفق دليل الطالب.</p>
+          <p className="section-lead">مقترحة بناءً على بيئاتك الثلاث الأعلى. ناقشها مع المختص.</p>
 
           <ul className="mt-5 flex flex-wrap gap-2">
             {result.recommendedFields.map((f) => (

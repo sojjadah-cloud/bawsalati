@@ -22,6 +22,12 @@ enum Role {
   SPECIALIST
 }
 
+/// النوع مطلوب لأن جداول التحويل المعيارية تختلف بين الذكور والإناث.
+enum Gender {
+  MALE
+  FEMALE
+}
+
 enum SessionStatus {
   IN_PROGRESS
   SUBMITTED
@@ -70,11 +76,12 @@ model User {
   updatedAt    DateTime  @updatedAt
 
   specialistProfile SpecialistProfile?
-  uploadedFiles     StoredFile[]           @relation("UploadedBy")
-  createdResources  LibraryResource[]      @relation("ResourceAuthor")
-  guideDocuments    GuideDocument[]        @relation("GuideAuthor")
-  statusChanges     AppointmentHistory[]   @relation("ChangedBy")
-  scoringRuleSets   ScoringRuleSet[]       @relation("RuleSetAuthor")
+  uploadedFiles     StoredFile[]         @relation("UploadedBy")
+  createdResources  LibraryResource[]    @relation("ResourceAuthor")
+  guideDocuments    GuideDocument[]      @relation("GuideAuthor")
+  statusChanges     AppointmentHistory[] @relation("ChangedBy")
+  scoringRuleSets   ScoringRuleSet[]     @relation("RuleSetAuthor")
+  approvedResults   AssessmentResult[]   @relation("ResultApprover")
 
   @@index([role, active])
   @@map("users")
@@ -152,7 +159,10 @@ model AssessmentGroup {
 model AssessmentDimension {
   id           String   @id @default(cuid())
   assessmentId String
+  /// الرمز كما في الدليل: و س ف ا م ت
   code         String
+  /// مفتاح لاتيني ثابت لا يتغيّر بتغيّر اللغة
+  key          String   @default("")
   label        String
   description  String   @default("")
   color        String   @default("#059669")
@@ -232,21 +242,22 @@ model ScoringRuleSet {
   @@map("scoring_rule_sets")
 }
 
-/// خلية واحدة من جدول التحويل: (بُعد، فئة الصف، درجة خام) ← رتبة مئوية.
+/// خلية واحدة من الجدول المعياري: (بُعد، صف، نوع، درجة خام) ← رتبة مئينية.
 model ScoringRule {
   id          String @id @default(cuid())
   ruleSetId   String
   dimensionId String
-  /// فئة الصف الدراسي التي ينطبق عليها التحويل
+  /// الصف الدراسي: 9 أو 10 أو 11 أو 12
   gradeBand   String
+  gender      Gender
   rawScore    Int
   percentile  Int
 
   ruleSet   ScoringRuleSet      @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
   dimension AssessmentDimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
 
-  @@unique([ruleSetId, dimensionId, gradeBand, rawScore])
-  @@index([ruleSetId, gradeBand])
+  @@unique([ruleSetId, dimensionId, gradeBand, gender, rawScore])
+  @@index([ruleSetId, gradeBand, gender])
   @@map("scoring_rules")
 }
 
@@ -258,6 +269,7 @@ model AssessmentSession {
   ruleSetId    String?
   studentName  String
   grade        String
+  gender       Gender        @default(MALE)
   phone        String
   /// وقت موافقة الطالب على إشعار الخصوصية
   consentAt    DateTime
@@ -297,20 +309,30 @@ model AssessmentAnswer {
 
 /// لقطة مجمّدة للنتيجة وقت التسليم.
 model AssessmentResult {
-  id                String   @id @default(cuid())
-  sessionId         String   @unique
+  id                String    @id @default(cuid())
+  sessionId         String    @unique
   ruleSetId         String
   assessmentVersion Int
-  /// رموز الأبعاد الثلاثة الأعلى بالترتيب
-  topDimensions     String[] @default([])
-  recommendedFields String[] @default([])
-  createdAt         DateTime @default(now())
+  /// رموز البيئات الثلاث الأعلى بالترتيب
+  topDimensions     String[]  @default([])
+  /// رمز الميول كما يُكتب في الدليل، مثل «و - ا - ت»
+  interestCode      String    @default("")
+  recommendedFields String[]  @default([])
+  /// تحليل الأخصائي وتوصياته — يكتبها بنفسه ولا يولّدها النظام
+  specialistNotes   String?
+  recommendation    String?
+  /// اعتماد النتيجة: لا تُعرض كنتيجة نهائية قبل مراجعة الأخصائي
+  approvedById      String?
+  approvedAt        DateTime?
+  createdAt         DateTime  @default(now())
 
-  session  AssessmentSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  ruleSet  ScoringRuleSet          @relation(fields: [ruleSetId], references: [id], onDelete: Restrict)
-  sections AssessmentResultSection[]
-  analysis AssessmentAnalysis?
+  session    AssessmentSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  ruleSet    ScoringRuleSet            @relation(fields: [ruleSetId], references: [id], onDelete: Restrict)
+  approvedBy User?                     @relation("ResultApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  sections   AssessmentResultSection[]
+  analysis   AssessmentAnalysis?
 
+  @@index([approvedAt])
   @@map("assessment_results")
 }
 
@@ -537,10 +559,10 @@ model Appointment {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
-  specialist   SpecialistProfile      @relation(fields: [specialistId], references: [id], onDelete: Restrict)
-  topic        ConsultationTopic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
-  history      AppointmentHistory[]
-  deliveries   NotificationDelivery[]
+  specialist SpecialistProfile      @relation(fields: [specialistId], references: [id], onDelete: Restrict)
+  topic      ConsultationTopic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  history    AppointmentHistory[]
+  deliveries NotificationDelivery[]
 
   /// منع الحجز المزدوج على مستوى قاعدة البيانات — لا يعتمد على شيفرة التطبيق وحدها
   @@unique([specialistId, scheduledDate, startTime])
@@ -551,13 +573,13 @@ model Appointment {
 }
 
 model AppointmentHistory {
-  id            String            @id @default(cuid())
+  id            String             @id @default(cuid())
   appointmentId String
   fromStatus    AppointmentStatus?
   toStatus      AppointmentStatus
-  note          String            @default("")
+  note          String             @default("")
   changedById   String?
-  createdAt     DateTime          @default(now())
+  createdAt     DateTime           @default(now())
 
   appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
   changedBy   User?       @relation("ChangedBy", fields: [changedById], references: [id], onDelete: SetNull)

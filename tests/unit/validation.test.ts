@@ -23,21 +23,29 @@ describe("بيانات الطالب", () => {
     expect(studentNameSchema.safeParse("سا").success).toBe(false);
   });
 
-  it("يشترط الموافقة على إشعار الخصوصية", () => {
+  it("يشترط الموافقة على إشعار الخصوصية والنوع", () => {
     const valid = {
       studentName: "سالم بن ناصر الكندي",
       grade: "11",
+      gender: "MALE",
       phone: "92112233",
       consent: true,
     };
     expect(startSessionSchema.safeParse(valid).success).toBe(true);
     expect(startSessionSchema.safeParse({ ...valid, consent: false }).success).toBe(false);
+    expect(startSessionSchema.safeParse({ ...valid, gender: "OTHER" }).success).toBe(false);
   });
 
   it("يقبل الصفوف المدعومة فقط", () => {
-    const base = { studentName: "سالم الكندي", phone: "92112233", consent: true as const };
+    const base = {
+      studentName: "سالم الكندي",
+      gender: "MALE" as const,
+      phone: "92112233",
+      consent: true as const,
+    };
     expect(startSessionSchema.safeParse({ ...base, grade: "12" }).success).toBe(true);
-    expect(startSessionSchema.safeParse({ ...base, grade: "9" }).success).toBe(false);
+    expect(startSessionSchema.safeParse({ ...base, grade: "9" }).success).toBe(true);
+    expect(startSessionSchema.safeParse({ ...base, grade: "8" }).success).toBe(false);
   });
 });
 

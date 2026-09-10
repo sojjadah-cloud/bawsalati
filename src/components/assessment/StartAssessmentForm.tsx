@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
-import { GRADES, PRIVACY } from "@/lib/constants";
+import { GENDERS, GRADES, PRIVACY } from "@/lib/constants";
 import { Alert } from "@/components/ui/primitives";
 import {
   CheckboxField,
@@ -18,6 +18,7 @@ import {
 interface FieldErrors {
   studentName?: string;
   grade?: string;
+  gender?: string;
   phone?: string;
   consent?: string;
 }
@@ -26,6 +27,7 @@ export function StartAssessmentForm() {
   const router = useRouter();
   const [studentName, setStudentName] = useState("");
   const [grade, setGrade] = useState("");
+  const [gender, setGender] = useState("");
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -37,6 +39,7 @@ export function StartAssessmentForm() {
     const next: FieldErrors = {};
     if (studentName.trim().length < 3) next.studentName = "أدخل الاسم كاملاً";
     if (!grade) next.grade = "اختر الصف الدراسي";
+    if (!gender) next.gender = "اختر النوع";
     if (!/^[79]\d{7}$/u.test(phone.trim())) {
       next.phone = "أدخل رقماً عُمانياً صحيحاً مكوّناً من 8 أرقام";
     }
@@ -56,6 +59,7 @@ export function StartAssessmentForm() {
       await api.post("/api/assessment/sessions", {
         studentName: studentName.trim(),
         grade,
+        gender,
         phone: phone.trim(),
         consent: true,
       });
@@ -65,6 +69,7 @@ export function StartAssessmentForm() {
         setErrors({
           studentName: err.fieldError("studentName"),
           grade: err.fieldError("grade"),
+          gender: err.fieldError("gender"),
           phone: err.fieldError("phone"),
           consent: err.fieldError("consent"),
         });
@@ -92,15 +97,29 @@ export function StartAssessmentForm() {
           placeholder="الاسم الثلاثي"
         />
 
-        <SelectField
-          label="الصف الدراسي"
-          required
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-          error={errors.grade}
-          placeholder="اختر الصف"
-          options={GRADES.map((g) => ({ value: g.value, label: g.label }))}
-        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <SelectField
+            label="الصف الدراسي"
+            required
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            error={errors.grade}
+            placeholder="اختر الصف"
+            options={GRADES.map((g) => ({ value: g.value, label: g.label }))}
+          />
+
+          {/* النوع مطلوب لأن جدول تحويل الدرجات يختلف بين الذكور والإناث */}
+          <SelectField
+            label="النوع"
+            required
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            error={errors.gender}
+            placeholder="اختر النوع"
+            hint="يُستخدم لاختيار الجدول المعياري المناسب."
+            options={GENDERS.map((g) => ({ value: g.value, label: g.label }))}
+          />
+        </div>
 
         <TextField
           label="رقم التواصل"

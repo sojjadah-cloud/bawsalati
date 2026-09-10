@@ -24,56 +24,59 @@ interface SeedData {
     code: string;
     title: string;
     version: number;
-    groupCount: number;
-    questionsPerGroup: number;
+    blockCount: number;
+    questionsPerBlock: number;
   };
   options: { value: number; label: string; displayOrder: number }[];
+  blocks: { number: number; title: string }[];
   dimensions: {
     code: string;
+    key: string;
     label: string;
     description: string;
     color: string;
-    fields: string[];
     displayOrder: number;
-    items: string[];
+    questionNumbers: number[];
   }[];
-  scoring: {
-    method: string;
-    notes: string;
-    gradeBands: string[];
-    percentiles: Record<string, Record<string, number[]>>;
-  };
+  questions: { number: number; text: string }[];
+  scoring: { method: string; notes: string; gradeBands: string[]; genders: string[] };
 }
 
 const data: SeedData = JSON.parse(
-  readFileSync(join(process.cwd(), "prisma", "seed-data", "assessment-v1.json"), "utf8")
+  readFileSync(join(process.cwd(), "prisma", "seed-data", "assessment-official.json"), "utf8")
 );
 
 const INTRO = [
-  "اختبار بوصلتي أداة تساعدك على التعرّف على ميولك المهنية، أي أنواع الأعمال التي تنسجم مع طبيعتك واهتماماتك.",
-  "يتكوّن الاختبار من 54 عبارة موزّعة على 9 مجموعات، وتستغرق الإجابة عليها نحو عشر دقائق.",
-  "أجب بصدق وتلقائية عمّا ينطبق عليك فعلاً، لا عمّا تظنّ أنه الأفضل. لا توجد إجابة صحيحة وأخرى خاطئة.",
-  "نتيجة الاختبار مؤشّر يساعدك ويساعد مختص التوجيه المهني على اتخاذ قرار أفضل، وليست حكماً نهائياً عليك.",
+  "مقياس الميول المهنية أداة تساعدك على التعرّف على البيئات المهنية الأقرب إلى ميولك.",
+  "يتكوّن من 54 عبارة، وتستغرق الإجابة عليها نحو عشر دقائق.",
+  "اقرأ كل عبارة واختر «أفضّل هذا النشاط» أو «لا أفضّل هذا النشاط» بصدق وتلقائية. لا توجد إجابة صحيحة وأخرى خاطئة.",
+  "النتيجة مؤشّر يساعدك ويساعد مختص التوجيه المهني على اتخاذ قرار أفضل، ويعتمدها المختص بعد مراجعتها معك.",
 ].join("\n\n");
 
 async function seedAssessment() {
+  // المقاييس السابقة تبقى في القاعدة لأن نتائج قديمة مرتبطة بها، لكنها تُعطَّل.
+  await prisma.assessment.updateMany({
+    where: { code: { not: data.assessment.code } },
+    data: { active: false },
+  });
+
   const def = await prisma.assessment.upsert({
     where: { code: data.assessment.code },
     update: {
       title: data.assessment.title,
       introduction: INTRO,
-      groupCount: data.assessment.groupCount,
-      questionsPerGroup: data.assessment.questionsPerGroup,
+      groupCount: data.assessment.blockCount,
+      questionsPerGroup: data.assessment.questionsPerBlock,
       active: true,
     },
     create: {
       code: data.assessment.code,
       title: data.assessment.title,
-      description: "مقياس ميول مهنية من 54 عبارة موزّعة على ستة محاور.",
+      description: "مقياس ميول مهنية من 54 عبارة موزّعة على ست بيئات مهنية.",
       introduction: INTRO,
       version: data.assessment.version,
-      groupCount: data.assessment.groupCount,
-      questionsPerGroup: data.assessment.questionsPerGroup,
+      groupCount: data.assessment.blockCount,
+      questionsPerGroup: data.assessment.questionsPerBlock,
       active: true,
     },
   });
@@ -92,136 +95,125 @@ async function seedAssessment() {
   }
 
   const dimensionIds = new Map<string, string>();
+  /** رقم السؤال ← البيئة التي ينتمي إليها، حسب توزيع الدليل. */
+  const questionDimension = new Map<number, string>();
+
   for (const dim of data.dimensions) {
     const row = await prisma.assessmentDimension.upsert({
       where: { assessmentId_code: { assessmentId: def.id, code: dim.code } },
       update: {
+        key: dim.key,
         label: dim.label,
         description: dim.description,
         color: dim.color,
-        fields: dim.fields,
         displayOrder: dim.displayOrder,
       },
       create: {
         assessmentId: def.id,
         code: dim.code,
+        key: dim.key,
         label: dim.label,
         description: dim.description,
         color: dim.color,
-        fields: dim.fields,
         displayOrder: dim.displayOrder,
       },
     });
     dimensionIds.set(dim.code, row.id);
-  }
 
-  // 9 مجموعات × 6 أسئلة — كل مجموعة تضم عبارة واحدة من كل محور.
-  const groupIds = new Map<number, string>();
-  for (let g = 1; g <= data.assessment.groupCount; g++) {
-    const row = await prisma.assessmentGroup.upsert({
-      where: { assessmentId_number: { assessmentId: def.id, number: g } },
-      update: { title: `المجموعة ${g}`, displayOrder: g },
-      create: {
-        assessmentId: def.id,
-        number: g,
-        title: `المجموعة ${g}`,
-        displayOrder: g,
-      },
-    });
-    groupIds.set(g, row.id);
-  }
-
-  const ordered = [...data.dimensions].sort((a, b) => a.displayOrder - b.displayOrder);
-  let created = 0;
-  for (let g = 1; g <= data.assessment.groupCount; g++) {
-    for (let i = 0; i < ordered.length; i++) {
-      const dim = ordered[i];
-      const text = dim.items[g - 1];
-      if (!text) throw new Error(`ينقص نص العبارة ${g} للمحور ${dim.code}`);
-      const displayOrder = i + 1;
-      const number = (g - 1) * data.assessment.questionsPerGroup + displayOrder;
-
-      await prisma.assessmentQuestion.upsert({
-        where: { assessmentId_number: { assessmentId: def.id, number } },
-        update: {
-          text,
-          groupId: groupIds.get(g)!,
-          dimensionId: dimensionIds.get(dim.code)!,
-          displayOrder,
-          active: true,
-        },
-        create: {
-          assessmentId: def.id,
-          groupId: groupIds.get(g)!,
-          dimensionId: dimensionIds.get(dim.code)!,
-          number,
-          text,
-          displayOrder,
-          active: true,
-        },
-      });
-      created++;
+    if (dim.questionNumbers.length !== 9) {
+      throw new Error(`البيئة ${dim.code} يجب أن تحمل 9 عبارات لا ${dim.questionNumbers.length}`);
+    }
+    for (const n of dim.questionNumbers) {
+      if (questionDimension.has(n)) {
+        throw new Error(`العبارة ${n} منسوبة لأكثر من بيئة`);
+      }
+      questionDimension.set(n, dim.code);
     }
   }
-  console.log(`  ✔ المقياس: ${created} سؤالاً في ${data.assessment.groupCount} مجموعات`);
+
+  if (questionDimension.size !== 54) {
+    throw new Error(`التوزيع يغطّي ${questionDimension.size} عبارة بدل 54`);
+  }
+
+  // ثلاث دفعات × 18 عبارة، كما هي مقسّمة في الدليل.
+  const groupIds = new Map<number, string>();
+  for (const block of data.blocks) {
+    const row = await prisma.assessmentGroup.upsert({
+      where: { assessmentId_number: { assessmentId: def.id, number: block.number } },
+      update: { title: block.title, displayOrder: block.number },
+      create: {
+        assessmentId: def.id,
+        number: block.number,
+        title: block.title,
+        displayOrder: block.number,
+      },
+    });
+    groupIds.set(block.number, row.id);
+  }
+
+  for (const q of data.questions) {
+    const code = questionDimension.get(q.number);
+    if (!code) throw new Error(`العبارة ${q.number} بلا بيئة`);
+    const blockNumber = Math.floor((q.number - 1) / data.assessment.questionsPerBlock) + 1;
+    const displayOrder = ((q.number - 1) % data.assessment.questionsPerBlock) + 1;
+
+    await prisma.assessmentQuestion.upsert({
+      where: { assessmentId_number: { assessmentId: def.id, number: q.number } },
+      update: {
+        text: q.text,
+        groupId: groupIds.get(blockNumber)!,
+        dimensionId: dimensionIds.get(code)!,
+        displayOrder,
+        active: true,
+      },
+      create: {
+        assessmentId: def.id,
+        groupId: groupIds.get(blockNumber)!,
+        dimensionId: dimensionIds.get(code)!,
+        number: q.number,
+        text: q.text,
+        displayOrder,
+        active: true,
+      },
+    });
+  }
+
+  console.log(
+    `  ✔ المقياس: ${data.questions.length} عبارة في ${data.blocks.length} دفعات، ${data.dimensions.length} بيئات`
+  );
 
   return { assessmentId: def.id, dimensionIds };
 }
 
-async function seedScoring(assessmentId: string, dimensionIds: Map<string, string>) {
+/**
+ * مجموعة قواعد فارغة بانتظار الجداول المعيارية الرسمية.
+ * تبقى غير فعّالة عمداً: لا تُحتسب نتيجة بجدول لم يُدخَل بعد.
+ */
+async function seedScoring(assessmentId: string) {
   const existing = await prisma.scoringRuleSet.findUnique({
     where: { assessmentId_version: { assessmentId, version: 1 } },
-    select: { id: true },
+    select: { id: true, _count: { select: { rules: true } } },
   });
 
-  const ruleSet =
-    existing ??
-    (await prisma.scoringRuleSet.create({
+  if (!existing) {
+    await prisma.scoringRuleSet.create({
       data: {
         assessmentId,
         version: 1,
         method: data.scoring.method,
         notes: `${data.scoring.notes} — ${data.provenance}`,
-        active: true,
+        active: false,
       },
-      select: { id: true },
-    }));
-
-  await prisma.scoringRuleSet.update({
-    where: { id: ruleSet.id },
-    data: { active: true },
-  });
-
-  let count = 0;
-  for (const band of data.scoring.gradeBands) {
-    const table = data.scoring.percentiles[band];
-    for (const [code, values] of Object.entries(table)) {
-      const dimensionId = dimensionIds.get(code);
-      if (!dimensionId) throw new Error(`محور غير معروف في جدول التحويل: ${code}`);
-      for (let raw = 0; raw < values.length; raw++) {
-        await prisma.scoringRule.upsert({
-          where: {
-            ruleSetId_dimensionId_gradeBand_rawScore: {
-              ruleSetId: ruleSet.id,
-              dimensionId,
-              gradeBand: band,
-              rawScore: raw,
-            },
-          },
-          update: { percentile: values[raw] },
-          create: {
-            ruleSetId: ruleSet.id,
-            dimensionId,
-            gradeBand: band,
-            rawScore: raw,
-            percentile: values[raw],
-          },
-        });
-        count++;
-      }
-    }
+    });
+    console.log("  ⚠ قواعد التحويل: مجموعة فارغة بانتظار الجداول المعيارية (غير فعّالة)");
+    return;
   }
-  console.log(`  ✔ قواعد التصحيح: ${count} قاعدة (الإصدار 1، فعّال)`);
+
+  console.log(
+    existing._count.rules > 0
+      ? `  ✔ قواعد التحويل: ${existing._count.rules} قاعدة`
+      : "  ⚠ قواعد التحويل: لم تُدخل الجداول المعيارية بعد (غير فعّالة)"
+  );
 }
 
 const CATEGORIES = [
@@ -396,8 +388,8 @@ async function seedSettings() {
 
 async function main() {
   console.log("\n🧭 تهيئة قاعدة بيانات بوصلتي\n");
-  const { assessmentId, dimensionIds } = await seedAssessment();
-  await seedScoring(assessmentId, dimensionIds);
+  const { assessmentId } = await seedAssessment();
+  await seedScoring(assessmentId);
   await seedLibrary();
   await seedTopics();
   await seedUsers();

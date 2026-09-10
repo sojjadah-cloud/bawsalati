@@ -66,6 +66,7 @@ export async function startSession(input: StartSessionInput): Promise<StartedSes
       assessmentId: assessment.id,
       studentName: input.studentName,
       grade: input.grade,
+      gender: input.gender as "MALE" | "FEMALE",
       phone: input.phone,
       consentAt: new Date(),
       tokenHash: hashToken(token),
@@ -177,7 +178,6 @@ export async function submitSession(sessionId: string): Promise<SubmitOutcome> {
         number: true,
         text: true,
         dimensionId: true,
-        group: { select: { number: true } },
       },
     }),
     prisma.assessmentDimension.findMany({
@@ -200,6 +200,13 @@ export async function submitSession(sessionId: string): Promise<SubmitOutcome> {
     );
   }
 
+  if (ruleSet.rules.length === 0) {
+    throw new ApiError(
+      "لم تُدخل الجداول المعيارية بعد. لا يمكن احتساب النتيجة قبل إدخالها.",
+      503
+    );
+  }
+
   const gradeBands = [...new Set(ruleSet.rules.map((r) => r.gradeBand))];
 
   let scored;
@@ -219,16 +226,17 @@ export async function submitSession(sessionId: string): Promise<SubmitOutcome> {
         number: q.number,
         text: q.text,
         dimensionId: q.dimensionId,
-        groupNumber: q.group.number,
       })),
       rules: ruleSet.rules.map((r) => ({
         dimensionId: r.dimensionId,
         gradeBand: r.gradeBand,
+        gender: r.gender,
         rawScore: r.rawScore,
         percentile: r.percentile,
       })),
       method: ruleSet.method,
       gradeBand: gradeBandOf(session.grade, gradeBands),
+      gender: session.gender,
       answers: answerMap,
     });
   } catch (e) {
@@ -248,6 +256,7 @@ export async function submitSession(sessionId: string): Promise<SubmitOutcome> {
         ruleSetId: ruleSet.id,
         assessmentVersion: assessment.version,
         topDimensions: scored.topDimensions,
+        interestCode: scored.interestCode,
         recommendedFields: scored.recommendedFields,
         sections: {
           create: scored.sections.map((s: ResultSection) => ({

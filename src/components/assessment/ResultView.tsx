@@ -1,6 +1,7 @@
-// عرض النتيجة: ستة جداول 3×3 ثم جدول التحليل.
+// عرض النتيجة: ستة جداول 3×3، ثم جدول التحليل، ثم المخطط المهني.
 // كل القيم تأتي من اللقطة المخزّنة وقت التسليم — لا يُحسب شيء هنا.
 import { Check, Minus } from "lucide-react";
+import { ProfileChart } from "./ProfileChart";
 
 export interface ResultCell {
   questionNumber: number;
@@ -25,7 +26,7 @@ export interface AnalysisRowData {
   rank: number;
 }
 
-/** جدول واحد: 3 أعمدة × 3 صفوف لعبارات محور واحد. */
+/** جدول واحد: 3 أعمدة × 3 صفوف لعبارات بيئة واحدة. */
 function SectionTable({ section }: { section: ResultSectionData }) {
   const maxScore = section.cells.flat().length;
   const captionId = `sec-${section.dimensionCode}`;
@@ -43,7 +44,7 @@ function SectionTable({ section }: { section: ResultSectionData }) {
 
       <table className="mt-4 w-full table-fixed border-collapse">
         <caption className="sr-only">
-          إجاباتك في محور {section.dimensionLabel}: {section.rawScore} من {maxScore}
+          إجاباتك في بيئة {section.dimensionLabel}: {section.rawScore} من {maxScore}
         </caption>
         <tbody>
           {section.cells.map((row, r) => (
@@ -66,7 +67,7 @@ function SectionTable({ section }: { section: ResultSectionData }) {
                       <Minus className="h-4 w-4" aria-hidden="true" />
                     )}
                     <span className="sr-only">
-                      العبارة {cell.questionNumber}: {cell.value > 0 ? "تنطبق" : "لا تنطبق"}
+                      العبارة {cell.questionNumber}: {cell.value > 0 ? "أفضّل" : "لا أفضّل"}
                     </span>
                   </div>
                 </td>
@@ -78,13 +79,13 @@ function SectionTable({ section }: { section: ResultSectionData }) {
 
       <div className="mt-4">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[var(--color-muted)]">الرتبة المئوية</span>
+          <span className="text-[var(--color-muted)]">الرتبة المئينية</span>
           <span className="font-bold tabular-nums text-slate-900">{section.percentile}٪</span>
         </div>
         <div
           className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
           role="img"
-          aria-label={`الرتبة المئوية ${section.percentile} بالمئة`}
+          aria-label={`الرتبة المئينية ${section.percentile} بالمئة`}
         >
           <div
             className="h-full rounded-full bg-brand-600"
@@ -95,7 +96,7 @@ function SectionTable({ section }: { section: ResultSectionData }) {
 
       <details className="mt-4 group">
         <summary className="cursor-pointer text-xs font-bold text-brand-700 hover:underline">
-          عرض عبارات هذا المحور
+          عرض عبارات هذه البيئة
         </summary>
         <ol className="mt-2 space-y-1.5">
           {section.cells.flat().map((cell) => (
@@ -124,6 +125,49 @@ export function ResultTables({ sections }: { sections: ResultSectionData[] }) {
   );
 }
 
+/** رمز الميول: البيئات الثلاث الأعلى رتبةً مئينية. */
+export function InterestCode({
+  interestCode,
+  rows,
+}: {
+  interestCode: string;
+  rows: AnalysisRowData[];
+}) {
+  const top = [...rows].sort((a, b) => a.rank - b.rank).slice(0, 3);
+  if (top.length === 0) return null;
+
+  return (
+    <section className="card card-pad" aria-labelledby="code-title">
+      <h2 id="code-title" className="text-base font-bold text-slate-900">
+        رمز ميولك
+      </h2>
+      <p className="mt-1 text-sm text-[var(--color-muted)]">
+        البيئات الثلاث الأعلى رتبةً مئينية، وعليها يُبنى البحث عن المهن المناسبة.
+      </p>
+
+      <p className="mt-4 text-3xl font-extrabold tracking-widest text-brand-800">
+        {interestCode || top.map((t) => t.code).join(" - ")}
+      </p>
+
+      <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+        {top.map((row) => (
+          <li key={row.code} className="rounded-[var(--radius-md)] bg-slate-50 p-3">
+            <span className="block text-xs text-[var(--color-muted)]">
+              البيئة {row.rank}
+            </span>
+            <span className="mt-0.5 block text-sm font-bold text-slate-900">
+              {row.label} ({row.code})
+            </span>
+            <span className="mt-1 block text-xs tabular-nums text-brand-800">
+              الرتبة المئينية {row.percentile}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export function AnalysisTable({
   rows,
   summary,
@@ -139,7 +183,7 @@ export function AnalysisTable({
         جدول التحليل
       </h2>
       <p className="section-lead">
-        ترتيب محاورك من الأقوى إلى الأقل حسب الرتبة المئوية.
+        ترتيب البيئات من الأقوى إلى الأقل حسب الرتبة المئينية.
       </p>
 
       <div className="table-wrap mt-5">
@@ -147,9 +191,10 @@ export function AnalysisTable({
           <thead>
             <tr>
               <th scope="col">الترتيب</th>
-              <th scope="col">المحور</th>
+              <th scope="col">البيئة</th>
+              <th scope="col">الرمز</th>
               <th scope="col">الدرجة الخام</th>
-              <th scope="col">الرتبة المئوية</th>
+              <th scope="col">الرتبة المئينية</th>
             </tr>
           </thead>
           <tbody>
@@ -157,17 +202,24 @@ export function AnalysisTable({
               <tr key={row.code}>
                 <td className="tabular-nums font-bold text-slate-900">{row.rank}</td>
                 <td className="font-semibold">{row.label}</td>
-                <td className="tabular-nums">{row.rawScore}</td>
-                <td className="tabular-nums font-bold text-brand-800">{row.percentile}٪</td>
+                <td className="font-bold text-brand-800">{row.code}</td>
+                <td className="tabular-nums">{row.rawScore} / 9</td>
+                <td className="tabular-nums font-bold text-brand-800">{row.percentile}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      {/* المخطط المهني كما في نموذج الدليل: البيئات بترتيبها الأصلي لا بترتيب الرتبة */}
+      <div className="mt-6">
+        <h3 className="mb-3 text-base font-bold text-slate-900">المخطط المهني</h3>
+        <ProfileChart rows={rows} />
+      </div>
+
       {summary ? (
         <div className="card card-pad mt-5">
-          <h3 className="text-base font-bold text-slate-900">أبرز محاورك</h3>
+          <h3 className="text-base font-bold text-slate-900">أبرز بيئاتك</h3>
           <ol className="mt-3 space-y-3">
             {summary
               .split("\n")

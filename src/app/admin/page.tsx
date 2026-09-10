@@ -22,6 +22,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminHome() {
   const session = await requireAdmin();
 
+  const activeAssessment = await prisma.assessment.findFirst({
+    where: { active: true },
+    select: { id: true, title: true },
+  });
+
   const [
     specialists,
     activeQuestions,
@@ -33,13 +38,17 @@ export default async function AdminHome() {
     guide,
   ] = await Promise.all([
     prisma.user.count({ where: { role: "SPECIALIST", active: true } }),
-    prisma.assessmentQuestion.count({ where: { active: true } }),
+    activeAssessment
+      ? prisma.assessmentQuestion.count({
+          where: { active: true, assessmentId: activeAssessment.id },
+        })
+      : Promise.resolve(0),
     prisma.consultationTopic.count({ where: { active: true } }),
     prisma.libraryResource.count({ where: { published: true, archivedAt: null } }),
     prisma.assessmentSession.count({ where: { status: "SUBMITTED" } }),
     prisma.appointment.count(),
     prisma.scoringRuleSet.findFirst({
-      where: { active: true },
+      where: { active: true, assessmentId: activeAssessment?.id },
       select: { version: true, method: true, _count: { select: { rules: true } } },
     }),
     prisma.guideDocument.findFirst({ where: { published: true }, select: { version: true } }),
@@ -47,9 +56,14 @@ export default async function AdminHome() {
 
   const warnings: string[] = [];
   if (specialists === 0) warnings.push("لا يوجد مختص فعّال — لن يتمكّن الطلاب من حجز موعد.");
-  if (!activeRuleSet) warnings.push("لا توجد قواعد تصحيح فعّالة — لن تُحتسب نتائج الاختبار.");
+  if (!activeAssessment) warnings.push("لا يوجد مقياس فعّال — شغّل تهيئة قاعدة البيانات.");
+  if (!activeRuleSet || activeRuleSet._count.rules === 0) {
+    warnings.push(
+      "لم تُدخل الجداول المعيارية بعد. لن تُحتسب أي نتيجة قبل استيرادها بالأمر npm run norms:import."
+    );
+  }
   if (activeQuestions !== 54) {
-    warnings.push(`عدد العبارات الفعّالة ${activeQuestions} بدل 54 — راجع أسئلة المقياس.`);
+    warnings.push(`عدد عبارات المقياس الفعّال ${activeQuestions} بدل 54 — راجع أسئلة المقياس.`);
   }
   if (!guide) warnings.push("لم يُنشر دليل الطالب بعد.");
 

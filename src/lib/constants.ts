@@ -16,10 +16,21 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const GRADES = [
+  { value: "9", label: "الصف التاسع" },
   { value: "10", label: "الصف العاشر" },
   { value: "11", label: "الصف الحادي عشر" },
   { value: "12", label: "الصف الثاني عشر" },
 ] as const;
+
+/** النوع مطلوب لأن الجداول المعيارية تختلف بين الذكور والإناث. */
+export const GENDERS = [
+  { value: "MALE", label: "ذكر" },
+  { value: "FEMALE", label: "أنثى" },
+] as const;
+
+export const GENDER_LABELS: Record<string, string> = Object.fromEntries(
+  GENDERS.map((g) => [g.value, g.label])
+);
 
 export const GRADE_LABELS: Record<string, string> = Object.fromEntries(
   GRADES.map((g) => [g.value, g.label])
