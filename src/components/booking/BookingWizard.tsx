@@ -9,6 +9,7 @@ import {
   CalendarCheck,
   Check,
   Clock,
+  Link2 as LinkIcon,
   UserRound,
 } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
@@ -84,6 +85,7 @@ export function BookingWizard({
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [trackingToken, setTrackingToken] = useState("");
 
   const selectedTopic = topics.find((t) => t.id === topicId);
   const selectedSpecialist = specialists.find((s) => s.id === specialistId);
@@ -154,7 +156,7 @@ export function BookingWizard({
 
     setSubmitting(true);
     try {
-      const res = await api.post<{ appointment: Confirmation }>("/api/appointments", {
+      const res = await api.post<{ appointment: Confirmation; trackingToken: string }>("/api/appointments", {
         specialistId,
         studentName: studentName.trim(),
         grade,
@@ -165,6 +167,7 @@ export function BookingWizard({
         topicDetails: selectedTopic?.requiresDetails ? topicDetails.trim() : "",
         consent: true,
       });
+      setTrackingToken(res.trackingToken);
       setConfirmation(res.appointment);
     } catch (err) {
       setFormError(messageOf(err));
@@ -210,12 +213,28 @@ export function BookingWizard({
           ))}
         </dl>
 
+        {trackingToken ? (
+          <div className="mt-5 rounded-[var(--radius-md)] border border-brand-100 bg-brand-50 p-4">
+            <p className="text-sm font-bold text-brand-900">تابع حالة موعدك</p>
+            <p className="mt-1 text-xs leading-relaxed text-brand-800">
+              احفظ هذا الرابط لمعرفة إن أكّد المختص موعدك.
+            </p>
+            <Link
+              href={`/booking/${encodeURIComponent(trackingToken)}`}
+              className="btn-secondary btn-sm mt-3"
+            >
+              <LinkIcon className="h-4 w-4" aria-hidden="true" />
+              فتح صفحة المتابعة
+            </Link>
+          </div>
+        ) : null}
+
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/" className="btn-outline">
-            العودة للرئيسية
-          </Link>
           <Link href="/assessment" className="btn-primary">
             جرّب اختبار بوصلتي
+          </Link>
+          <Link href="/" className="btn-outline">
+            الرئيسية
           </Link>
         </div>
       </div>

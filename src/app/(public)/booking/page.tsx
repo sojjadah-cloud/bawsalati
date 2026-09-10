@@ -18,11 +18,9 @@ export default async function BookingPage() {
 
   return (
     <div className="container-narrow py-10 sm:py-14">
-      <p className="section-kicker">استشارة فردية</p>
-      <h1 className="section-title">حجز موعد مع أخصائي التوجيه المهني</h1>
+      <h1 className="section-title">حجز موعد</h1>
       <p className="section-lead">
-        اختر المختص واليوم والوقت الذي يناسبك من الفترات المتاحة، وحدّد موضوع
-        الاستشارة. الحجز لا يستغرق أكثر من دقيقة، ولا يحتاج حساباً.
+        اختر مختصاً ووقتاً متاحاً وموضوع الاستشارة. لا يحتاج حساباً.
       </p>
 
       <div className="mt-8">

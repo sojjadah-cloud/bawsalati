@@ -65,9 +65,9 @@ export default async function ResultPage({
 
       <div className="mt-6 no-print">
         <Alert tone="info" title="كيف تقرأ نتيجتك">
-          كل جدول يمثّل محوراً من محاور الميول، وفيه العبارات التسع الخاصة به.
-          العلامة تعني أن العبارة تنطبق عليك. الرتبة المئوية تقارن درجتك بزملائك في
-          الصف نفسه. النتيجة مؤشّر يساعدك على الاختيار، وليست حكماً نهائياً.
+          كل جدول محور من محاور الميول بعباراته التسع، والعلامة تعني أن العبارة
+          تنطبق عليك. الرتبة المئوية تقارن درجتك بزملاء صفّك. النتيجة مؤشّر يساعدك
+          على الاختيار، لا حكم نهائي.
         </Alert>
       </div>
 
@@ -75,7 +75,7 @@ export default async function ResultPage({
         <h2 id="tables-title" className="section-title">
           جداول النتيجة
         </h2>
-        <p className="section-lead">ستة محاور، لكل محور تسع عبارات.</p>
+
         <div className="mt-5">
           <ResultTables sections={sections} />
         </div>
@@ -90,9 +90,7 @@ export default async function ResultPage({
           <h2 id="fields-title" className="section-title">
             مجالات دراسية قريبة من ميولك
           </h2>
-          <p className="section-lead">
-            المجالات المرتبطة بمحاورك الثلاثة الأعلى وفق دليل الطالب.
-          </p>
+          <p className="section-lead">المرتبطة بمحاورك الثلاثة الأعلى وفق دليل الطالب.</p>
 
           <ul className="mt-5 flex flex-wrap gap-2">
             {result.recommendedFields.map((f) => (

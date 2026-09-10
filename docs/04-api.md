@@ -16,6 +16,8 @@
 | `/api/files/library/[id]` | GET | تقديم ملف مورد (`kind=file\|audio`، `mode=view\|download`) |
 | `/api/files/guide` | GET | تقديم ملف دليل الطالب |
 
+صفحة `/booking/[token]` تتيح للطالب متابعة حالة حجزه برمزه دون حساب.
+
 ## المختص
 
 | المسار | الطريقة | الوظيفة |
@@ -29,6 +31,7 @@
 | `/api/specialist/library/resources/[id]` | PATCH · DELETE | تعديل/نشر/أرشفة · حذف نهائي (مدير فقط) |
 | `/api/specialist/uploads` | POST | رفع ملف |
 | `/api/specialist/profile` | GET · PATCH | الملف الشخصي ورقم الإشعار |
+| `/api/specialist/notifications` | GET · PATCH | تنبيهات اللوحة · تعليمها مقروءة |
 
 ## المدير
 
@@ -37,6 +40,8 @@
 | `/api/admin/specialists` | POST | إنشاء حساب |
 | `/api/admin/specialists/[id]` | PATCH | تفعيل/تعطيل، إعادة ضبط كلمة المرور |
 | `/api/admin/questions/[id]` | PATCH | تعديل نص عبارة أو تعطيلها |
+| `/api/admin/categories` | POST | إضافة تصنيف مكتبة |
+| `/api/admin/categories/[id]` | PATCH · DELETE | تعديل · حذف (يُرفض إن حوى موارد) |
 | `/api/admin/topics` | POST | إضافة موضوع استشارة |
 | `/api/admin/topics/[id]` | PATCH · DELETE | تعديل · حذف (يُرفض إن ارتبط بحجوزات) |
 | `/api/admin/guide` | POST | نشر إصدار جديد من الدليل |

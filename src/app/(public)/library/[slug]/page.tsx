@@ -107,7 +107,7 @@ export default async function CategoryPage({
             description={
               search || type
                 ? "جرّب كلمات بحث أخرى أو أزل التصفية."
-                : "سيضيف مختص التوجيه المهني موارد هذا التصنيف قريباً."
+                : "لم تُضف موارد إلى هذا التصنيف بعد."
             }
             action={
               search || type ? (

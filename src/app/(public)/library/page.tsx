@@ -23,19 +23,15 @@ export default async function LibraryPage() {
 
   return (
     <div className="container-x py-10 sm:py-14">
-      <p className="section-kicker">موارد للطلاب</p>
       <h1 className="section-title">المكتبة الرقمية</h1>
-      <p className="section-lead">
-        اختر تصنيفاً لتتصفّح موارده. الموارد متاحة للقراءة أو الاستماع مباشرة داخل
-        المنصة.
-      </p>
+      <p className="section-lead">اقرأ أو استمع مباشرة داخل المنصة.</p>
 
       {totalResources === 0 ? (
         <div className="mt-8">
           <EmptyState
             icon={<Library className="h-6 w-6" />}
             title="المكتبة قيد الإعداد"
-            description="لم تُنشر موارد بعد. تابعنا قريباً، أو احجز موعداً مع مختص التوجيه المهني للحصول على مراجع مناسبة لك."
+            description="لم تُنشر موارد بعد. احجز موعداً مع مختص التوجيه المهني للحصول على مراجع تناسبك."
             action={
               <Link href="/booking" className="btn-primary">
                 احجز موعداً

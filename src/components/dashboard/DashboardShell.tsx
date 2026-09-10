@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/client";
+import { NotificationBell } from "./NotificationBell";
 
 interface NavItem {
   href: string;
@@ -59,6 +60,7 @@ const NAV: Record<DashboardArea, { label: string; items: NavItem[] }> = {
       { href: "/admin/specialists", label: "المختصون", icon: Users, primary: true },
       { href: "/admin/questions", label: "أسئلة المقياس", icon: ListChecks, primary: true },
       { href: "/admin/topics", label: "مواضيع الاستشارة", icon: MessageSquare, primary: true },
+      { href: "/admin/library", label: "تصنيفات المكتبة", icon: BookOpenText },
       { href: "/admin/guide", label: "دليل الطالب", icon: FileText },
       { href: "/admin/settings", label: "إعدادات المنصة", icon: Settings },
       { href: "/admin/audit", label: "سجل النظام", icon: ShieldCheck },
@@ -112,10 +114,11 @@ export function DashboardShell({
           <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-brand-700 text-white">
             <Compass className="h-5 w-5" aria-hidden="true" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-extrabold text-slate-900">بوصلتي</p>
             <p className="truncate text-[11px] text-[var(--color-faint)]">{areaLabel}</p>
           </div>
+          {area === "specialist" ? <NotificationBell /> : null}
         </div>
 
         <nav aria-label={areaLabel} className="flex-1 overflow-y-auto p-3">
@@ -164,7 +167,11 @@ export function DashboardShell({
           </span>
           <span className="text-sm font-extrabold text-slate-900">{areaLabel}</span>
         </span>
-        <span className="truncate text-xs text-[var(--color-faint)]">{userName}</span>
+        {area === "specialist" ? (
+          <NotificationBell />
+        ) : (
+          <span className="truncate text-xs text-[var(--color-faint)]">{userName}</span>
+        )}
       </header>
 
       <main id="dash-main" className="pb-24 lg:mr-64 lg:pb-0">

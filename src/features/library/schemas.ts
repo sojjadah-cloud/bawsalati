@@ -74,7 +74,3 @@ export const resourceSchema = z
   });
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
-
-export const archiveSchema = z.object({
-  archived: z.boolean(),
-});
