@@ -9,33 +9,30 @@ const SERVICES = [
   { href: "/guide", label: "دليل الطالب" },
 ];
 
+/**
+ * تذييل أفقي مضغوط.
+ * الروابط وبيانات التواصل تُرصّ عرضاً وتلتفّ عند الحاجة، فلا يطول التذييل
+ * على الشاشات الصغيرة. العناوين مُعلَنة عبر aria بدل سطر مرئي لكل قسم.
+ */
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-[var(--color-line)] bg-white">
-      <div className="container-x py-12">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-brand-700 text-white">
-                <Compass className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span className="text-lg font-extrabold text-slate-900">{BRAND.name}</span>
-            </div>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--color-muted)]">
-              {BRAND.description}
-            </p>
-          </div>
+    <footer className="mt-14 border-t border-[var(--color-line)] bg-white">
+      <div className="container-x py-7">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+          <Link href="/" className="flex shrink-0 items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] bg-brand-700 text-white">
+              <Compass className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="font-extrabold text-slate-900">{BRAND.name}</span>
+          </Link>
 
-          <nav aria-labelledby="footer-services">
-            <h2 id="footer-services" className="text-sm font-bold text-slate-900">
-              الخدمات
-            </h2>
-            <ul className="mt-4 space-y-2.5">
+          <nav aria-label="الخدمات">
+            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
               {SERVICES.map((s) => (
                 <li key={s.href}>
                   <Link
                     href={s.href}
-                    className="text-sm text-[var(--color-muted)] transition-colors hover:text-brand-700"
+                    className="text-[var(--color-muted)] transition-colors hover:text-brand-700"
                   >
                     {s.label}
                   </Link>
@@ -44,30 +41,30 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          <div>
-            <h2 className="text-sm font-bold text-slate-900">التواصل</h2>
-            <ul className="mt-4 space-y-2.5 text-sm text-[var(--color-muted)]">
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <a href={`mailto:${BRAND.email}`} className="transition-colors hover:text-brand-700">
-                  {BRAND.email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span dir="ltr">{BRAND.phone}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{BRAND.location}</span>
-              </li>
-            </ul>
-          </div>
+          <ul
+            aria-label="بيانات التواصل"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--color-muted)]"
+          >
+            <li className="flex items-center gap-1.5">
+              <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <a href={`mailto:${BRAND.email}`} className="transition-colors hover:text-brand-700">
+                {BRAND.email}
+              </a>
+            </li>
+            <li className="flex items-center gap-1.5">
+              <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span dir="ltr">{BRAND.phone}</span>
+            </li>
+            <li className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{BRAND.location}</span>
+            </li>
+          </ul>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-[var(--color-line)] pt-6 text-xs text-[var(--color-faint)] sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {BRAND.name}. جميع الحقوق محفوظة.</p>
-          <div className="flex gap-4">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-2 border-t border-[var(--color-line)] pt-4 text-xs text-[var(--color-faint)]">
+          <p>© {new Date().getFullYear()} {BRAND.name}</p>
+          <div className="flex gap-5">
             <Link href="/privacy" className="transition-colors hover:text-brand-700">
               الخصوصية
             </Link>
