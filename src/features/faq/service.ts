@@ -23,7 +23,16 @@ async function loadEntries(): Promise<MatchableEntry[]> {
 
   const entries = await prisma.faqEntry.findMany({
     where: { active: true },
-    select: { id: true, question: true, answer: true, keywords: true, topic: true },
+    select: {
+      id: true,
+      question: true,
+      answer: true,
+      keywords: true,
+      topic: true,
+      source: true,
+      page: true,
+      priority: true,
+    },
   });
   cache = { entries, at: Date.now() };
   return entries;

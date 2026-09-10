@@ -24,6 +24,8 @@ services:
       npx prisma generate &&
       npx prisma migrate deploy &&
       npm run seed &&
+      npm run seed:content &&
+      npm run faq:guide &&
       npm run build
     startCommand: npm run start
 

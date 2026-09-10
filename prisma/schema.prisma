@@ -640,6 +640,12 @@ model FaqEntry {
   keywords   String[] @default([])
   topic      String   @default("")
   active     Boolean  @default(true)
+  /// مصدر الجواب: "guide" لما استُخرج من دليل الطالب، وفارغ لما كتبه المختص
+  source     String   @default("")
+  /// صفحة الدليل التي أُخذ منها الجواب، إن وُجدت
+  page       Int?
+  /// أولوية المطابقة: الأعلى يُرجَّح عند تقارب الدرجات
+  priority   Int      @default(0)
   /// عدد المرات التي طابق فيها سؤال طالب
   matchCount Int      @default(0)
   createdAt  DateTime @default(now())
@@ -647,6 +653,7 @@ model FaqEntry {
 
   @@index([active])
   @@index([topic])
+  @@index([source])
   @@map("faq_entries")
 }
 

@@ -43,6 +43,12 @@ export interface MatchableEntry {
   answer: string;
   keywords: string[];
   topic: string;
+  /** "guide" لما استُخرج من دليل الطالب */
+  source?: string;
+  /** صفحة الدليل، إن كان المصدر الدليل */
+  page?: number | null;
+  /** الأعلى يُرجَّح عند تقارب الدرجات */
+  priority?: number;
 }
 
 export interface MatchResult {
@@ -86,6 +92,20 @@ function scoreEntry(askTokens: string[], askNormalized: string, entry: Matchable
   return Math.min(1, coverage * 0.7 + density * 0.3 + containment);
 }
 
+/**
+ * ترجيح مصدر الجواب.
+ * الدليل هو المرجع الرسمي للقبول والبرامج، فيُقدَّم على الجواب العام
+ * حين يتقارب التطابق. الترجيح صغير عمداً كي لا يقلب تطابقاً واضحاً.
+ */
+export const PRIORITY_WEIGHT = 0.06;
+
+function weighted(score: number, entry: MatchableEntry): number {
+  const priority = entry.priority ?? 0;
+  if (priority <= 0 || score <= 0) return score;
+  // بلا تحديد بسقف واحد: التساوي التام يجب أن يُحسَم للدليل أيضاً
+  return score + Math.min(0.12, priority * (PRIORITY_WEIGHT / 10));
+}
+
 /** أفضل تطابق لسؤال الطالب، أو null إن لم يتجاوز أيٌّ منها عتبة الثقة. */
 export function findBestMatch(
   question: string,
@@ -95,13 +115,15 @@ export function findBestMatch(
   const askTokens = tokenize(question);
   if (askTokens.length === 0) return null;
 
-  let best: MatchResult | null = null;
+  let best: { entry: MatchableEntry; rank: number } | null = null;
   for (const entry of entries) {
-    const score = scoreEntry(askTokens, askNormalized, entry);
-    if (!best || score > best.score) best = { entry, score };
+    const rank = weighted(scoreEntry(askTokens, askNormalized, entry), entry);
+    if (!best || rank > best.rank) best = { entry, rank };
   }
 
-  return best && best.score >= CONFIDENCE_THRESHOLD ? best : null;
+  if (!best || best.rank < CONFIDENCE_THRESHOLD) return null;
+  // الدرجة المعروضة تبقى ضمن [0,1]؛ الترجيح أداة ترتيب لا قيمة تُعرض
+  return { entry: best.entry, score: Math.min(1, best.rank) };
 }
 
 /** اقتراحات قريبة تُعرض حين لا يوجد جواب مؤكّد. */
@@ -115,7 +137,7 @@ export function findRelated(
   if (askTokens.length === 0) return [];
 
   return entries
-    .map((entry) => ({ entry, score: scoreEntry(askTokens, askNormalized, entry) }))
+    .map((entry) => ({ entry, score: weighted(scoreEntry(askTokens, askNormalized, entry), entry) }))
     .filter((r) => r.score > 0.15)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
