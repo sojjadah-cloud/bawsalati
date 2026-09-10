@@ -79,7 +79,6 @@ async function newSession(grade = "11") {
     grade,
     gender: "MALE",
     phone: "92000001",
-    consent: true,
   });
   createdSessions.push(s.sessionId);
   return s;

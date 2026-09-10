@@ -22,9 +22,6 @@ export const startSessionSchema = z.object({
   grade: z.enum(gradeValues, { errorMap: () => ({ message: "اختر الصف الدراسي" }) }),
   gender: z.enum(genderValues, { errorMap: () => ({ message: "اختر النوع" }) }),
   phone: phoneSchema,
-  consent: z.literal(true, {
-    errorMap: () => ({ message: "يلزم الموافقة على إشعار الخصوصية للمتابعة" }),
-  }),
 });
 export type StartSessionInput = z.infer<typeof startSessionSchema>;
 

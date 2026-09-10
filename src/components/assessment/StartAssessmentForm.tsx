@@ -1,26 +1,19 @@
 "use client";
 
-// الخطوة الثانية: بيانات الطالب + الموافقة، ثم إنشاء جلسة الاختبار.
+// الخطوة الثانية: بيانات الطالب، ثم إنشاء جلسة الاختبار.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
-import { GENDERS, GRADES, PRIVACY } from "@/lib/constants";
+import { GENDERS, GRADES } from "@/lib/constants";
 import { Alert } from "@/components/ui/primitives";
-import {
-  CheckboxField,
-  SelectField,
-  SubmitButton,
-  TextField,
-} from "@/components/ui/form";
+import { SelectField, SubmitButton, TextField } from "@/components/ui/form";
 
 interface FieldErrors {
   studentName?: string;
   grade?: string;
   gender?: string;
   phone?: string;
-  consent?: string;
 }
 
 export function StartAssessmentForm() {
@@ -29,7 +22,6 @@ export function StartAssessmentForm() {
   const [grade, setGrade] = useState("");
   const [gender, setGender] = useState("");
   const [phone, setPhone] = useState("");
-  const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,7 +35,6 @@ export function StartAssessmentForm() {
     if (!/^[79]\d{7}$/u.test(phone.trim())) {
       next.phone = "أدخل رقماً عُمانياً صحيحاً مكوّناً من 8 أرقام";
     }
-    if (!consent) next.consent = "يلزم الموافقة على إشعار الخصوصية للمتابعة";
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -61,7 +52,6 @@ export function StartAssessmentForm() {
         grade,
         gender,
         phone: phone.trim(),
-        consent: true,
       });
       router.push("/assessment/questions");
     } catch (err) {
@@ -71,7 +61,6 @@ export function StartAssessmentForm() {
           grade: err.fieldError("grade"),
           gender: err.fieldError("gender"),
           phone: err.fieldError("phone"),
-          consent: err.fieldError("consent"),
         });
       }
       setFormError(messageOf(err));
@@ -135,25 +124,6 @@ export function StartAssessmentForm() {
           hint="8 أرقام تبدأ بـ 9 أو 7"
           placeholder="9xxxxxxx"
         />
-
-        <div className="rounded-[var(--radius-md)] bg-slate-50 p-4">
-          <p className="text-xs leading-relaxed text-[var(--color-muted)]">{PRIVACY.assessment}</p>
-          <div className="mt-3">
-            <CheckboxField
-              label={
-                <>
-                  {PRIVACY.consentLabel}.{" "}
-                  <Link href="/privacy" className="font-bold text-brand-700 underline">
-                    اقرأ إشعار الخصوصية
-                  </Link>
-                </>
-              }
-              checked={consent}
-              onChange={setConsent}
-              error={errors.consent}
-            />
-          </div>
-        </div>
 
         {formError ? <Alert tone="danger">{formError}</Alert> : null}
       </div>

@@ -22,9 +22,6 @@ export const createAppointmentSchema = z
     startTime: hhmm,
     topicId: z.string().trim().min(1, "اختر موضوع الاستشارة"),
     topicDetails: z.string().trim().max(1000, "التفاصيل طويلة جداً").optional().or(z.literal("")),
-    consent: z.literal(true, {
-      errorMap: () => ({ message: "يلزم الموافقة على إشعار الخصوصية للمتابعة" }),
-    }),
   })
   .strict();
 

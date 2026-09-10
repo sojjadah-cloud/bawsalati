@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Clock, ListChecks, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Alert } from "@/components/ui/primitives";
 import { StartAssessmentForm } from "@/components/assessment/StartAssessmentForm";
@@ -19,9 +18,6 @@ async function getIntro() {
     select: {
       title: true,
       introduction: true,
-      groupCount: true,
-      questionsPerGroup: true,
-      _count: { select: { questions: { where: { active: true } } } },
     },
   });
   return assessment;
@@ -40,7 +36,6 @@ export default async function AssessmentIntroPage() {
     );
   }
 
-  const total = assessment._count.questions;
   const paragraphs = assessment.introduction.split("\n\n").filter(Boolean);
 
   return (
@@ -56,24 +51,6 @@ export default async function AssessmentIntroPage() {
             <p key={i}>{p}</p>
           ))}
         </div>
-
-        <ul className="mt-8 grid gap-3 sm:grid-cols-3">
-          {[
-            { icon: ListChecks, label: `${total} عبارة`, sub: `${assessment.groupCount} مجموعات` },
-            { icon: Clock, label: "نحو 10 دقائق", sub: "يمكنك العودة والتعديل" },
-            { icon: ShieldCheck, label: "نتيجتك خاصة", sub: "لا تُنشر ولا تُشارك" },
-          ].map((item) => (
-            <li key={item.label} className="card flex items-center gap-3 p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-brand-50 text-brand-700">
-                <item.icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-bold text-slate-900">{item.label}</span>
-                <span className="block text-xs text-[var(--color-muted)]">{item.sub}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
 
         <div className="mt-10">
           <StartAssessmentForm />

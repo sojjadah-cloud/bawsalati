@@ -58,7 +58,6 @@ function appointmentData(startTime: string, studentName: string) {
     scheduledDate: isoDateToUtc(testDate),
     startTime,
     endTime: "09:00",
-    consentAt: new Date(),
     tokenHash: `${SUFFIX}-${startTime}-${studentName}`,
   };
 }

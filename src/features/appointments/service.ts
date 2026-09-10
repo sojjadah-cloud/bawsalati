@@ -100,7 +100,6 @@ export async function createAppointment(
           scheduledDate: isoDateToUtc(input.date),
           startTime: slot.startTime,
           endTime: slot.endTime,
-          consentAt: new Date(),
           tokenHash: hashToken(token),
         },
         select: { id: true, startTime: true, endTime: true },

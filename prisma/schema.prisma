@@ -271,8 +271,6 @@ model AssessmentSession {
   grade        String
   gender       Gender        @default(MALE)
   phone        String
-  /// وقت موافقة الطالب على إشعار الخصوصية
-  consentAt    DateTime
   status       SessionStatus @default(IN_PROGRESS)
   /// SHA-256 لرمز الوصول للنتيجة — الرمز نفسه لا يُخزَّن
   tokenHash    String        @unique
@@ -553,7 +551,6 @@ model Appointment {
   status          AppointmentStatus @default(PENDING)
   specialistNotes String?
   cancelReason    String?
-  consentAt       DateTime
   /// رمز يتيح للطالب متابعة حجزه دون حساب (SHA-256)
   tokenHash       String            @unique
   createdAt       DateTime          @default(now())

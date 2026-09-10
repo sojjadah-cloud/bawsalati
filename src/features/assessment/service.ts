@@ -68,7 +68,6 @@ export async function startSession(input: StartSessionInput): Promise<StartedSes
       grade: input.grade,
       gender: input.gender as "MALE" | "FEMALE",
       phone: input.phone,
-      consentAt: new Date(),
       tokenHash: hashToken(token),
       tokenExpires: expires,
     },

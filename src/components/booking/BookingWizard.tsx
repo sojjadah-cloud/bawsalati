@@ -13,11 +13,10 @@ import {
   UserRound,
 } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
-import { GRADES, GRADE_LABELS, PRIVACY } from "@/lib/constants";
+import { GRADES, GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate, formatArabicTime, WEEKDAY_LABELS } from "@/lib/time";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/primitives";
 import {
-  CheckboxField,
   SelectField,
   SubmitButton,
   TextAreaField,
@@ -75,7 +74,6 @@ export function BookingWizard({
   const [startTime, setStartTime] = useState("");
   const [topicId, setTopicId] = useState("");
   const [topicDetails, setTopicDetails] = useState("");
-  const [consent, setConsent] = useState(false);
 
   const [days, setDays] = useState<DayAvailability[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -120,9 +118,20 @@ export function BookingWizard({
       case 3:
         return !!topicId && (!selectedTopic?.requiresDetails || topicDetails.trim().length >= 5);
       default:
-        return consent;
+        return true;
     }
-  }, [step, studentName, grade, phone, specialistId, date, startTime, topicId, selectedTopic, topicDetails, consent]);
+  }, [
+    step,
+    studentName,
+    grade,
+    phone,
+    specialistId,
+    date,
+    startTime,
+    topicId,
+    selectedTopic,
+    topicDetails,
+  ]);
 
   function next() {
     const nextErrors: Record<string, string | undefined> = {};
@@ -149,11 +158,6 @@ export function BookingWizard({
     e.preventDefault();
     if (submitting) return;
     setFormError(null);
-    if (!consent) {
-      setErrors({ consent: "يلزم الموافقة على إشعار الخصوصية للمتابعة" });
-      return;
-    }
-
     setSubmitting(true);
     try {
       const res = await api.post<{ appointment: Confirmation; trackingToken: string }>("/api/appointments", {
@@ -165,7 +169,6 @@ export function BookingWizard({
         startTime,
         topicId,
         topicDetails: selectedTopic?.requiresDetails ? topicDetails.trim() : "",
-        consent: true,
       });
       setTrackingToken(res.trackingToken);
       setConfirmation(res.appointment);
@@ -556,25 +559,6 @@ export function BookingWizard({
               ))}
             </dl>
 
-            <div className="mt-5 rounded-[var(--radius-md)] bg-slate-50 p-4">
-              <p className="text-xs leading-relaxed text-[var(--color-muted)]">{PRIVACY.booking}</p>
-              <div className="mt-3">
-                <CheckboxField
-                  label={
-                    <>
-                      {PRIVACY.consentLabel}.{" "}
-                      <Link href="/privacy" className="font-bold text-brand-700 underline">
-                        اقرأ إشعار الخصوصية
-                      </Link>
-                    </>
-                  }
-                  checked={consent}
-                  onChange={setConsent}
-                  error={errors.consent}
-                />
-              </div>
-            </div>
-
             {formError ? (
               <div className="mt-5">
                 <Alert tone="danger">{formError}</Alert>
@@ -602,7 +586,7 @@ export function BookingWizard({
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </button>
         ) : (
-          <SubmitButton loading={submitting} disabled={!consent} className="btn-primary flex-1 sm:flex-none">
+          <SubmitButton loading={submitting} className="btn-primary flex-1 sm:flex-none">
             <CalendarCheck className="h-5 w-5" aria-hidden="true" />
             تأكيد الحجز
           </SubmitButton>
