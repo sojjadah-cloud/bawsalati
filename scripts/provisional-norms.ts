@@ -48,6 +48,21 @@ async function main() {
   });
   if (dimensions.length === 0) throw new Error("لا توجد بيئات معرّفة للمقياس.");
 
+  // جدول فعّال مكتمل لا يُستبدل بمؤقّت: السكربت يُستدعى في كل عملية نشر،
+  // ولو أزاح جدولاً معتمداً لأعاد المنصة إلى قيم غير معيارية بلا قصد.
+  const active = await prisma.scoringRuleSet.findFirst({
+    where: { assessmentId: assessment.id, active: true },
+    select: { version: true, provisional: true, _count: { select: { rules: true } } },
+  });
+  if (active && active._count.rules > 0) {
+    console.log(
+      `↩︎ يوجد جدول فعّال (إصدار ${active.version}، ${active._count.rules} قاعدة، ${
+        active.provisional ? "مؤقّت" : "معتمد"
+      }) — لا تغيير.`
+    );
+    return;
+  }
+
   const latest = await prisma.scoringRuleSet.findFirst({
     where: { assessmentId: assessment.id },
     orderBy: { version: "desc" },
