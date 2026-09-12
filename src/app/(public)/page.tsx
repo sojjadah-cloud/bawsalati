@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   ClipboardList,
   GraduationCap,
+  ListChecks,
 } from "lucide-react";
 import { HeroBackdrop } from "@/components/public/HeroBackdrop";
 
@@ -38,6 +39,13 @@ const SERVICES = [
     title: "دليل الطالب",
     description: "تصفّح التخصصات حسب المجال والمؤسسة، أو ابحث برمز البرنامج.",
     cta: "تصفّح التخصصات",
+  },
+  {
+    href: "/eligibility",
+    icon: ListChecks,
+    title: "أي تخصص أستطيع دخوله؟",
+    description: "أدخل صفّك وموادك ودرجاتك لتعرف ما تنطبق عليك شروطه.",
+    cta: "اعرف تخصصاتك",
   },
 ];
 

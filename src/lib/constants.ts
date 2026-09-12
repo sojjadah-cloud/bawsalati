@@ -36,6 +36,24 @@ export const GRADE_LABELS: Record<string, string> = Object.fromEntries(
   GRADES.map((g) => [g.value, g.label])
 );
 
+/** مواد دبلوم التعليم العام كما ترد في شروط برامج الدليل. */
+export const SUBJECTS = [
+  "اللغة العربية",
+  "اللغة الإنجليزية",
+  "الرياضيات المتقدمة",
+  "الرياضيات الأساسية",
+  "الفيزياء",
+  "الكيمياء",
+  "الأحياء",
+  "الجيولوجيا",
+  "تقنية المعلومات",
+  "إدارة الأعمال",
+  "الدراسات الاجتماعية",
+  "التربية الإسلامية",
+  "الهندسة",
+  "الفنون التشكيلية",
+] as const;
+
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   READABLE: "كتاب مقروء",
   AUDIO: "كتاب مسموع",

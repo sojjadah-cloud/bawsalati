@@ -416,6 +416,10 @@ model StudyProgram {
   notes         String  @default("")
   /// صفحة الدليل التي أُخذ منها الصفّ، ليتحقّق الطالب بنفسه
   guidePage     Int?
+  /// أدنى معدل عام مقروء من نصّ الشروط، أو null إن لم يُذكر
+  minOverall    Int?
+  /// شروط المواد مقروءةً: [{ min, anyOf: [مادة], count }]
+  subjectRules  Json    @default("[]")
   active        Boolean @default(true)
   /// عدد مرات فتح صفحة البرنامج — إحصاء فقط
   viewCount     Int      @default(0)

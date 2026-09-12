@@ -9,8 +9,9 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { parseRequirements } from "../src/features/programs/requirements";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -42,7 +43,13 @@ async function main() {
   let added = 0;
   let updated = 0;
 
+  let withRules = 0;
+
   for (const p of programs) {
+    // الشروط النثرية تُقرأ مرة واحدة عند الإدخال، فلا تُحلَّل مع كل طلب
+    const parsed = parseRequirements(p.requirements);
+    if (parsed.rules.length > 0) withRules++;
+
     const data = {
       name: p.name,
       field: p.field,
@@ -57,6 +64,8 @@ async function main() {
       qualification: p.qualification,
       notes: p.notes,
       guidePage: p.page,
+      minOverall: parsed.minOverall,
+      subjectRules: parsed.rules as unknown as Prisma.InputJsonValue,
       active: true,
     };
 
