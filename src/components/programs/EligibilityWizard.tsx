@@ -7,7 +7,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, TriangleAlert } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
-import { GRADES, SUBJECTS } from "@/lib/constants";
+import { GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
 import { Alert, EmptyState } from "@/components/ui/primitives";
 
 type Subject = (typeof SUBJECTS)[number];
@@ -31,12 +31,14 @@ interface ProgramMatch {
   competitive: number | null;
   unmetRules: SubjectRule[];
   overallMet: boolean;
+  missingSubjects: Subject[];
   eligible: boolean;
 }
 
 interface MatchResult {
   eligible: ProgramMatch[];
   nearMisses: ProgramMatch[];
+  needsSubjects: ProgramMatch[];
   fields: { field: string; count: number }[];
   overall: number | null;
   unchecked: number;
@@ -45,10 +47,16 @@ interface MatchResult {
 /** الصفّان الحادي عشر والثاني عشر يدخلان الدرجات، وما دونهما المواد فقط. */
 const GRADES_WITH_MARKS = ["11", "12"];
 
+const CORE = SUBJECT_GROUPS.core as readonly Subject[];
+const MATHS = SUBJECT_GROUPS.math as readonly Subject[];
+const SCIENCES = SUBJECT_GROUPS.science as readonly Subject[];
+const ELECTIVES = [...SUBJECT_GROUPS.science, ...SUBJECT_GROUPS.elective] as readonly Subject[];
+
 export function EligibilityWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [grade, setGrade] = useState("");
-  const [chosen, setChosen] = useState<Subject[]>([]);
+  const [math, setMath] = useState<Subject | "">("");
+  const [electives, setElectives] = useState<Subject[]>([]);
   const [marks, setMarks] = useState<Partial<Record<Subject, string>>>({});
   const [result, setResult] = useState<MatchResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,23 +64,50 @@ export function EligibilityWizard() {
 
   const needsMarks = GRADES_WITH_MARKS.includes(grade);
 
-  function toggle(subject: Subject) {
-    setChosen((list) =>
-      list.includes(subject) ? list.filter((s) => s !== subject) : [...list, subject]
-    );
+  // الخطة الرسمية: الإلزامية للجميع، ومادة رياضيات، وثلاث اختيارية
+  const chosen: Subject[] = [...CORE, ...(math ? [math] : []), ...electives];
+
+  function pickMath(subject: Subject) {
+    setMath((current) => {
+      if (current && current !== subject) clearMark(current);
+      return current === subject ? "" : subject;
+    });
+    if (math === subject) clearMark(subject);
+  }
+
+  function toggleElective(subject: Subject) {
+    setElectives((list) => {
+      if (list.includes(subject)) {
+        clearMark(subject);
+        return list.filter((s) => s !== subject);
+      }
+      if (list.length >= SUBJECT_PLAN.electiveCount) return list;
+      return [...list, subject];
+    });
+  }
+
+  function clearMark(subject: Subject) {
     setMarks((m) => {
       const next = { ...m };
-      if (subject in next) delete next[subject];
+      delete next[subject];
       return next;
     });
   }
 
-  const ready = needsMarks
-    ? chosen.length > 0 && chosen.every((s) => {
-        const v = Number(marks[s]);
-        return marks[s] !== undefined && marks[s] !== "" && v >= 0 && v <= 100;
-      })
-    : chosen.length > 0;
+  const scienceCount = electives.filter((s) => SCIENCES.includes(s)).length;
+  const planComplete =
+    math !== "" &&
+    electives.length === SUBJECT_PLAN.electiveCount &&
+    scienceCount >= SUBJECT_PLAN.minScience;
+
+  const marksComplete = chosen.every((s) => {
+    const value = marks[s];
+    if (value === undefined || value === "") return false;
+    const n = Number(value);
+    return n >= 0 && n <= 100;
+  });
+
+  const ready = planComplete && (!needsMarks || marksComplete);
 
   async function submit() {
     setLoading(true);
@@ -94,7 +129,8 @@ export function EligibilityWizard() {
   function restart() {
     setStep(1);
     setGrade("");
-    setChosen([]);
+    setMath("");
+    setElectives([]);
     setMarks({});
     setResult(null);
     setError(null);
@@ -157,58 +193,61 @@ export function EligibilityWizard() {
       ) : null}
 
       {step === 2 ? (
-        <section className="card card-pad">
-          <h2 className="text-base font-bold text-slate-900">
-            {needsMarks ? "اختر موادك وأدخل درجاتك" : "اختر المواد التي تدرسها"}
-          </h2>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {needsMarks
-              ? "أدخل درجتك في كل مادة من 100. كلما اكتملت موادك دقّت النتيجة."
-              : "اختر ما تدرسه أو تنوي دراسته، لتظهر لك المجالات التي تفتحها."}
-          </p>
+        <section className="space-y-4">
+          <div className="card card-pad">
+            <h2 className="text-base font-bold text-slate-900">موادك في الخطة الدراسية</h2>
+            <p className="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">
+              الخطة الرسمية: أربع مواد إلزامية للجميع، ومادة رياضيات واحدة، وثلاث مواد
+              اختيارية على أن تكون واحدة منها على الأقل مادة علمية.
+              {needsMarks ? " وأدخل درجتك في كل مادة من 100." : ""}
+            </p>
+          </div>
 
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {SUBJECTS.map((subject) => {
-              const picked = chosen.includes(subject);
-              return (
-                <li
-                  key={subject}
-                  className={`flex items-center gap-3 rounded-[var(--radius-md)] border p-2 ${
-                    picked ? "border-brand-300 bg-brand-50/60" : "border-[var(--color-line)]"
-                  }`}
-                >
-                  <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-2 text-sm font-bold text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={picked}
-                      onChange={() => toggle(subject)}
-                      className="h-5 w-5 accent-[var(--color-brand-700)]"
-                    />
-                    {subject}
-                  </label>
-                  {needsMarks && picked ? (
-                    <span className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        inputMode="numeric"
-                        value={marks[subject] ?? ""}
-                        onChange={(e) =>
-                          setMarks((m) => ({ ...m, [subject]: e.target.value }))
-                        }
-                        aria-label={`درجتك في ${subject}`}
-                        className="input h-11 w-20 text-center tabular-nums"
-                      />
-                      <span className="text-xs text-[var(--color-muted)]">٪</span>
-                    </span>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
+          <SubjectGroup
+            title="المواد الإلزامية"
+            hint="تُدرَس للجميع"
+            subjects={CORE}
+            isPicked={() => true}
+            locked
+            needsMarks={needsMarks}
+            marks={marks}
+            setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+          />
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <SubjectGroup
+            title="الرياضيات"
+            hint={math ? "اخترت مادة" : "اختر واحدة"}
+            subjects={MATHS}
+            isPicked={(s) => math === s}
+            onToggle={pickMath}
+            needsMarks={needsMarks}
+            marks={marks}
+            setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+          />
+
+          <SubjectGroup
+            title="المواد الاختيارية"
+            hint={`اخترت ${electives.length} من ${SUBJECT_PLAN.electiveCount}`}
+            subjects={ELECTIVES}
+            isPicked={(s) => electives.includes(s)}
+            onToggle={toggleElective}
+            disabledWhen={(s) =>
+              !electives.includes(s) && electives.length >= SUBJECT_PLAN.electiveCount
+            }
+            scienceSet={SCIENCES}
+            needsMarks={needsMarks}
+            marks={marks}
+            setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+          />
+
+          {electives.length > 0 && scienceCount < SUBJECT_PLAN.minScience ? (
+            <Alert tone="warning" title="ينقصك مادة علمية">
+              يجب أن تكون واحدة من الثلاث على الأقل مادة علمية: الفيزياء أو الكيمياء أو
+              الأحياء أو العلوم البيئية.
+            </Alert>
+          ) : null}
+
+          <div className="card card-pad flex flex-wrap items-center gap-3">
             <button type="button" onClick={() => setStep(1)} className="btn-outline">
               <ArrowRight className="h-5 w-5" aria-hidden="true" />
               السابق
@@ -228,9 +267,13 @@ export function EligibilityWizard() {
             </button>
             {!ready ? (
               <span className="text-xs text-[var(--color-muted)]">
-                {chosen.length === 0
-                  ? "اختر مادة واحدة على الأقل"
-                  : "أكمل درجات المواد المختارة"}
+                {!math
+                  ? "اختر مادة الرياضيات"
+                  : electives.length < SUBJECT_PLAN.electiveCount
+                    ? `اختر ${SUBJECT_PLAN.electiveCount - electives.length} مادة اختيارية`
+                    : scienceCount < SUBJECT_PLAN.minScience
+                      ? "اختر مادة علمية واحدة على الأقل"
+                      : "أكمل درجات موادك"}
               </span>
             ) : null}
           </div>
@@ -241,6 +284,95 @@ export function EligibilityWizard() {
         <Results result={result} needsMarks={needsMarks} onRestart={restart} />
       ) : null}
     </div>
+  );
+}
+
+/** مجموعة مواد من الخطة: إلزامية مقفلة، أو خيار واحد، أو اختيار محدود. */
+function SubjectGroup({
+  title,
+  hint,
+  subjects,
+  isPicked,
+  onToggle,
+  disabledWhen,
+  locked = false,
+  scienceSet,
+  needsMarks,
+  marks,
+  setMark,
+}: {
+  title: string;
+  hint: string;
+  subjects: readonly Subject[];
+  isPicked: (subject: Subject) => boolean;
+  onToggle?: (subject: Subject) => void;
+  disabledWhen?: (subject: Subject) => boolean;
+  locked?: boolean;
+  scienceSet?: readonly Subject[];
+  needsMarks: boolean;
+  marks: Partial<Record<Subject, string>>;
+  setMark: (subject: Subject, value: string) => void;
+}) {
+  return (
+    <section className="card card-pad">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-base font-bold text-slate-900">{title}</h3>
+        <span className="text-xs text-[var(--color-muted)]">{hint}</span>
+      </div>
+
+      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+        {subjects.map((subject) => {
+          const picked = isPicked(subject);
+          const disabled = !locked && (disabledWhen?.(subject) ?? false);
+          const isScience = scienceSet?.includes(subject) ?? false;
+
+          return (
+            <li
+              key={subject}
+              className={`flex items-center gap-3 rounded-[var(--radius-md)] border p-2 ${
+                picked ? "border-brand-300 bg-brand-50/60" : "border-[var(--color-line)]"
+              } ${disabled ? "opacity-50" : ""}`}
+            >
+              <label
+                className={`flex min-h-11 flex-1 items-center gap-2 text-sm font-bold text-slate-700 ${
+                  locked || disabled ? "cursor-default" : "cursor-pointer"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={picked}
+                  disabled={locked || disabled}
+                  onChange={() => onToggle?.(subject)}
+                  className="h-5 w-5 accent-[var(--color-brand-700)]"
+                />
+                <span>{subject}</span>
+                {isScience ? (
+                  <span className="rounded-full bg-slate-100 px-1.5 text-[11px] font-semibold text-slate-500">
+                    علمية
+                  </span>
+                ) : null}
+              </label>
+
+              {needsMarks && picked ? (
+                <span className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    inputMode="numeric"
+                    value={marks[subject] ?? ""}
+                    onChange={(e) => setMark(subject, e.target.value)}
+                    aria-label={`درجتك في ${subject}`}
+                    className="input h-11 w-20 text-center tabular-nums"
+                  />
+                  <span className="text-xs text-[var(--color-muted)]">٪</span>
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -272,6 +404,9 @@ function MatchCard({ match, showCompetitive }: { match: ProgramMatch; showCompet
         <p className="mt-3 text-xs leading-relaxed text-warning-700">
           ينقصك:{" "}
           {[
+            match.missingSubjects.length > 0
+              ? `دراسة ${match.missingSubjects.join(" أو ")}`
+              : null,
             !match.overallMet && match.minOverall !== null
               ? `معدل عام ${match.minOverall}٪`
               : null,
@@ -372,6 +507,21 @@ function Results({
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {result.nearMisses.map((m) => (
               <MatchCard key={m.id} match={m} showCompetitive={needsMarks} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {result.needsSubjects.length > 0 ? (
+        <section>
+          <h2 className="text-center text-lg font-bold text-slate-900">تحتاج مواد أخرى</h2>
+          <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
+            برامج تشترط مواد ليست ضمن خطتك. إن كنت في الحادي عشر فما زال بإمكانك تعديل
+            اختيارك، وناقش ذلك مع مختص التوجيه المهني.
+          </p>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {result.needsSubjects.map((m) => (
+              <MatchCard key={m.id} match={m} showCompetitive={false} />
             ))}
           </ul>
         </section>

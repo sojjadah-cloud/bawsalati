@@ -7,6 +7,7 @@ import {
   competitiveAverage,
   type Marks,
 } from "@/features/programs/requirements";
+import { SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
 
 /**
  * شروط القبول في الدليل نثر، والقبول لا يُبنى على تخمين.
@@ -152,5 +153,41 @@ describe("المعدل التنافسي", () => {
   it("لا يحتسب معدّلاً بلا مواد برنامج معروفة", () => {
     const parsed = parseRequirements("• اجتياز المقابلة الشخصية.");
     expect(competitiveAverage(parsed, { "الكيمياء": 90 })).toBeNull();
+  });
+});
+
+describe("خطة الصف الحادي عشر", () => {
+  it("تجمع المواد في مجموعاتها كما في الخطة الرسمية", () => {
+    expect(SUBJECT_GROUPS.core).toHaveLength(4);
+    expect(SUBJECT_GROUPS.math).toEqual(["الرياضيات المتقدمة", "الرياضيات الأساسية"]);
+    expect(SUBJECT_GROUPS.science).toContain("العلوم البيئية");
+    expect(SUBJECT_PLAN).toEqual({ electiveCount: 3, minScience: 1, mathCount: 1 });
+  });
+
+  it("لا تتكرّر مادة بين المجموعات", () => {
+    const all = [
+      ...SUBJECT_GROUPS.core,
+      ...SUBJECT_GROUPS.math,
+      ...SUBJECT_GROUPS.science,
+      ...SUBJECT_GROUPS.elective,
+      ...SUBJECT_GROUPS.other,
+    ];
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("تقرأ المواد الجديدة في شروط الدليل", () => {
+    expect(readSubjects("العلوم البيئية")).toEqual(["العلوم البيئية"]);
+    expect(readSubjects("الجغرافيا الاقتصادية")).toEqual(["الجغرافيا الاقتصادية"]);
+    expect(readSubjects("التاريخ")).toEqual(["التاريخ (الحضارة الإسلامية)"]);
+  });
+
+  it("مسار علمي يفتح ما لا يفتحه المسار الأدبي", () => {
+    const medicine = parseRequirements(
+      ["• الحصول على (90%) في الكيمياء.", "• الحصول على (90%) في الأحياء."].join("\n")
+    );
+    const science = ["الكيمياء", "الأحياء", "الفيزياء"] as const;
+    const literary = ["الجغرافيا الاقتصادية", "التاريخ (الحضارة الإسلامية)"] as const;
+    expect(canStudyWith(medicine, [...science])).toBe(true);
+    expect(canStudyWith(medicine, [...literary])).toBe(false);
   });
 });

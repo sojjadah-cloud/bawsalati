@@ -41,14 +41,18 @@ export interface ProgramMatch {
   unmetRules: SubjectRule[];
   /** هل بلغ معدّله العام الحدّ الأدنى للبرنامج؟ */
   overallMet: boolean;
+  /** مواد يشترطها البرنامج ولا يدرسها الطالب */
+  missingSubjects: Subject[];
   eligible: boolean;
 }
 
 export interface MatchResult {
   /** يستوفي شروطه بالكامل */
   eligible: ProgramMatch[];
-  /** قريب: مواده تكفي لكن درجة أو أكثر دون المطلوب */
+  /** قريب: يدرس مواده لكن درجة أو أكثر دون المطلوب */
   nearMisses: ProgramMatch[];
+  /** يحتاج مواد لا يدرسها — تُذكر له ليعرف ما ينقصه */
+  needsSubjects: ProgramMatch[];
   /** المجالات التي تفتحها مواد الطالب، بعدد برامجها */
   fields: { field: string; count: number }[];
   overall: number | null;
@@ -74,6 +78,16 @@ function toParsed(row: { minOverall: number | null; subjectRules: unknown }): Pa
   return { minOverall: row.minOverall, rules, unparsed: [] };
 }
 
+/** مواد يشترطها البرنامج ولا يدرسها الطالب. */
+function missingFor(parsed: ParsedRequirements, studied: Subject[]): Subject[] {
+  const missing: Subject[] = [];
+  for (const rule of parsed.rules) {
+    if (rule.anyOf.filter((s) => studied.includes(s)).length >= rule.count) continue;
+    for (const s of rule.anyOf) if (!missing.includes(s)) missing.push(s);
+  }
+  return missing;
+}
+
 /** متوسّط درجات الطالب في كل المواد التي أدخلها. */
 export function overallAverage(marks: Marks): number | null {
   const values = Object.values(marks).filter((v): v is number => typeof v === "number");
@@ -95,6 +109,7 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
 
   const eligible: ProgramMatch[] = [];
   const nearMisses: ProgramMatch[] = [];
+  const needsSubjects: ProgramMatch[] = [];
   const fieldCount = new Map<string, number>();
   let unchecked = 0;
 
@@ -127,9 +142,22 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
           competitive: null,
           unmetRules: [],
           overallMet: true,
+          missingSubjects: [],
           eligible: true,
         });
         fieldCount.set(row.field, (fieldCount.get(row.field) ?? 0) + 1);
+      } else {
+        const missing = missingFor(parsed, studied);
+        if (missing.length > 0) {
+          needsSubjects.push({
+            ...base,
+            competitive: null,
+            unmetRules: [],
+            overallMet: true,
+            missingSubjects: missing,
+            eligible: false,
+          });
+        }
       }
       continue;
     }
@@ -142,6 +170,7 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
       competitive,
       unmetRules,
       overallMet: check.overallMet,
+      missingSubjects: check.missingSubjects,
       eligible: check.eligible,
     };
 
@@ -151,15 +180,20 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
     } else if (check.missingSubjects.length === 0) {
       // يدرس المواد المطلوبة لكن درجته دونها — قريب لا بعيد
       nearMisses.push(entry);
+    } else {
+      needsSubjects.push(entry);
     }
   }
 
   eligible.sort((a, b) => (b.competitive ?? 0) - (a.competitive ?? 0) || a.code.localeCompare(b.code));
   nearMisses.sort((a, b) => (b.competitive ?? 0) - (a.competitive ?? 0));
 
+  needsSubjects.sort((a, b) => a.missingSubjects.length - b.missingSubjects.length);
+
   return {
     eligible,
     nearMisses: nearMisses.slice(0, 12),
+    needsSubjects: needsSubjects.slice(0, 12),
     fields: [...fieldCount.entries()]
       .map(([field, count]) => ({ field, count }))
       .sort((a, b) => b.count - a.count),
