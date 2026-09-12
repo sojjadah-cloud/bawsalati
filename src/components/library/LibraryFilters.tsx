@@ -6,7 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Search, X } from "lucide-react";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 
-const TYPES = ["READABLE", "AUDIO", "LINK", "OTHER"] as const;
+// الترتيب كما يراه الطالب. النشرات نوعان مستقلّان لا يندرجان تحت «مورد آخر».
+const TYPES = ["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"] as const;
 
 export function LibraryFilters() {
   const router = useRouter();

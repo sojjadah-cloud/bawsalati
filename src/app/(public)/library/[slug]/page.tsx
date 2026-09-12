@@ -13,7 +13,7 @@ import { HeroBreadcrumb, PageHero } from "@/components/public/PageHero";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 12;
-const VALID_TYPES: ResourceType[] = ["READABLE", "AUDIO", "LINK", "OTHER"];
+const VALID_TYPES: ResourceType[] = ["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"];
 
 async function getCategory(slug: string) {
   return prisma.libraryCategory.findFirst({
