@@ -16,7 +16,7 @@ export function ProgramSearch({ initial = "" }: { initial?: string }) {
         e.preventDefault();
         const value = new FormData(e.currentTarget).get("q");
         const q = typeof value === "string" ? value.trim() : "";
-        router.push(q ? `/programs?q=${encodeURIComponent(q)}` : "/programs");
+        router.push(q ? `/guide?q=${encodeURIComponent(q)}` : "/guide");
       }}
     >
       <label htmlFor="program-search" className="label">

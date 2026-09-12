@@ -1,51 +1,72 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, GraduationCap } from "lucide-react";
 import { getPublishedGuide } from "@/features/guide/service";
+import {
+  browseFacets,
+  listPrograms,
+  searchPrograms,
+  programCount,
+  type ProgramFilters as Filters,
+} from "@/features/programs/service";
 import { EmptyState } from "@/components/ui/primitives";
 import { GuideReader } from "@/components/library/GuideReader";
 import { PageHero } from "@/components/public/PageHero";
+import { ProgramSearch } from "@/components/programs/ProgramSearch";
+import { ProgramCard } from "@/components/programs/ProgramCard";
+import { FilterChips, FilterStep, buildHref } from "@/components/programs/ProgramFilters";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 24;
 
 export const metadata: Metadata = {
   title: "دليل الطالب",
   description:
-    "الدليل الرسمي للتخصصات والبرامج الدراسية وشروط القبول، متاح للقراءة داخل المنصة.",
+    "تصفّح التخصصات والبرامج الدراسية حسب المجال ونوع البرنامج والمؤسسة، أو ابحث برمز البرنامج، واقرأ الدليل الرسمي كاملاً.",
 };
 
-export default async function GuidePage() {
-  const guide = await getPublishedGuide();
+export default async function GuidePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ field?: string; type?: string; inst?: string; q?: string; page?: string }>;
+}) {
+  const sp = await searchParams;
+  const query = sp.q?.trim() || "";
+  const page = Math.max(1, Number(sp.page ?? 1) || 1);
 
-  if (!guide) {
-    return (
-      <div className="container-narrow py-14">
-        <h1 className="section-title text-center">دليل الطالب</h1>
-        <div className="mt-6">
-          <EmptyState
-            icon={<FileText className="h-6 w-6" />}
-            title="الدليل غير متاح حالياً"
-            description="لم يُنشر إصدار من الدليل بعد. يمكنك حجز موعد مع مختص التوجيه المهني للحصول على المعلومات التي تحتاجها."
-            action={
-              <Link href="/booking" className="btn-primary">
-                احجز موعداً
-              </Link>
-            }
-          />
-        </div>
-      </div>
-    );
-  }
+  const filters: Filters = {
+    field: sp.field?.trim() || undefined,
+    programType: sp.type?.trim() || undefined,
+    institution: sp.inst?.trim() || undefined,
+  };
 
-  const hasContent = !!guide.file || !!guide.externalUrl;
+  const [guide, total] = await Promise.all([getPublishedGuide(), programCount()]);
+
+  const searchResults = query ? await searchPrograms(query, 48) : null;
+  const browse = query
+    ? null
+    : await Promise.all([browseFacets(filters), listPrograms(filters, page, PAGE_SIZE)]);
+
+  const hasFilter = Boolean(filters.field || filters.programType || filters.institution);
+  const matched = browse ? browse[1].total : 0;
+  const totalPages = Math.max(1, Math.ceil(matched / PAGE_SIZE));
+
+  const pageHref = (n: number) => {
+    const base = buildHref(filters);
+    if (n <= 1) return base;
+    return `${base}${base.includes("?") ? "&" : "?"}page=${n}`;
+  };
+
+  const hasFile = !!guide && (!!guide.file || !!guide.externalUrl);
 
   return (
     <>
       <PageHero
-        title={guide.title}
-        description={guide.description || undefined}
+        title={guide?.title ?? "دليل الطالب"}
+        description={`${total} برنامجاً دراسياً مرتّبة حسب المجال ونوع البرنامج والمؤسسة، والدليل الرسمي كاملاً للقراءة.`}
         action={
-          guide.downloadable && guide.file ? (
+          guide?.downloadable && guide.file ? (
             <a href="/api/files/guide?mode=download" className="btn-secondary">
               <Download className="h-5 w-5" aria-hidden="true" />
               تنزيل الدليل
@@ -55,26 +76,176 @@ export default async function GuidePage() {
       />
 
       <div className="container-x py-10 sm:py-14">
-        {hasContent ? (
-          <GuideReader
-            hasFile={!!guide.file}
-            externalUrl={guide.externalUrl}
-            title={guide.title}
-          />
-        ) : (
-          <EmptyState
-            icon={<FileText className="h-6 w-6" />}
-            title="لم يُرفق ملف الدليل بعد"
-            description="سيُرفع الدليل قريباً من قِبل إدارة المنصة."
-          />
-        )}
+        {/* ابحث أولاً: من يعرف رمز برنامجه لا يحتاج شيئاً آخر */}
+        <ProgramSearch initial={query} />
 
-        <p className="mt-6 text-xs text-[var(--color-faint)]">
-          الإصدار {guide.version}
-          {guide.publishedAt
-            ? ` · نُشر في ${guide.publishedAt.toISOString().slice(0, 10)}`
-            : null}
-        </p>
+        {searchResults ? (
+          <>
+            <p className="mt-6 text-sm text-[var(--color-muted)]" aria-live="polite">
+              {searchResults.length === 0
+                ? `لا نتائج لـ «${query}»`
+                : `${searchResults.length} نتيجة لـ «${query}»`}
+            </p>
+
+            {searchResults.length === 0 ? (
+              <div className="mt-4">
+                <EmptyState
+                  icon={<GraduationCap className="h-6 w-6" />}
+                  title="لم نجد برنامجاً بهذا الرمز أو الاسم"
+                  description="تأكّد من كتابة الرمز كما ورد في الدليل، أو تصفّح البرامج حسب المجال الأكاديمي."
+                  action={
+                    <Link href="/guide" className="btn-primary">
+                      تصفّح كل البرامج
+                    </Link>
+                  }
+                />
+              </div>
+            ) : (
+              <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {searchResults.map((p) => (
+                  <ProgramCard key={p.id} program={p} />
+                ))}
+              </ul>
+            )}
+          </>
+        ) : browse ? (
+          <>
+            <div className="mt-6 space-y-4">
+              <FilterStep
+                step={1}
+                title="اختر المجال الأكاديمي"
+                options={browse[0].fields}
+                selected={filters.field}
+                hrefFor={(value) => buildHref({ field: value || undefined })}
+              />
+
+              {filters.field ? (
+                <FilterStep
+                  step={2}
+                  title="اختر نوع البرنامج"
+                  hint="تظهر الأنواع المتوفّرة في هذا المجال فقط"
+                  options={browse[0].types}
+                  selected={filters.programType}
+                  hrefFor={(value) =>
+                    buildHref({ field: filters.field, programType: value || undefined })
+                  }
+                />
+              ) : null}
+
+              {filters.field && filters.programType ? (
+                <FilterStep
+                  step={3}
+                  title="اختر المؤسسة التعليمية"
+                  hint="تظهر المؤسسات التي لديها برامج مطابقة فقط"
+                  options={browse[0].institutions}
+                  selected={filters.institution}
+                  hrefFor={(value) =>
+                    buildHref({
+                      field: filters.field,
+                      programType: filters.programType,
+                      institution: value || undefined,
+                    })
+                  }
+                />
+              ) : null}
+            </div>
+
+            {hasFilter ? (
+              <div className="mt-6">
+                <FilterChips filters={filters} />
+              </div>
+            ) : null}
+
+            <p className="mt-6 text-sm font-bold text-slate-900" aria-live="polite">
+              {matched === 0 ? "لا توجد برامج مطابقة" : `${matched} برنامجاً`}
+              {!hasFilter ? (
+                <span className="font-normal text-[var(--color-muted)]">
+                  {" "}
+                  — اختر مجالاً أعلاه لتضييق النتائج
+                </span>
+              ) : null}
+            </p>
+
+            {browse[1].items.length === 0 ? (
+              <div className="mt-4">
+                <EmptyState
+                  icon={<GraduationCap className="h-6 w-6" />}
+                  title="لا توجد برامج بهذه التصفية"
+                  description="أزل أحد عناصر التصفية أو ابدأ من جديد."
+                  action={
+                    <Link href="/guide" className="btn-outline">
+                      مسح التصفية
+                    </Link>
+                  }
+                />
+              </div>
+            ) : (
+              <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {browse[1].items.map((p) => (
+                  <ProgramCard key={p.id} program={p} />
+                ))}
+              </ul>
+            )}
+
+            {totalPages > 1 ? (
+              <nav
+                aria-label="صفحات النتائج"
+                className="mt-10 flex items-center justify-center gap-3"
+              >
+                {page > 1 ? (
+                  <Link href={pageHref(page - 1)} className="btn-outline btn-sm">
+                    السابق
+                  </Link>
+                ) : null}
+                <span className="text-sm text-[var(--color-muted)]">
+                  صفحة {page} من {totalPages}
+                </span>
+                {page < totalPages ? (
+                  <Link href={pageHref(page + 1)} className="btn-outline btn-sm">
+                    التالي
+                  </Link>
+                ) : null}
+              </nav>
+            ) : null}
+          </>
+        ) : null}
+
+        {/* الدليل الرسمي كاملاً تحت التصفّح: مرجع من أراد الصفحات نفسها */}
+        <section className="mt-14 border-t border-[var(--color-line)] pt-10">
+          <h2 className="flex items-center justify-center gap-2 text-xl font-bold text-slate-900">
+            <FileText className="h-5 w-5 text-brand-700" aria-hidden="true" />
+            الدليل الرسمي كاملاً
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-sm leading-relaxed text-[var(--color-muted)]">
+            كل ما سبق مأخوذ من هذا الدليل، ومع كل برنامج رقم صفحته فيه. اقرأه هنا للاطّلاع على
+            إجراءات التسجيل والقبول ومواعيدها.
+          </p>
+
+          <div className="mt-6">
+            {hasFile ? (
+              <GuideReader
+                hasFile={!!guide!.file}
+                externalUrl={guide!.externalUrl}
+                title={guide!.title}
+              />
+            ) : (
+              <EmptyState
+                icon={<FileText className="h-6 w-6" />}
+                title="لم يُرفق ملف الدليل بعد"
+                description="سيُرفع الدليل قريباً من قِبل إدارة المنصة."
+              />
+            )}
+          </div>
+
+          {guide ? (
+            <p className="mt-6 text-center text-xs text-[var(--color-faint)]">
+              الإصدار {guide.version}
+              {guide.publishedAt
+                ? ` · نُشر في ${guide.publishedAt.toISOString().slice(0, 10)}`
+                : null}
+            </p>
+          ) : null}
+        </section>
       </div>
     </>
   );

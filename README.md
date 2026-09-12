@@ -32,8 +32,8 @@ npm run dev         # http://localhost:3000
 خطوات اختيارية:
 
 ```bash
-npm run migrate:legacy                                  # ترحيل البرامج والموارد من قاعدة بوّابة قديمة
-npm run guide:import -- ../StudentGuide2025.pdf "دليل الطالب 2025"   # نشر دليل الطالب
+npm run norms:build              # اشتقاق الجداول المعيارية من نتائج الطلبة
+npm run library:files -- <مجلد>  # إرفاق نسخ الكتب بعناوين المكتبة
 ```
 
 حسابات التطوير التي ينشئها `npm run seed`:
@@ -92,7 +92,6 @@ scripts/                 قاعدة التطوير، الترحيل، استير
 | المتغيّر | الوصف |
 |---|---|
 | `DATABASE_URL` | اتصال PostgreSQL |
-| `LEGACY_DATABASE_URL` | القاعدة القديمة — تُقرأ أثناء الترحيل فقط |
 | `JWT_SECRET` | مفتاح توقيع الجلسات، 32 محرفاً فأكثر |
 | `STORAGE_DIR` | مجلد الملفات الخاصة خارج `public/` |
 | `NOTIFY_PROVIDER` | `console` للتطوير، أو `whatsapp` / `sms` |
@@ -103,7 +102,6 @@ scripts/                 قاعدة التطوير، الترحيل، استير
 
 | الملف | المحتوى |
 |---|---|
-| [`docs/00-architecture-audit.md`](docs/00-architecture-audit.md) | تدقيق ما قبل إعادة الهيكلة وخطة الترحيل |
 | [`docs/01-design-system.md`](docs/01-design-system.md) | الرموز التصميمية والمكوّنات وقواعد RTL |
 | [`docs/02-assessment.md`](docs/02-assessment.md) | محرّك المقياس والتصحيح والنتائج |
 | [`docs/03-database.md`](docs/03-database.md) | نماذج البيانات والقيود |

@@ -4,7 +4,6 @@ import {
   BookOpenText,
   CalendarCheck,
   ClipboardList,
-  FileText,
   GraduationCap,
 } from "lucide-react";
 import { HeroBackdrop } from "@/components/public/HeroBackdrop";
@@ -34,18 +33,11 @@ const SERVICES = [
     cta: "احجز موعداً",
   },
   {
-    href: "/programs",
-    icon: GraduationCap,
-    title: "دليل التخصصات",
-    description: "تصفّح البرامج حسب المجال والنوع والمؤسسة، أو ابحث برمز البرنامج.",
-    cta: "تصفّح البرامج",
-  },
-  {
     href: "/guide",
-    icon: FileText,
+    icon: GraduationCap,
     title: "دليل الطالب",
-    description: "الدليل الرسمي كاملاً: إجراءات التسجيل والقبول ومواعيدها.",
-    cta: "اقرأ الدليل",
+    description: "تصفّح التخصصات حسب المجال والمؤسسة، أو ابحث برمز البرنامج.",
+    cta: "تصفّح التخصصات",
   },
 ];
 

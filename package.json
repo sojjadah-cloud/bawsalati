@@ -15,7 +15,6 @@
     "prisma:generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "migrate:legacy": "tsx scripts/migrate-legacy.ts",
     "seed": "tsx prisma/seed.ts",
     "seed:content": "tsx scripts/seed-content.ts",
     "reset:demo": "tsx scripts/reset-demo-data.ts",

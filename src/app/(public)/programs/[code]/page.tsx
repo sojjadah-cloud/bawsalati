@@ -70,8 +70,8 @@ export default async function ProgramPage({
         breadcrumb={
           <HeroBreadcrumb>
             <li>
-              <Link href="/programs" className="transition-colors hover:text-white">
-                دليل التخصصات
+              <Link href="/guide" className="transition-colors hover:text-white">
+                دليل الطالب
               </Link>
             </li>
             <li aria-hidden="true">
@@ -79,7 +79,7 @@ export default async function ProgramPage({
             </li>
             <li>
               <Link
-                href={`/programs?field=${encodeURIComponent(program.field)}`}
+                href={`/guide?field=${encodeURIComponent(program.field)}`}
                 className="transition-colors hover:text-white"
               >
                 {program.field}
@@ -134,7 +134,7 @@ export default async function ProgramPage({
                 الشروط والمواعيد تتغيّر سنوياً، فافتح الدليل وتأكّد قبل التقديم.
               </p>
               <Link href="/guide" className="btn-outline btn-sm mt-4">
-                افتح دليل الطالب
+                افتح الدليل الرسمي
               </Link>
             </section>
           </div>

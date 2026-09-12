@@ -10,7 +10,7 @@ export function buildHref(filters: Filters): string {
   if (filters.programType) q.set("type", filters.programType);
   if (filters.institution) q.set("inst", filters.institution);
   const qs = q.toString();
-  return qs ? `/programs?${qs}` : "/programs";
+  return qs ? `/guide?${qs}` : "/guide";
 }
 
 /** خطوة تصفية واحدة: عنوانها وخياراتها المتاحة فعلاً. */
@@ -105,7 +105,7 @@ export function FilterChips({ filters }: { filters: Filters }) {
           <span className="sr-only">إزالة هذه التصفية</span>
         </Link>
       ))}
-      <Link href="/programs" className="btn-ghost btn-sm">
+      <Link href="/guide" className="btn-ghost btn-sm">
         مسح الكل
       </Link>
     </nav>

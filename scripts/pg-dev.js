@@ -1,7 +1,7 @@
 /*
  * Local development PostgreSQL, zero external install required.
  * Boots a real, embedded PostgreSQL server (Zonky binaries) on port 5433
- * with a UTF-8 `portal` database so Arabic text is stored correctly.
+ * with a UTF-8 database so Arabic text is stored correctly.
  *
  * Usage:  npm run db     (leave running in its own terminal)
  * Data lives in ./.pgdata  — delete that folder to reset the cluster.
@@ -13,8 +13,6 @@ const EmbeddedPostgres = require("embedded-postgres").default || require("embedd
 const DATA_DIR = path.join(__dirname, "..", ".pgdata");
 const PORT = 5433;
 const DB_NAME = "bawsalati";
-// قاعدة البوّابة القديمة تبقى كما هي للرجوع إليها عند الترحيل.
-const LEGACY_DB = "portal";
 
 async function main() {
   const firstRun = !fs.existsSync(DATA_DIR);
@@ -37,10 +35,10 @@ async function main() {
   await pg.start();
   console.log(`✅ PostgreSQL running on localhost:${PORT}`);
 
-  // Ensure the `portal` database exists, created as UTF-8 from template0.
+  // Ensure the database exists, created as UTF-8 from template0.
   const client = pg.getPgClient();
   await client.connect();
-  for (const name of [DB_NAME, LEGACY_DB]) {
+  for (const name of [DB_NAME]) {
     const { rows } = await client.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
       [name]

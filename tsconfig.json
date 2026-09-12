@@ -32,5 +32,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "_removed-portal", "storage"]
+  "exclude": ["node_modules", "storage"]
 }

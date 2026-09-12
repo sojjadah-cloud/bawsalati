@@ -4,6 +4,7 @@ const paths = [
   "/", "/assessment", "/assessment/questions", "/library", "/booking", "/guide",
   "/ask", "/privacy", "/login", "/robots.txt", "/sitemap.xml",
   "/library/career-guidance", "/library/personal-skills", "/library/science",
+  "/guide?field=%D8%A7%D9%84%D8%B5%D8%AD%D8%A9", "/guide?q=SE021", "/programs/SE021",
   "/specialist", "/specialist/appointments", "/specialist/assessments",
   "/specialist/availability", "/specialist/categories", "/specialist/faq",
   "/specialist/library", "/specialist/profile",
