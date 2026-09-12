@@ -20,7 +20,7 @@
     "seed:content": "tsx scripts/seed-content.ts",
     "reset:demo": "tsx scripts/reset-demo-data.ts",
     "guide:import": "tsx scripts/import-guide.ts",
-    "db:setup": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/provisional-norms.ts && tsx scripts/seed-content.ts && tsx scripts/import-guide.ts content/StudentGuide2026.pdf \"دليل الطالب 2026\" && tsx scripts/import-guide-faq.ts",
+    "db:setup": "prisma migrate deploy && tsx prisma/seed.ts && tsx scripts/provisional-norms.ts && tsx scripts/seed-content.ts && tsx scripts/import-guide.ts content/StudentGuide2026.pdf \"دليل الطالب 2026\" && tsx scripts/import-programs.ts && tsx scripts/import-guide-faq.ts",
     "verify": "npm run typecheck && npm run lint && npm run test",
     "norms:import": "tsx scripts/import-norms.ts",
     "norms:provisional": "tsx scripts/provisional-norms.ts",
@@ -30,7 +30,8 @@
     "faq:guide": "tsx scripts/import-guide-faq.ts",
     "faq:build": "tsx scripts/build-guide-faq.ts",
     "library:files": "tsx scripts/import-library-files.ts",
-    "norms:build": "tsx scripts/build-norms.ts"
+    "norms:build": "tsx scripts/build-norms.ts",
+    "programs:import": "tsx scripts/import-programs.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

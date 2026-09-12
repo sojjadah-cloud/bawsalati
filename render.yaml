@@ -27,6 +27,7 @@ services:
       npm run norms:provisional &&
       npm run seed:content &&
       npm run guide:import content/StudentGuide2026.pdf "دليل الطالب 2026" &&
+      npm run programs:import &&
       npm run faq:guide &&
       npm run build
     startCommand: npm run start

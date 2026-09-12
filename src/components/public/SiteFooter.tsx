@@ -5,6 +5,7 @@ import { BRAND } from "@/lib/constants";
 const SERVICES = [
   { href: "/assessment", label: "اختبار بوصلتي" },
   { href: "/library", label: "المكتبة الرقمية" },
+  { href: "/programs", label: "دليل التخصصات" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
 ];

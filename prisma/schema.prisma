@@ -387,6 +387,44 @@ model Program {
   @@map("programs")
 }
 
+/// دليل التخصصات والبرامج الدراسية كما ورد في دليل الطالب (صفحات 74–242).
+/// يُتصفَّح هرمياً: المجال الأكاديمي ← نوع البرنامج ← المؤسسة ← البرنامج.
+model StudyProgram {
+  id     String @id @default(cuid())
+  /// رمز البرنامج في نظام القبول الموحد، فريد ويُبحث به مباشرة
+  code   String @unique
+  name   String
+  /// المجال الأكاديمي: الصحة، الهندسة، تكنولوجيا المعلومات …
+  field  String
+  /// نوع البرنامج المستخدم في التصفية: حكومي، بعثة خارجية، منحة …
+  programType   String
+  /// المسار أو جهة التمويل كما ورد في الدليل
+  track         String  @default("")
+  /// فئة الاستحقاق: جميع الطلبة، ضمان اجتماعي، دخل محدود، ذوو الإعاقة
+  eligibility   String  @default("")
+  /// الحد الأدنى للتقدم والشروط، أسطراً كما وردت
+  requirements  String  @default("")
+  /// مواد المفاضلة وحسم التعادل
+  tieBreakers   String  @default("")
+  language      String  @default("")
+  country       String  @default("")
+  institution   String  @default("")
+  qualification String  @default("")
+  notes         String  @default("")
+  /// صفحة الدليل التي أُخذ منها الصفّ، ليتحقّق الطالب بنفسه
+  guidePage     Int?
+  active        Boolean @default(true)
+  /// عدد مرات فتح صفحة البرنامج — إحصاء فقط
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([active, field])
+  @@index([active, programType])
+  @@index([active, institution])
+  @@map("study_programs")
+}
+
 // ─────────────────────────── المكتبة الرقمية ───────────────────────────
 
 model LibraryCategory {

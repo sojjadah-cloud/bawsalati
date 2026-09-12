@@ -9,6 +9,7 @@ const NAV = [
   { href: "/", label: "الرئيسية" },
   { href: "/assessment", label: "اختبار بوصلتي" },
   { href: "/library", label: "المكتبة الرقمية" },
+  { href: "/programs", label: "دليل التخصصات" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
 ];

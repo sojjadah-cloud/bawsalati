@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   ClipboardList,
   FileText,
+  GraduationCap,
 } from "lucide-react";
 import { HeroBackdrop } from "@/components/public/HeroBackdrop";
 
@@ -33,10 +34,17 @@ const SERVICES = [
     cta: "احجز موعداً",
   },
   {
+    href: "/programs",
+    icon: GraduationCap,
+    title: "دليل التخصصات",
+    description: "تصفّح البرامج حسب المجال والنوع والمؤسسة، أو ابحث برمز البرنامج.",
+    cta: "تصفّح البرامج",
+  },
+  {
     href: "/guide",
     icon: FileText,
     title: "دليل الطالب",
-    description: "التخصصات والبرامج الدراسية وشروط القبول.",
+    description: "الدليل الرسمي كاملاً: إجراءات التسجيل والقبول ومواعيدها.",
     cta: "اقرأ الدليل",
   },
 ];

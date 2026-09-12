@@ -138,6 +138,20 @@ async function main() {
   const withSlots = await prisma.specialistProfile.count({ where: { availability: { some: { active: true } } } });
   check("لكل مختص أوقات استقبال", withSlots === 3, withSlots + " من 3");
 
+  const programs = await prisma.studyProgram.count({ where: { active: true } });
+  check("دليل التخصصات مُدخَل", programs > 500, programs + " برنامجاً");
+
+  const progFields = await prisma.studyProgram.groupBy({ by: ["field"], _count: { _all: true } });
+  check("المجالات الأكاديمية ثلاثة عشر", progFields.length === 13, progFields.length + "");
+
+  const dupProg = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
+    `SELECT COUNT(*)::bigint AS count FROM (SELECT code FROM study_programs GROUP BY code HAVING COUNT(*) > 1) t`
+  );
+  check("لا رمز برنامج مكرّر", Number(dupProg[0].count) === 0, dupProg[0].count + " مكرّراً");
+
+  const noPage = await prisma.studyProgram.count({ where: { guidePage: null } });
+  check("كل برنامج يحمل صفحته في الدليل", noPage === 0, noPage + " بلا صفحة");
+
   const guide = await prisma.guideDocument.count({ where: { published: true } });
   check("دليل الطالب منشور", guide >= 1, guide + "");
 
