@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, GraduationCap } from "lucide-react";
+import { ExternalLink, GraduationCap } from "lucide-react";
 import { getPublishedGuide } from "@/features/guide/service";
 import {
   browseFacets,
@@ -80,10 +80,16 @@ export default async function GuidePage({
         title={guide?.title ?? "دليل الطالب"}
         description={`${total} برنامجاً دراسياً من الدليل الرسمي، مرتّبة حسب المجال ونوع البرنامج والمؤسسة.`}
         action={
-          guide?.downloadable && guide.file ? (
-            <a href="/api/files/guide?mode=download" className="btn-secondary">
-              <Download className="h-5 w-5" aria-hidden="true" />
-              تنزيل الدليل
+          guide?.file ? (
+            /* يُفتح في تبويب جديد ليقرأه الطالب في مكانه، ومن أراد حفظه حفظه من متصفّحه */
+            <a
+              href="/api/files/guide"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary"
+            >
+              <ExternalLink className="h-5 w-5" aria-hidden="true" />
+              افتح الدليل
             </a>
           ) : undefined
         }
