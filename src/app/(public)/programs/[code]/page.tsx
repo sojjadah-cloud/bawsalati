@@ -159,9 +159,14 @@ export default async function ProgramPage({
                   : "هذا البرنامج مأخوذ من دليل الطالب."}{" "}
                 الشروط والمواعيد تتغيّر سنوياً، فافتح الدليل وتأكّد قبل التقديم.
               </p>
-              <Link href="/guide" className="btn-outline btn-sm mt-4">
+              <a
+                href="/api/files/guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline btn-sm mt-4"
+              >
                 افتح الدليل الرسمي
-              </Link>
+              </a>
             </section>
           </div>
 

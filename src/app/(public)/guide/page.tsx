@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileText, GraduationCap } from "lucide-react";
+import { Download, GraduationCap } from "lucide-react";
 import { getPublishedGuide } from "@/features/guide/service";
 import {
   browseFacets,
@@ -10,7 +10,6 @@ import {
   type ProgramFilters as Filters,
 } from "@/features/programs/service";
 import { EmptyState } from "@/components/ui/primitives";
-import { GuideReader } from "@/components/library/GuideReader";
 import { PageHero } from "@/components/public/PageHero";
 import { ProgramSearch } from "@/components/programs/ProgramSearch";
 import { ProgramCard } from "@/components/programs/ProgramCard";
@@ -23,7 +22,7 @@ const PAGE_SIZE = 24;
 export const metadata: Metadata = {
   title: "دليل الطالب",
   description:
-    "تصفّح التخصصات والبرامج الدراسية حسب المجال ونوع البرنامج والمؤسسة، أو ابحث برمز البرنامج، واقرأ الدليل الرسمي كاملاً.",
+    "تصفّح التخصصات والبرامج الدراسية حسب المجال ونوع البرنامج والمؤسسة، أو ابحث برمز البرنامج مباشرة.",
 };
 
 export default async function GuidePage({
@@ -75,13 +74,11 @@ export default async function GuidePage({
     return `${base}${base.includes("?") ? "&" : "?"}page=${n}`;
   };
 
-  const hasFile = !!guide && (!!guide.file || !!guide.externalUrl);
-
   return (
     <>
       <PageHero
         title={guide?.title ?? "دليل الطالب"}
-        description={`${total} برنامجاً دراسياً مرتّبة حسب المجال ونوع البرنامج والمؤسسة، والدليل الرسمي كاملاً للقراءة.`}
+        description={`${total} برنامجاً دراسياً من الدليل الرسمي، مرتّبة حسب المجال ونوع البرنامج والمؤسسة.`}
         action={
           guide?.downloadable && guide.file ? (
             <a href="/api/files/guide?mode=download" className="btn-secondary">
@@ -242,42 +239,6 @@ export default async function GuidePage({
           </>
         ) : null}
 
-        {/* الدليل الرسمي كاملاً تحت التصفّح: مرجع من أراد الصفحات نفسها */}
-        <section className="mt-14 border-t border-[var(--color-line)] pt-10">
-          <h2 className="flex items-center justify-center gap-2 text-xl font-bold text-slate-900">
-            <FileText className="h-5 w-5 text-brand-700" aria-hidden="true" />
-            الدليل الرسمي كاملاً
-          </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-sm leading-relaxed text-[var(--color-muted)]">
-            كل ما سبق مأخوذ من هذا الدليل، ومع كل برنامج رقم صفحته فيه. اقرأه هنا للاطّلاع على
-            إجراءات التسجيل والقبول ومواعيدها.
-          </p>
-
-          <div className="mt-6">
-            {hasFile ? (
-              <GuideReader
-                hasFile={!!guide!.file}
-                externalUrl={guide!.externalUrl}
-                title={guide!.title}
-              />
-            ) : (
-              <EmptyState
-                icon={<FileText className="h-6 w-6" />}
-                title="لم يُرفق ملف الدليل بعد"
-                description="سيُرفع الدليل قريباً من قِبل إدارة المنصة."
-              />
-            )}
-          </div>
-
-          {guide ? (
-            <p className="mt-6 text-center text-xs text-[var(--color-faint)]">
-              الإصدار {guide.version}
-              {guide.publishedAt
-                ? ` · نُشر في ${guide.publishedAt.toISOString().slice(0, 10)}`
-                : null}
-            </p>
-          ) : null}
-        </section>
       </div>
     </>
   );
