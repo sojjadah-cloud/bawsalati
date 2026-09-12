@@ -13,6 +13,7 @@ const ACCEPT: Record<StorageKind, string[]> = {
   GUIDE: ["application/pdf"],
   AUDIO: ["audio/mpeg", "audio/mp4"],
   COVER: ["image/jpeg", "image/png", "image/webp"],
+  BULLETIN: ["image/jpeg", "image/png", "image/webp", "video/mp4"],
 };
 
 /**

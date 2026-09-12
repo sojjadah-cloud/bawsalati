@@ -4,21 +4,68 @@
 // فلا يُثقَل الجهاز ولا يُستهلك الاتصال دون داعٍ.
 import { useState } from "react";
 import Link from "next/link";
-import { BookOpen, ExternalLink, Headphones, Loader2 } from "lucide-react";
+import { BookOpen, ExternalLink, Headphones, Image as ImageIcon, Loader2, Play } from "lucide-react";
 import { Alert } from "@/components/ui/primitives";
 
 interface Props {
   resourceId: string;
   title: string;
+  type: string;
   hasFile: boolean;
   hasAudio: boolean;
   externalUrl: string | null;
 }
 
-export function ResourceViewer({ resourceId, title, hasFile, hasAudio, externalUrl }: Props) {
+export function ResourceViewer({
+  resourceId,
+  title,
+  type,
+  hasFile,
+  hasAudio,
+  externalUrl,
+}: Props) {
   const [openDoc, setOpenDoc] = useState(false);
   const [docLoading, setDocLoading] = useState(false);
   const [audioError, setAudioError] = useState(false);
+
+  // النشرة المرئية تُشغَّل في الصفحة، ولا تُحمَّل قبل أن يطلبها المستخدم.
+  if (type === "VIDEO" && hasFile) {
+    return (
+      <div className="card card-pad">
+        <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+          <Play className="h-5 w-5 text-brand-700" aria-hidden="true" />
+          مشاهدة النشرة
+        </h2>
+        <video
+          controls
+          preload="none"
+          playsInline
+          className="mt-4 w-full rounded-[var(--radius-md)] bg-black"
+          aria-label={`نشرة مرئية: ${title}`}
+        >
+          <source src={`/api/files/library/${resourceId}?kind=file`} type="video/mp4" />
+          متصفّحك لا يدعم تشغيل المقاطع المرئية.
+        </video>
+      </div>
+    );
+  }
+
+  if (type === "IMAGE" && hasFile) {
+    return (
+      <div className="card card-pad">
+        <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+          <ImageIcon className="h-5 w-5 text-brand-700" aria-hidden="true" />
+          النشرة
+        </h2>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/api/files/library/${resourceId}?kind=file`}
+          alt={title}
+          className="mt-4 w-full rounded-[var(--radius-md)] border border-[var(--color-line)]"
+        />
+      </div>
+    );
+  }
 
   if (hasAudio) {
     return (

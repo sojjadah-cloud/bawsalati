@@ -42,6 +42,12 @@ export const ALLOWED_TYPES: AllowedType[] = [
     ext: "m4a",
     magic: (b) => b.length > 12 && b.toString("ascii", 4, 8) === "ftyp",
   },
+  {
+    mime: "video/mp4",
+    ext: "mp4",
+    // MP4 يبدأ بصندوق ftyp عند الإزاحة 4، وهو التوقيع المعتمد للحاويات
+    magic: (b) => b.length > 12 && b.toString("ascii", 4, 8) === "ftyp",
+  },
 ];
 
 export const MAX_UPLOAD_BYTES = {
@@ -49,6 +55,8 @@ export const MAX_UPLOAD_BYTES = {
   LIBRARY: 30 * 1024 * 1024, // 30MB
   GUIDE: 60 * 1024 * 1024, // 60MB
   AUDIO: 60 * 1024 * 1024, // 60MB
+  /** نشرات المختصين: صورة أو مقطع مرئي قصير */
+  BULLETIN: 60 * 1024 * 1024, // 60MB
 } as const;
 
 export type StorageKind = keyof typeof MAX_UPLOAD_BYTES;

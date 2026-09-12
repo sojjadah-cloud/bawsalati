@@ -52,6 +52,7 @@ function SectionTable({ section }: { section: ResultSectionData }) {
               {row.map((cell) => (
                 <td key={cell.questionNumber} className="p-1">
                   <div
+                    title={`${cell.text} — ${cell.value > 0 ? "أفضّل" : "لا أفضّل"}`}
                     className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-[var(--radius-sm)] border text-center ${
                       cell.value > 0
                         ? "border-brand-200 bg-brand-50 text-brand-800"
@@ -94,18 +95,37 @@ function SectionTable({ section }: { section: ResultSectionData }) {
         </div>
       </div>
 
-      <details className="mt-4 group">
+      {/* كل عبارة مع إجابة الطالب عليها بنصّها، فلا يبقى الجدول أرقاماً مجرّدة.
+          الإجابة مكتوبة لا ملوّنة فقط، فتُقرأ على شاشة وعلى ورق ولقارئ الشاشة. */}
+      <details className="group mt-4">
         <summary className="cursor-pointer text-xs font-bold text-brand-700 hover:underline">
-          عرض عبارات هذه البيئة
+          عبارات هذه البيئة وإجاباتك عليها ({maxScore})
         </summary>
-        <ol className="mt-2 space-y-1.5">
+        <ol className="mt-3 space-y-2">
           {section.cells.flat().map((cell) => (
-            <li key={cell.questionNumber} className="flex gap-2 text-xs leading-relaxed">
-              <span className="shrink-0 font-bold tabular-nums text-[var(--color-faint)]">
-                {cell.questionNumber}.
+            <li
+              key={cell.questionNumber}
+              className="flex items-start justify-between gap-3 border-b border-[var(--color-line)] pb-2 text-xs leading-relaxed last:border-0"
+            >
+              <span className="flex gap-2">
+                <span className="shrink-0 font-bold tabular-nums text-[var(--color-faint)]">
+                  {cell.questionNumber}.
+                </span>
+                <span className="text-slate-700">{cell.text}</span>
               </span>
-              <span className={cell.value > 0 ? "text-slate-700" : "text-[var(--color-faint)]"}>
-                {cell.text}
+              <span
+                className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-bold ${
+                  cell.value > 0
+                    ? "bg-brand-50 text-brand-800"
+                    : "bg-slate-100 text-[var(--color-muted)]"
+                }`}
+              >
+                {cell.value > 0 ? (
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <Minus className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                {cell.value > 0 ? "أفضّل" : "لا أفضّل"}
               </span>
             </li>
           ))}

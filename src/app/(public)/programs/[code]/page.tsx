@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarCheck, ChevronLeft, FileText } from "lucide-react";
+import { CalendarCheck, ChevronLeft, FileText, Layers, MapPin, Tag } from "lucide-react";
 import { getProgramByCode, relatedPrograms } from "@/features/programs/service";
 import { HeroBreadcrumb, PageHero } from "@/components/public/PageHero";
-import { ProgramCard } from "@/components/programs/ProgramCard";
+import { ProgramCard, placeOfStudy } from "@/components/programs/ProgramCard";
 
 export const dynamic = "force-dynamic";
 
@@ -90,11 +90,37 @@ export default async function ProgramPage({
       />
 
       <div className="container-x py-10 sm:py-14">
+        {/* البيانات الأساسية نفسها التي رآها الطالب في البطاقة، ليتأكّد أنه فتح ما أراد */}
+        <ul className="mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-brand-700 px-3 py-1 font-mono font-bold text-white">
+            {program.code}
+          </li>
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-700">
+            <Layers className="h-4 w-4" aria-hidden="true" />
+            {program.field}
+          </li>
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-700">
+            <Tag className="h-4 w-4" aria-hidden="true" />
+            {program.programType}
+          </li>
+          {placeOfStudy(program) ? (
+            <li className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-700">
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              {placeOfStudy(program)}
+            </li>
+          ) : null}
+        </ul>
+
         <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
           <div className="min-w-0 space-y-6">
             {program.requirements ? (
               <section className="card card-pad">
-                <h2 className="text-base font-bold text-slate-900">الحد الأدنى للتقدم والشروط</h2>
+                <h2 className="text-base font-bold text-slate-900">
+                  المواد والدرجات المطلوبة للتقدم
+                </h2>
+                <p className="mt-2 text-sm text-[var(--color-muted)]">
+                  الحد الأدنى كما ورد في الدليل. النسب على درجات دبلوم التعليم العام.
+                </p>
                 <div className="mt-3">
                   <Lines text={program.requirements} />
                 </div>
@@ -115,7 +141,7 @@ export default async function ProgramPage({
 
             {program.notes ? (
               <section className="card card-pad">
-                <h2 className="text-base font-bold text-slate-900">ملاحظات وشروط إضافية</h2>
+                <h2 className="text-base font-bold text-slate-900">اشتراطات وملاحظات أخرى</h2>
                 <div className="mt-3">
                   <Lines text={program.notes} />
                 </div>

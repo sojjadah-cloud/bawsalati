@@ -37,6 +37,8 @@ enum SessionStatus {
 enum ResourceType {
   READABLE // كتاب مقروء
   AUDIO // كتاب مسموع
+  VIDEO // نشرة مرئية
+  IMAGE // نشرة مصوّرة
   LINK // رابط تعليمي خارجي
   OTHER // مورد آخر
 }
@@ -60,6 +62,7 @@ enum FileKind {
   AUDIO
   COVER
   GUIDE
+  BULLETIN
 }
 
 // ─────────────────────────── الحسابات ───────────────────────────

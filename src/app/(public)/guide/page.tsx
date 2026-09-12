@@ -29,11 +29,19 @@ export const metadata: Metadata = {
 export default async function GuidePage({
   searchParams,
 }: {
-  searchParams: Promise<{ field?: string; type?: string; inst?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    field?: string;
+    type?: string;
+    inst?: string;
+    q?: string;
+    page?: string;
+    all?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const query = sp.q?.trim() || "";
   const page = Math.max(1, Number(sp.page ?? 1) || 1);
+  const showAll = sp.all === "1";
 
   const filters: Filters = {
     field: sp.field?.trim() || undefined,
@@ -49,11 +57,20 @@ export default async function GuidePage({
     : await Promise.all([browseFacets(filters), listPrograms(filters, page, PAGE_SIZE)]);
 
   const hasFilter = Boolean(filters.field || filters.programType || filters.institution);
+  /**
+   * النتائج لا تُعرض حتى يصل الطالب إلى آخر مرحلة أو يطلب «الكل» صراحةً،
+   * فلا تُغرقه مئات البطاقات قبل أن يحدّد ما يريد.
+   */
+  const reachedEnd = Boolean(
+    filters.institution ||
+      (filters.field && filters.programType && browse && browse[0].institutions.length === 0)
+  );
+  const showResults = showAll || reachedEnd;
   const matched = browse ? browse[1].total : 0;
   const totalPages = Math.max(1, Math.ceil(matched / PAGE_SIZE));
 
   const pageHref = (n: number) => {
-    const base = buildHref(filters);
+    const base = buildHref(filters, showAll);
     if (n <= 1) return base;
     return `${base}${base.includes("?") ? "&" : "?"}page=${n}`;
   };
@@ -114,9 +131,12 @@ export default async function GuidePage({
               <FilterStep
                 step={1}
                 title="اختر المجال الأكاديمي"
+                hint="أو اعرض كل البرامج دفعةً واحدة"
                 options={browse[0].fields}
                 selected={filters.field}
                 hrefFor={(value) => buildHref({ field: value || undefined })}
+                allLabel="إظهار الكل"
+                allHref={buildHref({}, true)}
               />
 
               {filters.field ? (
@@ -129,6 +149,8 @@ export default async function GuidePage({
                   hrefFor={(value) =>
                     buildHref({ field: filters.field, programType: value || undefined })
                   }
+                  allLabel="إظهار الكل في هذا المجال"
+                  allHref={buildHref({ field: filters.field }, true)}
                 />
               ) : null}
 
@@ -146,6 +168,11 @@ export default async function GuidePage({
                       institution: value || undefined,
                     })
                   }
+                  allLabel="إظهار الكل في هذا النوع"
+                  allHref={buildHref(
+                    { field: filters.field, programType: filters.programType },
+                    true
+                  )}
                 />
               ) : null}
             </div>
@@ -156,14 +183,17 @@ export default async function GuidePage({
               </div>
             ) : null}
 
+            {!showResults ? (
+              <p className="mt-6 text-sm leading-relaxed text-[var(--color-muted)]">
+                {matched} برنامجاً ضمن اختيارك حتى الآن. أكمل الخطوة التالية لتصل إلى ما
+                تريده بالضبط، أو اضغط «إظهار الكل» في أي مرحلة لعرضها الآن.
+              </p>
+            ) : null}
+
+            {showResults ? (
+            <>
             <p className="mt-6 text-sm font-bold text-slate-900" aria-live="polite">
               {matched === 0 ? "لا توجد برامج مطابقة" : `${matched} برنامجاً`}
-              {!hasFilter ? (
-                <span className="font-normal text-[var(--color-muted)]">
-                  {" "}
-                  — اختر مجالاً أعلاه لتضييق النتائج
-                </span>
-              ) : null}
             </p>
 
             {browse[1].items.length === 0 ? (
@@ -206,6 +236,8 @@ export default async function GuidePage({
                   </Link>
                 ) : null}
               </nav>
+            ) : null}
+            </>
             ) : null}
           </>
         ) : null}

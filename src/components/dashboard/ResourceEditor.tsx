@@ -27,7 +27,7 @@ export interface ResourceDraft {
   categoryId: string;
   title: string;
   description: string;
-  type: "READABLE" | "AUDIO" | "LINK" | "OTHER";
+  type: "READABLE" | "AUDIO" | "VIDEO" | "IMAGE" | "LINK" | "OTHER";
   author: string;
   publisher: string;
   publishedYear: string;
@@ -55,7 +55,7 @@ const EMPTY = (categoryId: string): ResourceDraft => ({
   published: true,
 });
 
-const MAX_MB = { LIBRARY: 30, AUDIO: 60 };
+const MAX_MB = { LIBRARY: 30, AUDIO: 60, BULLETIN: 60 };
 
 export function ResourceEditor({
   categories,
@@ -81,14 +81,14 @@ export function ResourceEditor({
     setDraft((d) => ({ ...d, [key]: value }));
   }
 
-  async function upload(kind: "LIBRARY" | "AUDIO", file: File) {
-    const limit = kind === "LIBRARY" ? MAX_MB.LIBRARY : MAX_MB.AUDIO;
+  async function upload(kind: "LIBRARY" | "AUDIO" | "BULLETIN", file: File) {
+    const limit = MAX_MB[kind];
     if (file.size > limit * 1024 * 1024) {
       setFormError(`حجم الملف يتجاوز ${limit} ميغابايت`);
       return;
     }
     setFormError(null);
-    setUploading(kind === "LIBRARY" ? "file" : "audio");
+    setUploading(kind === "AUDIO" ? "audio" : "file");
     try {
       const form = new FormData();
       form.append("kind", kind);
@@ -97,7 +97,7 @@ export function ResourceEditor({
         "/api/specialist/uploads",
         form
       );
-      if (kind === "LIBRARY") {
+      if (kind === "LIBRARY" || kind === "BULLETIN") {
         set("fileId", res.file.id);
         setFileLabel(res.file.originalName);
       } else {
@@ -211,7 +211,7 @@ export function ResourceEditor({
               required
               value={draft.type}
               onChange={(e) => set("type", e.target.value as ResourceDraft["type"])}
-              options={(["READABLE", "AUDIO", "LINK", "OTHER"] as const).map((t) => ({
+              options={(["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"] as const).map((t) => ({
                 value: t,
                 label: RESOURCE_TYPE_LABELS[t],
               }))}
@@ -273,6 +273,38 @@ export function ResourceEditor({
                 </label>
                 <span className="text-xs text-[var(--color-muted)]">
                   {fileLabel || (draft.fileId ? "ملف مرفق" : `PDF حتى ${MAX_MB.LIBRARY} ميغابايت`)}
+                </span>
+              </div>
+              {errors.fileId ? <p className="field-error">{errors.fileId}</p> : null}
+            </div>
+          ) : null}
+
+          {draft.type === "VIDEO" || draft.type === "IMAGE" ? (
+            <div>
+              <span className="label">
+                {draft.type === "VIDEO" ? "ملف النشرة (MP4)" : "صورة النشرة (JPG / PNG / WEBP)"}
+              </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="btn-outline btn-sm cursor-pointer">
+                  {uploading === "file" ? (
+                    <Spinner className="h-4 w-4" />
+                  ) : (
+                    <Upload className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  اختر ملفاً
+                  <input
+                    type="file"
+                    accept={draft.type === "VIDEO" ? "video/mp4" : "image/jpeg,image/png,image/webp"}
+                    className="sr-only"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void upload("BULLETIN", f);
+                    }}
+                  />
+                </label>
+                <span className="text-xs text-[var(--color-muted)]">
+                  {fileLabel ||
+                    (draft.fileId ? "ملف مرفق" : `حتى ${MAX_MB.BULLETIN} ميغابايت، أو اكتفِ برابط`)}
                 </span>
               </div>
               {errors.fileId ? <p className="field-error">{errors.fileId}</p> : null}

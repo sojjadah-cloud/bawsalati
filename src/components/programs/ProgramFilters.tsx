@@ -3,12 +3,16 @@ import { X } from "lucide-react";
 import type { Facet, ProgramFilters as Filters } from "@/features/programs/service";
 import { NO_INSTITUTION } from "@/features/programs/service";
 
-/** يبني رابط الصفحة من التصفية المطلوبة، ويُسقط ما بعدها من مستويات. */
-export function buildHref(filters: Filters): string {
+/**
+ * يبني رابط الصفحة من التصفية المطلوبة، ويُسقط ما بعدها من مستويات.
+ * `showAll` يعني: لا تضيق أكثر، اعرض نتائج ما اخترته الآن.
+ */
+export function buildHref(filters: Filters, showAll = false): string {
   const q = new URLSearchParams();
   if (filters.field) q.set("field", filters.field);
   if (filters.programType) q.set("type", filters.programType);
   if (filters.institution) q.set("inst", filters.institution);
+  if (showAll) q.set("all", "1");
   const qs = q.toString();
   return qs ? `/guide?${qs}` : "/guide";
 }
@@ -21,6 +25,8 @@ export function FilterStep({
   options,
   selected,
   hrefFor,
+  allLabel,
+  allHref,
 }: {
   step: number;
   title: string;
@@ -28,8 +34,12 @@ export function FilterStep({
   options: Facet[];
   selected?: string;
   hrefFor: (value: string) => string;
+  /** خيار «الكل» في هذه المرحلة: يعرض النتائج بلا تضييق أكثر */
+  allLabel?: string;
+  allHref?: string;
 }) {
   if (options.length === 0) return null;
+  const total = options.reduce((n, o) => n + o.count, 0);
 
   return (
     <section aria-labelledby={`step-${step}`} className="card card-pad">
@@ -44,6 +54,19 @@ export function FilterStep({
       </div>
 
       <ul className="mt-4 flex flex-wrap gap-2">
+        {allLabel && allHref ? (
+          <li>
+            <Link
+              href={allHref}
+              className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-dashed border-brand-400 bg-brand-50/60 px-3 text-sm font-bold text-brand-800 transition-colors hover:bg-brand-100"
+            >
+              <span>{allLabel}</span>
+              <span className="rounded-full bg-white/70 px-1.5 text-xs font-semibold text-brand-700">
+                {total}
+              </span>
+            </Link>
+          </li>
+        ) : null}
         {options.map((o) => {
           const isSelected = selected === o.value;
           return (

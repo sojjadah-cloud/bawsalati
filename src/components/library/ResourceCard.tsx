@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { BookOpen, ExternalLink, Headphones, FileText, Download } from "lucide-react";
+import {
+  BookOpen,
+  ExternalLink,
+  Headphones,
+  FileText,
+  Download,
+  Image as ImageIcon,
+  Play,
+} from "lucide-react";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { CoverArt } from "./CoverArt";
 import type { PublicResource } from "@/features/library/service";
@@ -7,6 +15,8 @@ import type { PublicResource } from "@/features/library/service";
 const TYPE_ICON = {
   READABLE: BookOpen,
   AUDIO: Headphones,
+  VIDEO: Play,
+  IMAGE: ImageIcon,
   LINK: ExternalLink,
   OTHER: FileText,
 } as const;

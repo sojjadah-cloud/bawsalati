@@ -39,6 +39,8 @@ export const GRADE_LABELS: Record<string, string> = Object.fromEntries(
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   READABLE: "كتاب مقروء",
   AUDIO: "كتاب مسموع",
+  VIDEO: "نشرة مرئية",
+  IMAGE: "نشرة مصوّرة",
   LINK: "رابط تعليمي",
   OTHER: "مورد آخر",
 };

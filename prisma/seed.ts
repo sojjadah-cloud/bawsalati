@@ -234,6 +234,12 @@ const CATEGORIES = [
     description: "مراجع علمية تثري معرفتك وتوسّع اهتماماتك البحثية.",
     displayOrder: 3,
   },
+  {
+    slug: "bulletins",
+    name: "نشرات التوجيه المهني",
+    description: "نشرات يرفعها مختصو التوجيه المهني: مقاطع مرئية وصور وروابط مختارة.",
+    displayOrder: 4,
+  },
 ];
 
 async function seedLibrary() {

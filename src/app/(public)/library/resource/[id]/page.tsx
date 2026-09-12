@@ -87,6 +87,7 @@ export default async function ResourcePage({
             <ResourceViewer
               resourceId={resource.id}
               title={resource.title}
+              type={resource.type}
               hasFile={resource.hasFile}
               hasAudio={resource.hasAudio}
               externalUrl={resource.externalUrl}

@@ -29,7 +29,7 @@ export const resourceSchema = z
     categoryId: z.string().trim().min(1, "اختر التصنيف"),
     title: z.string().trim().min(2, "أدخل العنوان").max(250),
     description: z.string().trim().max(3000).optional().or(z.literal("")),
-    type: z.enum(["READABLE", "AUDIO", "LINK", "OTHER"], {
+    type: z.enum(["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"], {
       errorMap: () => ({ message: "اختر نوع المورد" }),
     }),
     author: z.string().trim().max(160).optional().or(z.literal("")),
@@ -60,6 +60,14 @@ export const resourceSchema = z
     // المقروء والمسموع يجوز تسجيلهما في الفهرس قبل توفّر النسخة:
     // صفحة المورد تعرض حينها «مُدرَج في الفهرس» وتدعو الطالب لسؤال المختص.
     // أما المورد من نوع رابط فلا معنى له بلا رابط، ولذلك بقي شرطه أعلاه.
+    // والنشرة كذلك: لا تُنشر فارغة، فهي إما ملف مرفوع أو رابط.
+    if ((v.type === "VIDEO" || v.type === "IMAGE") && !v.fileId && !v.externalUrl) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["fileId"],
+        message: "ارفع ملف النشرة أو أضف رابطاً لها",
+      });
+    }
   });
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
