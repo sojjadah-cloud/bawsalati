@@ -30,7 +30,8 @@
     "faq:build": "tsx scripts/build-guide-faq.ts",
     "library:files": "tsx scripts/import-library-files.ts",
     "norms:build": "tsx scripts/build-norms.ts",
-    "programs:import": "tsx scripts/import-programs.ts"
+    "programs:import": "tsx scripts/import-programs.ts",
+    "programs:verify": "python scripts/verify-programs.py"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

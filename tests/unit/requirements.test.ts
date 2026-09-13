@@ -7,7 +7,7 @@ import {
   competitiveAverage,
   type Marks,
 } from "@/features/programs/requirements";
-import { SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
+import { GUIDE_FIELDS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
 
 /**
  * شروط القبول في الدليل نثر، والقبول لا يُبنى على تخمين.
@@ -189,5 +189,20 @@ describe("خطة الصف الحادي عشر", () => {
     const literary = ["الجغرافيا الاقتصادية", "التاريخ (الحضارة الإسلامية)"] as const;
     expect(canStudyWith(medicine, [...science])).toBe(true);
     expect(canStudyWith(medicine, [...literary])).toBe(false);
+  });
+});
+
+describe("مجالات الدليل", () => {
+  it("ثلاثة عشر مجالاً بنطاقات صفحات متتابعة بلا تداخل ولا فجوة", () => {
+    expect(GUIDE_FIELDS).toHaveLength(13);
+    expect(GUIDE_FIELDS[0].from).toBe(74);
+    expect(GUIDE_FIELDS[GUIDE_FIELDS.length - 1].to).toBe(242);
+    for (let i = 1; i < GUIDE_FIELDS.length; i++) {
+      expect(GUIDE_FIELDS[i].from).toBe(GUIDE_FIELDS[i - 1].to + 1);
+    }
+  });
+
+  it("كل نطاق يبدأ قبل نهايته", () => {
+    for (const f of GUIDE_FIELDS) expect(f.to).toBeGreaterThan(f.from);
   });
 });

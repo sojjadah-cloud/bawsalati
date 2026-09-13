@@ -5,6 +5,7 @@ import { CalendarCheck, ChevronLeft, FileText, Layers, MapPin, Tag } from "lucid
 import { getProgramByCode, relatedPrograms } from "@/features/programs/service";
 import { HeroBreadcrumb, PageHero } from "@/components/public/PageHero";
 import { ProgramCard, placeOfStudy } from "@/components/programs/ProgramCard";
+import { GUIDE_FIELD_PAGES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -155,8 +156,12 @@ export default async function ProgramPage({
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
                 {program.guidePage
-                  ? `هذا البرنامج مذكور في صفحة ${program.guidePage} من دليل الطالب.`
-                  : "هذا البرنامج مأخوذ من دليل الطالب."}{" "}
+                  ? `هذا البرنامج مذكور في صفحة ${program.guidePage} من دليل الطالب`
+                  : "هذا البرنامج مأخوذ من دليل الطالب"}
+                {GUIDE_FIELD_PAGES[program.field]
+                  ? `، ضمن «${program.field}» في الصفحات ${GUIDE_FIELD_PAGES[program.field].from}–${GUIDE_FIELD_PAGES[program.field].to}`
+                  : ""}
+                .{" "}
                 الشروط والمواعيد تتغيّر سنوياً، فافتح الدليل وتأكّد قبل التقديم.
               </p>
               <a

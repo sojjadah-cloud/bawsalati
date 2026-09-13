@@ -2,6 +2,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import type { Facet, ProgramFilters as Filters } from "@/features/programs/service";
 import { NO_INSTITUTION } from "@/features/programs/service";
+import { GUIDE_FIELD_PAGES } from "@/lib/constants";
 
 /**
  * يبني رابط الصفحة من التصفية المطلوبة، ويُسقط ما بعدها من مستويات.
@@ -81,6 +82,16 @@ export function FilterStep({
                 }`}
               >
                 <span>{o.value === NO_INSTITUTION ? "بدون مؤسسة محدّدة" : o.value}</span>
+                {/* نطاق صفحات المجال في الدليل: الصفحة مرجع يُراجَع لا قائمة فقط */}
+                {GUIDE_FIELD_PAGES[o.value] ? (
+                  <span
+                    className={`hidden text-[11px] font-normal tabular-nums sm:inline ${
+                      isSelected ? "text-white/70" : "text-[var(--color-faint)]"
+                    }`}
+                  >
+                    ص {GUIDE_FIELD_PAGES[o.value].from}–{GUIDE_FIELD_PAGES[o.value].to}
+                  </span>
+                ) : null}
                 <span
                   className={`rounded-full px-1.5 text-xs font-semibold ${
                     isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"

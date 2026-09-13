@@ -5,6 +5,7 @@
 // كل قائمة تُبنى من البرامج الموافقة لما قبلها، فلا يظهر خيار بلا نتائج.
 // ═══════════════════════════════════════════════════════════════
 import { prisma } from "@/lib/prisma";
+import { GUIDE_FIELDS } from "@/lib/constants";
 
 export interface ProgramFilters {
   field?: string;
@@ -44,13 +45,22 @@ async function facet(
     _count: { _all: true },
   });
 
-  return rows
+  const facets = rows
     .map((r) => ({
       value: (r[by] as string) || (by === "institution" ? NO_INSTITUTION : ""),
       count: r._count._all,
     }))
-    .filter((r) => r.value)
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "ar"));
+    .filter((r) => r.value);
+
+  // المجالات ترتيبها ترتيب الدليل نفسه، فالصفحة مرجع لا قائمة إحصاء
+  if (by === "field") {
+    const order = new Map<string, number>(GUIDE_FIELDS.map((f, i) => [f.field, i]));
+    return facets.sort(
+      (a, b) => (order.get(a.value) ?? 99) - (order.get(b.value) ?? 99)
+    );
+  }
+
+  return facets.sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "ar"));
 }
 
 /**

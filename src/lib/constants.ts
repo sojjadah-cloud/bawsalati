@@ -80,6 +80,29 @@ export const SUBJECTS = [
   ...SUBJECT_GROUPS.other,
 ] as const;
 
+/**
+ * المجالات الأكاديمية بترتيب الدليل ونطاق صفحات كل مجال فيه.
+ * تُعرض للطالب ليعرف أين يقرأ، ويُتحقّق بها من تصنيف كل برنامج.
+ */
+export const GUIDE_FIELDS = [
+  { field: "الصحة", from: 74, to: 93 },
+  { field: "برامج دراسية متعددة التخصصات", from: 94, to: 108 },
+  { field: "العلوم الطبيعية والفيزيائية", from: 109, to: 116 },
+  { field: "الزراعة والبيئة والعلوم المرتبطة بها", from: 117, to: 121 },
+  { field: "الهندسة والتقنيات ذات الصلة", from: 122, to: 145 },
+  { field: "العمارة والإنشاء", from: 146, to: 152 },
+  { field: "تكنولوجيا المعلومات", from: 153, to: 169 },
+  { field: "التربية", from: 170, to: 187 },
+  { field: "الإدارة والمعاملات التجارية", from: 188, to: 206 },
+  { field: "المجتمع والثقافة", from: 207, to: 217 },
+  { field: "الفنون الإبداعية", from: 218, to: 225 },
+  { field: "الدين والفلسفة", from: 226, to: 228 },
+  { field: "البرامج المخصصة للطلبة ذوي الإعاقات الخاصة", from: 229, to: 242 },
+] as const;
+
+export const GUIDE_FIELD_PAGES: Record<string, { from: number; to: number }> =
+  Object.fromEntries(GUIDE_FIELDS.map((f) => [f.field, { from: f.from, to: f.to }]));
+
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   READABLE: "كتاب مقروء",
   AUDIO: "كتاب مسموع",
