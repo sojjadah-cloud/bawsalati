@@ -24,8 +24,13 @@ export function ProgramCard({ program }: { program: Program }) {
       </span>
 
       {/* البطاقة كلها مدخل واحد إلى صفحة البرنامج: الرابط يغطّيها بالكامل */}
+      {/* بعض أسماء الدليل فقرةٌ كاملة، فتُقصّ هنا وتُقرأ كاملةً في صفحة البرنامج */}
       <h3 className="mt-3 text-base leading-relaxed font-bold text-slate-900">
-        <Link href={`/programs/${program.code}`} className="after:absolute after:inset-0">
+        <Link
+          href={`/programs/${program.code}`}
+          title={program.name}
+          className="line-clamp-3 after:absolute after:inset-0"
+        >
           {program.name}
         </Link>
       </h3>
