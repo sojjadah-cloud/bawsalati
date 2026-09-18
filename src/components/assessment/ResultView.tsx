@@ -147,14 +147,14 @@ export function ResultTables({ sections }: { sections: ResultSectionData[] }) {
 
 /** رمز الميول: البيئات الثلاث الأعلى رتبةً مئينية. */
 export function InterestCode({
-  interestCode,
   rows,
 }: {
-  interestCode: string;
+  /** الرمز المخزّن (الثلاث الأعلى) يبقى أساس المجالات المقترحة، والعرض يشمل الست */
+  interestCode?: string;
   rows: AnalysisRowData[];
 }) {
-  const top = [...rows].sort((a, b) => a.rank - b.rank).slice(0, 3);
-  if (top.length === 0) return null;
+  const ranked = [...rows].sort((a, b) => a.rank - b.rank);
+  if (ranked.length === 0) return null;
 
   return (
     <section className="card card-pad" aria-labelledby="code-title">
@@ -162,19 +162,31 @@ export function InterestCode({
         رمز ميولك
       </h2>
       <p className="mt-1 text-sm text-[var(--color-muted)]">
-        البيئات الثلاث الأعلى رتبةً مئينية، وعليها يُبنى البحث عن المهن المناسبة.
+        البيئات الست مرتّبة من الأعلى رتبةً مئينية إلى الأدنى. الثلاث الأولى هي
+        الأبرز، وعليها يُبنى البحث عن المجالات المناسبة.
       </p>
 
-      <p className="mt-4 text-3xl font-extrabold tracking-widest text-brand-800">
-        {interestCode || top.map((t) => t.code).join(" - ")}
+      <p
+        className="mt-4 text-3xl font-extrabold tracking-widest"
+        aria-label={ranked.map((r) => r.code).join(" ")}
+      >
+        {ranked.map((r, i) => (
+          <span key={r.code} className={i < 3 ? "text-brand-800" : "text-slate-400"}>
+            {i > 0 ? " - " : ""}
+            {r.code}
+          </span>
+        ))}
       </p>
 
       <ol className="mt-4 grid gap-3 sm:grid-cols-3">
-        {top.map((row) => (
-          <li key={row.code} className="rounded-[var(--radius-md)] bg-slate-50 p-3">
-            <span className="block text-xs text-[var(--color-muted)]">
-              البيئة {row.rank}
-            </span>
+        {ranked.map((row, i) => (
+          <li
+            key={row.code}
+            className={`rounded-[var(--radius-md)] p-3 ${
+              i < 3 ? "border border-brand-200 bg-brand-50/60" : "bg-slate-50"
+            }`}
+          >
+            <span className="block text-xs text-[var(--color-muted)]">البيئة {row.rank}</span>
             <span className="mt-0.5 block text-sm font-bold text-slate-900">
               {row.label} ({row.code})
             </span>
