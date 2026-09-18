@@ -58,6 +58,16 @@ npm run library:files -- <مجلد>  # إرفاق نسخ الكتب بعناوي
 | `npm run seed` | بيانات المقياس والتصنيفات والمواضيع |
 | `npm run norms:provisional` | جدول تحويل مؤقّت للتجربة (يظهر تحذير على كل نتيجة) |
 | `npm run norms:import` | استيراد الجداول المعيارية الرسمية |
+| `npm run norms:build` | اشتقاق الجداول المعيارية من نتائج الطلبة |
+| `npm run programs:convert` | تحويل إكسل الدليل إلى بيانات البرامج |
+| `npm run programs:import` | إدخال البرامج في قاعدة البيانات |
+| `npm run programs:verify` | مطابقة البرامج بصفحات الدليل |
+| `npm run programs:text` | فحص أسماء البرامج وشروطها |
+| `npm run audit:data` | فحص البيانات والمحتوى |
+| `npm run audit:pages` / `audit:api` | فحص الصفحات والواجهات على الخادم المحلي |
+| `npm run audit:flow` / `audit:booking` | فحص الاختبار والحجز من البداية للنهاية |
+| `npm run audit:cells` | مطابقة إجابات الاختبار بخانات النتيجة |
+| `npm run audit:live` | فحص الموقع المنشور |
 
 ## النشر
 

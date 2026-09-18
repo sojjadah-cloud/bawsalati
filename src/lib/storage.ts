@@ -2,7 +2,7 @@
 // لا يُشتق اسم الملف من مدخلات المستخدم إطلاقاً، فلا مجال لاجتياز المسارات.
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 export interface AllowedType {
   mime: string;
@@ -82,6 +82,7 @@ export class UploadError extends Error {
   status: number;
   constructor(message: string, status = 415) {
     super(message);
+    this.name = "UploadError";
     this.status = status;
   }
 }
@@ -130,8 +131,33 @@ function safePath(storageKey: string): string {
   return full;
 }
 
+/**
+ * يعيد كتابة ملف بمفتاحه المسجّل. قرص Render المجاني يُمسح مع كل نشر وقاعدة
+ * البيانات باقية، فيبقى السجلّ ويضيع الملف ما لم يُستعَد من مصدره.
+ */
+export async function restoreFile(storageKey: string, buffer: Buffer): Promise<boolean> {
+  const full = safePath(storageKey);
+  try {
+    const s = await stat(full);
+    if (s.size === buffer.length) return false;
+  } catch {
+    // غير موجود: يُكتب أدناه
+  }
+  await mkdir(dirname(full), { recursive: true });
+  await writeFile(full, buffer);
+  return true;
+}
+
 export async function readStoredFile(storageKey: string): Promise<Buffer> {
-  return readFile(safePath(storageKey));
+  try {
+    return await readFile(safePath(storageKey));
+  } catch (e) {
+    // السجلّ موجود والملف مفقود: قرص مُسح مع النشر، لا عطل في الخادم
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new UploadError("الملف لم يعد متاحاً. يُرجى إبلاغ المختص لإعادة رفعه.", 404);
+    }
+    throw e;
+  }
 }
 
 export async function storedFileSize(storageKey: string): Promise<number> {

@@ -11,7 +11,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { inspectUpload, saveFile } from "../src/lib/storage";
+import { inspectUpload, restoreFile, saveFile } from "../src/lib/storage";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -38,11 +38,21 @@ async function main() {
   // فيصلح استدعاء السكربت في كل عملية نشر.
   const already = await prisma.storedFile.findFirst({
     where: { checksum: detected.checksum, kind: "GUIDE" },
-    select: { id: true, guideDocuments: { select: { id: true, published: true, version: true } } },
+    select: {
+      id: true,
+      storageKey: true,
+      guideDocuments: { select: { id: true, published: true, version: true } },
+    },
   });
   if (already?.guideDocuments.some((g) => g.published)) {
     const v = already.guideDocuments.find((g) => g.published)?.version;
-    console.log(`↩︎ الإصدار ${v} منشور بالفعل بالملف نفسه — لا تغيير.`);
+    // السجلّ باقٍ لكن القرص قد يكون مُسح مع النشر، فيُستعاد الملف بمفتاحه نفسه
+    const restored = await restoreFile(already.storageKey, detected.buffer);
+    console.log(
+      restored
+        ? `↺ الإصدار ${v} منشور، وأُعيد ملفه إلى التخزين بعد أن مُسح.`
+        : `↩︎ الإصدار ${v} منشور بالفعل بالملف نفسه — لا تغيير.`
+    );
     return;
   }
 

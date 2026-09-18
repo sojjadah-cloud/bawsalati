@@ -27,6 +27,11 @@ export function noStore(data: unknown, status = 200) {
 export function errorResponse(err: unknown) {
   if (err instanceof ApiError) return json({ error: err.message }, err.status);
 
+  // أخطاء التخزين تحمل حالتها، ولا تُستورد هنا كي لا يجرّ التخزين طبقة الواجهة
+  if (err instanceof Error && err.name === "UploadError" && "status" in err) {
+    return json({ error: err.message }, Number(err.status));
+  }
+
   if (err instanceof ZodError) {
     return json(
       { error: "بيانات غير صحيحة", issues: err.flatten().fieldErrors },
