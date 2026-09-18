@@ -139,6 +139,7 @@ export default async function GuidePage({
                 selected={filters.field}
                 hrefFor={(value) => buildHref({ field: value || undefined })}
                 allLabel="إظهار الكل"
+                changeLabel="المجال"
                 allHref={buildHref({}, true)}
               />
 
@@ -153,6 +154,7 @@ export default async function GuidePage({
                     buildHref({ field: filters.field, programType: value || undefined })
                   }
                   allLabel="إظهار الكل في هذا المجال"
+                  changeLabel="النوع"
                   allHref={buildHref({ field: filters.field }, true)}
                 />
               ) : null}
@@ -172,6 +174,7 @@ export default async function GuidePage({
                     })
                   }
                   allLabel="إظهار الكل في هذا النوع"
+                  changeLabel="المؤسسة"
                   allHref={buildHref(
                     { field: filters.field, programType: filters.programType },
                     true

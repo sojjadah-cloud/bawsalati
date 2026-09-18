@@ -28,6 +28,7 @@ export function FilterStep({
   hrefFor,
   allLabel,
   allHref,
+  changeLabel,
 }: {
   step: number;
   title: string;
@@ -38,6 +39,8 @@ export function FilterStep({
   /** خيار «الكل» في هذه المرحلة: يعرض النتائج بلا تضييق أكثر */
   allLabel?: string;
   allHref?: string;
+  /** ما يُكتب بعد «تغيير» حين يُطوى الاختيار: «المجال»، «النوع»… */
+  changeLabel?: string;
 }) {
   if (options.length === 0) return null;
   const total = options.reduce((n, o) => n + o.count, 0);
@@ -51,11 +54,20 @@ export function FilterStep({
           </span>
           {title}
         </h2>
-        {hint ? <p className="text-xs text-[var(--color-muted)]">{hint}</p> : null}
+        {selected ? (
+          <Link
+            href={hrefFor("")}
+            className="rounded-[var(--radius-sm)] px-2 py-1 text-sm font-bold text-brand-700 hover:bg-brand-50 hover:text-brand-800"
+          >
+            تغيير {changeLabel ?? "الاختيار"}
+          </Link>
+        ) : hint ? (
+          <p className="text-xs text-[var(--color-muted)]">{hint}</p>
+        ) : null}
       </div>
 
       <ul className="mt-4 flex flex-wrap gap-2">
-        {allLabel && allHref ? (
+        {allLabel && allHref && !selected ? (
           <li>
             <Link
               href={allHref}
@@ -68,7 +80,8 @@ export function FilterStep({
             </Link>
           </li>
         ) : null}
-        {options.map((o) => {
+        {/* بعد الاختيار يبقى المختار وحده، وتعود الخيارات كلها بـ«تغيير» */}
+        {options.filter((o) => !selected || o.value === selected).map((o) => {
           const isSelected = selected === o.value;
           return (
             <li key={o.value}>
