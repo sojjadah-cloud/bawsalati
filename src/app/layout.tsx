@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -53,9 +54,14 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // سياسة CSP تسمح فقط بالسكربتات التي تحمل nonce الطلب (proxy.ts). الصفحة
+  // المبنية سلفاً لا nonce فيها، فيحجب المتصفح سكربتاتها وتتعطّل كل تفاعلاتها.
+  // لذلك تُرسم كل صفحة عند الطلب.
+  await connection();
+
   return (
     <html lang="ar" dir="rtl" className={bodyFont.variable}>
       <body>

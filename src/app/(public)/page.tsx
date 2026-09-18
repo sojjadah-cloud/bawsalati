@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { HeroBackdrop } from "@/components/public/HeroBackdrop";
 
-export const dynamic = "force-static";
-
 const SERVICES = [
   {
     href: "/assessment",

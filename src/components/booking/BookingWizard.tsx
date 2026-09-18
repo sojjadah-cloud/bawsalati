@@ -136,7 +136,7 @@ export function BookingWizard({
   function next() {
     const nextErrors: Record<string, string | undefined> = {};
     if (step === 0) {
-      if (studentName.trim().length < 3) nextErrors.studentName = "أدخل الاسم كاملاً";
+      if (studentName.trim().length < 3) nextErrors.studentName = "اكتب اسمك كاملاً (3 أحرف على الأقل)";
       if (!grade) nextErrors.grade = "اختر الصف الدراسي";
       if (!/^[79]\d{7}$/u.test(phone.trim())) {
         nextErrors.phone = "أدخل رقماً عُمانياً صحيحاً مكوّناً من 8 أرقام";
@@ -581,7 +581,11 @@ export function BookingWizard({
         </button>
 
         {step < STEPS.length - 1 ? (
-          <button type="button" className="btn-primary flex-1 sm:flex-none" onClick={next} disabled={!stepValid}>
+          <button type="button" className="btn-primary flex-1 sm:flex-none" onClick={next}
+            // خطوتا البيانات والموضوع تبقيان مفعّلتين: الضغط يُظهر ما ينقص تحت حقله
+            // بدل زرّ معطّل صامت لا يقول لماذا
+            disabled={step !== 0 && step !== 3 && !stepValid}
+          >
             التالي
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </button>

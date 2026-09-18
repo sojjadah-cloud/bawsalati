@@ -5,7 +5,6 @@ import { CalendarCheck, GraduationCap, Printer } from "lucide-react";
 import { getResultByToken } from "@/features/assessment/service";
 import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/time";
-import { Alert } from "@/components/ui/primitives";
 import {
   AnalysisTable,
   InterestCode,
@@ -13,7 +12,6 @@ import {
   type AnalysisRowData,
   type ResultSectionData,
 } from "@/components/assessment/ResultView";
-import { ProvisionalNotice } from "@/components/assessment/ProvisionalNotice";
 
 // نتيجة طالب — لا تُفهرس ولا تُخزَّن.
 export const metadata: Metadata = {
@@ -63,21 +61,6 @@ export default async function ResultPage({
         </Link>
       </header>
 
-      {result.ruleSet.provisional ? (
-        <div className="mt-6">
-          <ProvisionalNotice audience="student" />
-        </div>
-      ) : null}
-
-      <div className="mt-6 no-print">
-        <Alert tone="info" title="كيف تقرأ نتيجتك">
-          كل جدول بيئة مهنية بعباراتها التسع، والعلامة تعني أنك تفضّل ذلك النشاط.
-          الدرجة الخام عدد ما فضّلته منها، وتُحوَّل إلى رتبة مئينية تقارنك بزملاء
-          صفّك ونوعك. النتيجة مؤشّر يساعدك على الاختيار، ويعتمدها مختص التوجيه
-          المهني بعد مناقشتها معك.
-        </Alert>
-      </div>
-
       <section className="mt-10" aria-labelledby="tables-title">
         <h2 id="tables-title" className="section-title">
           جداول البيئات الست
@@ -89,11 +72,11 @@ export default async function ResultPage({
       </section>
 
       <div className="mt-12">
-        <InterestCode interestCode={result.interestCode} rows={analysisRows} />
+        <AnalysisTable rows={analysisRows} summary={result.analysis?.summary} />
       </div>
 
       <div className="mt-12">
-        <AnalysisTable rows={analysisRows} summary={result.analysis?.summary} />
+        <InterestCode interestCode={result.interestCode} rows={analysisRows} />
       </div>
 
       {/* تحليل الأخصائي — يظهر بعد اعتماده النتيجة فقط */}
