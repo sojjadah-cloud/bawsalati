@@ -69,13 +69,25 @@ services:
       - key: TRUSTED_PROXY_HOPS
         value: "1"
 
-      # مزوّد الإشعارات: console يسجّل محلياً بدل الإرسال.
-      # غيّره إلى whatsapp أو sms بعد ضبط بيانات المزوّد أدناه.
+      # مزوّد الإشعارات عبر واتساب. callmebot أسرع طريق لتنبيه رقم الإدارة:
+      # يكفي أن يضاف مفتاح الرقم في CALLMEBOT_KEYS من لوحة Render.
+      # للواتساب الرسمي من Meta: whatsapp-cloud مع WHATSAPP_TOKEN و
+      # WHATSAPP_PHONE_NUMBER_ID. بلا مفاتيح لا يُرسل شيء ويبقى الحجز سليماً.
       - key: NOTIFY_PROVIDER
-        value: console
+        value: callmebot
       # يستلم تفاصيل كل حجز مؤكَّد كاملةً (إدارة المدرسة).
       - key: BOOKING_ALERT_PHONE
         value: "96894996269"
+      # «الرقم:المفتاح» مفصولة بفواصل، مثل 96894996269:1234567
+      - key: CALLMEBOT_KEYS
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      # اسم قالب معتمد في Meta، لإرسال الرسالة خارج نافذة الـ24 ساعة
+      - key: WHATSAPP_TEMPLATE
+        sync: false
       - key: NOTIFY_API_URL
         sync: false
       - key: NOTIFY_API_TOKEN
