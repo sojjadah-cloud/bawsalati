@@ -414,9 +414,21 @@ export function BookingWizard({
             ) : days ? (
               <>
                 <fieldset className="mt-6">
-                  <legend className="label">اليوم</legend>
+                  <div className="flex items-center justify-between gap-3">
+                    <legend className="label">اليوم</legend>
+                    {date ? (
+                      <ChangeButton
+                        label="تغيير اليوم"
+                        onClick={() => {
+                          setDate("");
+                          setStartTime("");
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                  {/* بعد الاختيار يبقى اليوم المختار وحده، فتقصر الصفحة ويتّضح ما اختير */}
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                    {days.map((d) => {
+                    {days.filter((d) => !date || d.date === date).map((d) => {
                       const active = date === d.date;
                       const [, month, day] = d.date.split("-");
                       return (
@@ -449,9 +461,16 @@ export function BookingWizard({
 
                 {selectedDay ? (
                   <fieldset className="mt-5">
-                    <legend className="label">الوقت</legend>
+                    <div className="flex items-center justify-between gap-3">
+                      <legend className="label">الوقت</legend>
+                      {startTime ? (
+                        <ChangeButton label="تغيير الوقت" onClick={() => setStartTime("")} />
+                      ) : null}
+                    </div>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {selectedDay.slots.map((slot) => {
+                      {selectedDay.slots
+                        .filter((slot) => !startTime || slot.startTime === startTime)
+                        .map((slot) => {
                         const active = startTime === slot.startTime;
                         return (
                           <button
@@ -597,5 +616,18 @@ export function BookingWizard({
         )}
       </div>
     </form>
+  );
+}
+
+/** يعيد عرض الخيارات كلها بعد أن طُويت على الخيار المختار. */
+function ChangeButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mb-2 cursor-pointer rounded-[var(--radius-sm)] px-2 py-1 text-sm font-bold text-brand-700 hover:bg-brand-50 hover:text-brand-800"
+    >
+      {label}
+    </button>
   );
 }
