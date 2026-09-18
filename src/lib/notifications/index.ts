@@ -32,10 +32,9 @@ function composeBookingText(n: BookingNotice): string {
 }
 
 export async function sendBookingNotification(n: BookingNotice): Promise<void> {
-  const provider = getProvider();
   const template = "APPOINTMENT_CREATED";
-
   if (!n.specialistPhone) {
+    const provider = getProvider();
     await recordDelivery({
       channel: provider.channel,
       provider: provider.name,
@@ -48,12 +47,55 @@ export async function sendBookingNotification(n: BookingNotice): Promise<void> {
     });
     return;
   }
+  await deliver(n.specialistPhone, composeBookingText(n), template, n.appointmentId);
+}
 
-  const message: OutboundMessage = {
-    to: n.specialistPhone,
-    text: composeBookingText(n),
-    template,
-  };
+export interface BookingSummary {
+  appointmentId: string;
+  studentName: string;
+  grade: string;
+  studentPhone: string;
+  specialistName: string;
+  date: string;
+  time: string;
+  topic: string;
+  details: string | null;
+}
+
+/** رسالة الإدارة: تفاصيل الحجز كاملة، بطلب إدارة المدرسة. */
+export function composeBookingSummary(n: BookingSummary): string {
+  return [
+    "بوصلتي — تأكيد حجز استشارة",
+    `الطالب: ${n.studentName}`,
+    `الصف: ${n.grade}`,
+    `هاتف الطالب: ${n.studentPhone}`,
+    `المختص: ${n.specialistName}`,
+    `التاريخ: ${n.date}`,
+    `الوقت: ${n.time}`,
+    `الموضوع: ${n.topic}`,
+    ...(n.details ? [`التفاصيل: ${n.details}`] : []),
+  ].join("\n");
+}
+
+/** رقم عُماني من ثمانية أرقام يُكمَل برمز الدولة، وما عداه يُمرَّر كما هو. */
+export function internationalPhone(raw: string): string {
+  const digits = raw.replace(/\D/gu, "");
+  return /^[79]\d{7}$/u.test(digits) ? `968${digits}` : digits;
+}
+
+/**
+ * يرسل ملخّص الحجز الكامل إلى الرقم المضبوط في BOOKING_ALERT_PHONE.
+ * بلا رقم مضبوط لا يُرسل شيئاً.
+ */
+export async function sendBookingSummary(n: BookingSummary): Promise<void> {
+  const to = process.env.BOOKING_ALERT_PHONE?.trim();
+  if (!to) return;
+  await deliver(internationalPhone(to), composeBookingSummary(n), "APPOINTMENT_SUMMARY", n.appointmentId);
+}
+
+async function deliver(to: string, text: string, template: string, appointmentId: string) {
+  const provider = getProvider();
+  const message: OutboundMessage = { to, text, template };
 
   let result;
   try {
@@ -65,12 +107,12 @@ export async function sendBookingNotification(n: BookingNotice): Promise<void> {
   await recordDelivery({
     channel: provider.channel,
     provider: provider.name,
-    recipientMasked: maskPhone(n.specialistPhone),
+    recipientMasked: maskPhone(to),
     template,
-    status: result.ok ? "SENT" : result.skipped ? "SKIPPED" : "FAILED",
+    status: result.ok ? "SENT" : "skipped" in result && result.skipped ? "SKIPPED" : "FAILED",
     lastError: result.ok ? null : (result.error ?? "فشل غير معروف"),
-    providerMessageId: result.providerMessageId ?? null,
-    appointmentId: n.appointmentId,
+    providerMessageId: "providerMessageId" in result ? (result.providerMessageId ?? null) : null,
+    appointmentId,
     attempts: 1,
   });
 }

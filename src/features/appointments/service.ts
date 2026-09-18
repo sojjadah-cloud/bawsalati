@@ -4,7 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { ApiError } from "@/lib/api";
 import { generateAccessToken, hashToken } from "@/lib/tokens";
 import { isoDateToUtc } from "@/lib/time";
-import { sendBookingNotification, notifySpecialistInApp } from "@/lib/notifications";
+import {
+  sendBookingNotification,
+  sendBookingSummary,
+  notifySpecialistInApp,
+} from "@/lib/notifications";
+import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate, formatArabicTime } from "@/lib/time";
 import { isSlotOffered } from "./availability";
 import type { CreateAppointmentInput } from "./schemas";
@@ -127,6 +132,17 @@ export async function createAppointment(
       date: formatArabicDate(input.date),
       time: formatArabicTime(appointment.startTime),
       topic: topic.name,
+    }),
+    sendBookingSummary({
+      appointmentId: appointment.id,
+      studentName: input.studentName,
+      grade: GRADE_LABELS[input.grade] ?? input.grade,
+      studentPhone: input.phone,
+      specialistName: specialist.user.name,
+      date: formatArabicDate(input.date),
+      time: formatArabicTime(appointment.startTime),
+      topic: topic.name,
+      details: topic.requiresDetails ? details || null : null,
     }),
     notifySpecialistInApp({
       specialistId: specialist.id,

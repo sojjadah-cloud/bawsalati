@@ -73,6 +73,9 @@ services:
       # غيّره إلى whatsapp أو sms بعد ضبط بيانات المزوّد أدناه.
       - key: NOTIFY_PROVIDER
         value: console
+      # يستلم تفاصيل كل حجز مؤكَّد كاملةً (إدارة المدرسة).
+      - key: BOOKING_ALERT_PHONE
+        value: "96894996269"
       - key: NOTIFY_API_URL
         sync: false
       - key: NOTIFY_API_TOKEN
