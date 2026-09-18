@@ -45,9 +45,9 @@ function Lines({ text }: { text: string }) {
 function Detail({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
-    <div className="flex justify-between gap-3 border-b border-[var(--color-line)] py-2 last:border-0">
-      <dt className="shrink-0 text-[var(--color-muted)]">{label}</dt>
-      <dd className="text-left font-semibold text-slate-800">{value}</dd>
+    <div className="grid grid-cols-[7rem_1fr] gap-3 border-b border-[var(--color-line)] py-2 last:border-0">
+      <dt className="text-[var(--color-muted)]">{label}</dt>
+      <dd className="font-semibold text-slate-800">{value}</dd>
     </div>
   );
 }

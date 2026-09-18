@@ -209,9 +209,9 @@ export function BookingWizard({
             },
             { label: "الموضوع", value: confirmation.topicName },
           ].map((row) => (
-            <div key={row.label} className="flex justify-between gap-4">
+            <div key={row.label} className="grid grid-cols-[5.5rem_1fr] gap-4">
               <dt className="text-[var(--color-muted)]">{row.label}</dt>
-              <dd className="text-left font-bold text-slate-900">{row.value}</dd>
+              <dd className="font-bold text-slate-900">{row.value}</dd>
             </div>
           ))}
         </dl>
@@ -415,7 +415,7 @@ export function BookingWizard({
               <>
                 <fieldset className="mt-6">
                   <legend className="label">اليوم</legend>
-                  <div className="flex gap-2 overflow-x-auto pb-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                     {days.map((d) => {
                       const active = date === d.date;
                       const [, month, day] = d.date.split("-");
@@ -428,7 +428,7 @@ export function BookingWizard({
                             setStartTime("");
                           }}
                           aria-pressed={active}
-                          className={`min-w-20 shrink-0 cursor-pointer rounded-[var(--radius-md)] border-2 px-3 py-2.5 text-center transition-colors ${
+                          className={`cursor-pointer rounded-[var(--radius-md)] border-2 px-3 py-2.5 text-center transition-colors ${
                             active
                               ? "border-brand-700 bg-brand-50 text-brand-900"
                               : "border-[var(--color-line-strong)] bg-white text-slate-700 hover:border-brand-400"
@@ -552,9 +552,9 @@ export function BookingWizard({
                   ? [{ label: "التفاصيل", value: topicDetails }]
                   : []),
               ].map((row) => (
-                <div key={row.label} className="flex justify-between gap-4">
-                  <dt className="shrink-0 text-[var(--color-muted)]">{row.label}</dt>
-                  <dd className="text-left font-bold text-slate-900">{row.value}</dd>
+                <div key={row.label} className="grid grid-cols-[5.5rem_1fr] gap-4">
+                  <dt className="text-[var(--color-muted)]">{row.label}</dt>
+                  <dd className="font-bold text-slate-900">{row.value}</dd>
                 </div>
               ))}
             </dl>

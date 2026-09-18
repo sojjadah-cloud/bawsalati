@@ -115,9 +115,9 @@ export default async function ResourcePage({
             <h2 className="text-sm font-bold text-slate-900">معلومات المورد</h2>
             <dl className="mt-4 space-y-3 text-sm">
               {meta.map((m) => (
-                <div key={m.label} className="flex justify-between gap-3">
+                <div key={m.label} className="grid grid-cols-[6rem_1fr] gap-3">
                   <dt className="text-[var(--color-muted)]">{m.label}</dt>
-                  <dd className="text-left font-semibold text-slate-800">{m.value}</dd>
+                  <dd className="font-semibold text-slate-800">{m.value}</dd>
                 </div>
               ))}
             </dl>
