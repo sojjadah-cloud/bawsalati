@@ -18,7 +18,7 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    healthCheckPath: /
+    healthCheckPath: /api/health
     buildCommand: >-
       npm ci &&
       npx prisma generate &&
