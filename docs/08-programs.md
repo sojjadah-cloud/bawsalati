@@ -169,7 +169,7 @@ GUIDE_TXT=guide_table.txt npm run programs:text
 بعض أسماء المؤسسات ترد في الدليل بصيغتين (`University of glasgow` و
 `The University of Glasgow`)، وهي كما في المصدر ولم تُدمج.
 
-## «أي تخصص أستطيع دخوله؟»
+## «اعرف تخصصك»
 
 قسم مستقلّ في `‎/eligibility` يطابق الطالب ببرامج الدليل بثلاث خطوات:
 

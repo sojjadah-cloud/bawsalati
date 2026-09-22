@@ -41,7 +41,7 @@ const SERVICES = [
   {
     href: "/eligibility",
     icon: ListChecks,
-    title: "أي تخصص أستطيع دخوله؟",
+    title: "اعرف تخصصك",
     description: "أدخل صفّك وموادك ودرجاتك لتعرف ما تنطبق عليك شروطه.",
     cta: "اعرف تخصصاتك",
   },

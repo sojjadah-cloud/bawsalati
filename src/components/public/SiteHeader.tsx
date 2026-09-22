@@ -12,7 +12,7 @@ const NAV = [
   { href: "/library", label: "المكتبة الرقمية" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
-  { href: "/eligibility", label: "أي تخصص أدخل؟" },
+  { href: "/eligibility", label: "اعرف تخصصك" },
 ];
 
 export function SiteHeader() {

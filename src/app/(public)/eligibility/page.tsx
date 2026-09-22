@@ -6,7 +6,7 @@ import { EligibilityWizard } from "@/components/programs/EligibilityWizard";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "أي تخصص أستطيع دخوله؟",
+  title: "اعرف تخصصك",
   description:
     "اختر صفّك وموادك ودرجاتك، لتعرف التخصصات التي تنطبق عليك شروطها ومعدّلك التنافسي في كل برنامج.",
 };
@@ -17,7 +17,7 @@ export default async function EligibilityPage() {
   return (
     <>
       <PageHero
-        title="أي تخصص أستطيع دخوله؟"
+        title="اعرف تخصصك"
         description={`اختر صفّك وموادك، فتُطابَق شروط ${total} برنامجاً في الدليل بما تدرسه ودرجاتك.`}
       />
       <div className="container-x py-10 sm:py-14">
