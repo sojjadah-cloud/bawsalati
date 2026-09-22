@@ -27,7 +27,13 @@ export interface AnalysisRowData {
 }
 
 /** جدول واحد: 3 أعمدة × 3 صفوف لعبارات بيئة واحدة. */
-function SectionTable({ section }: { section: ResultSectionData }) {
+function SectionTable({
+  section,
+  showScores,
+}: {
+  section: ResultSectionData;
+  showScores: boolean;
+}) {
   const maxScore = section.cells.flat().length;
   const captionId = `sec-${section.dimensionCode}`;
 
@@ -37,14 +43,17 @@ function SectionTable({ section }: { section: ResultSectionData }) {
         <h3 id={captionId} className="text-base font-bold text-slate-900">
           {section.dimensionLabel}
         </h3>
-        <span className="badge-brand shrink-0">
-          {section.rawScore} من {maxScore}
-        </span>
+        {showScores ? (
+          <span className="badge-brand shrink-0">
+            {section.rawScore} من {maxScore}
+          </span>
+        ) : null}
       </div>
 
       <table className="mt-4 w-full table-fixed border-collapse">
         <caption className="sr-only">
-          إجاباتك في بيئة {section.dimensionLabel}: {section.rawScore} من {maxScore}
+          إجاباتك في بيئة {section.dimensionLabel}
+          {showScores ? `: ${section.rawScore} من ${maxScore}` : ""}
         </caption>
         <tbody>
           {section.cells.map((row, r) => (
@@ -78,22 +87,24 @@ function SectionTable({ section }: { section: ResultSectionData }) {
         </tbody>
       </table>
 
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-[var(--color-muted)]">الرتبة المئينية</span>
-          <span className="font-bold tabular-nums text-slate-900">{section.percentile}٪</span>
-        </div>
-        <div
-          className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
-          role="img"
-          aria-label={`الرتبة المئينية ${section.percentile} بالمئة`}
-        >
+      {showScores ? (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[var(--color-muted)]">الرتبة المئينية</span>
+            <span className="font-bold tabular-nums text-slate-900">{section.percentile}٪</span>
+          </div>
           <div
-            className="h-full rounded-full bg-brand-600"
-            style={{ width: `${section.percentile}%` }}
-          />
+            className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
+            role="img"
+            aria-label={`الرتبة المئينية ${section.percentile} بالمئة`}
+          >
+            <div
+              className="h-full rounded-full bg-brand-600"
+              style={{ width: `${section.percentile}%` }}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* كل عبارة مع إجابة الطالب عليها بنصّها، فلا يبقى الجدول أرقاماً مجرّدة.
           الإجابة مكتوبة لا ملوّنة فقط، فتُقرأ على شاشة وعلى ورق ولقارئ الشاشة. */}
@@ -135,11 +146,18 @@ function SectionTable({ section }: { section: ResultSectionData }) {
   );
 }
 
-export function ResultTables({ sections }: { sections: ResultSectionData[] }) {
+export function ResultTables({
+  sections,
+  showScores = true,
+}: {
+  sections: ResultSectionData[];
+  /** صفحة الطالب تعرض إجاباته فقط، والدرجات والرتب تبقى للمختص */
+  showScores?: boolean;
+}) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {sections.map((s) => (
-        <SectionTable key={s.dimensionCode} section={s} />
+        <SectionTable key={s.dimensionCode} section={s} showScores={showScores} />
       ))}
     </div>
   );

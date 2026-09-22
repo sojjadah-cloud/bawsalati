@@ -5,13 +5,7 @@ import { CalendarCheck, GraduationCap, Printer } from "lucide-react";
 import { getResultByToken } from "@/features/assessment/service";
 import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/time";
-import {
-  AnalysisTable,
-  InterestCode,
-  ResultTables,
-  type AnalysisRowData,
-  type ResultSectionData,
-} from "@/components/assessment/ResultView";
+import { ResultTables, type ResultSectionData } from "@/components/assessment/ResultView";
 
 // نتيجة طالب — لا تُفهرس ولا تُخزَّن.
 export const metadata: Metadata = {
@@ -31,7 +25,7 @@ export default async function ResultPage({
 
   if (!data) notFound();
 
-  const { session, result, programs } = data;
+  const { session, result } = data;
   const sections = result.sections.map((s) => ({
     dimensionCode: s.dimensionCode,
     dimensionLabel: s.dimensionLabel,
@@ -40,7 +34,6 @@ export default async function ResultPage({
     percentile: s.percentile,
     cells: s.cells as unknown as ResultSectionData["cells"],
   }));
-  const analysisRows = (result.analysis?.rows ?? []) as unknown as AnalysisRowData[];
 
   return (
     <div className="container-x py-10 sm:py-14">
@@ -63,21 +56,16 @@ export default async function ResultPage({
 
       <section className="mt-10" aria-labelledby="tables-title">
         <h2 id="tables-title" className="section-title">
-          جداول البيئات الست
+          إجاباتك في البيئات الست
         </h2>
+        <p className="section-lead">
+          هذه إجاباتك كما سجّلتها. يقرؤها مختص التوجيه المهني ويحلّلها معك.
+        </p>
 
         <div className="mt-5">
-          <ResultTables sections={sections} />
+          <ResultTables sections={sections} showScores={false} />
         </div>
       </section>
-
-      <div className="mt-12">
-        <AnalysisTable rows={analysisRows} summary={result.analysis?.summary} />
-      </div>
-
-      <div className="mt-12">
-        <InterestCode interestCode={result.interestCode} rows={analysisRows} />
-      </div>
 
       {/* تحليل الأخصائي — يظهر بعد اعتماده النتيجة فقط */}
       {result.approvedAt && (result.specialistNotes || result.recommendation) ? (
@@ -108,46 +96,6 @@ export default async function ResultPage({
               اعتُمدت النتيجة في {result.approvedAt.toISOString().slice(0, 10)}
             </p>
           </div>
-        </section>
-      ) : null}
-
-      {result.recommendedFields.length > 0 ? (
-        <section className="mt-12" aria-labelledby="fields-title">
-          <h2 id="fields-title" className="section-title">
-            مجالات دراسية قد تناسبك
-          </h2>
-          <p className="section-lead">مقترحة بناءً على بيئاتك الثلاث الأعلى. ناقشها مع المختص.</p>
-
-          <ul className="mt-5 flex flex-wrap gap-2">
-            {result.recommendedFields.map((f) => (
-              <li key={f} className="badge-brand">
-                {f}
-              </li>
-            ))}
-          </ul>
-
-          {programs.length > 0 ? (
-            <div className="table-wrap mt-6">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th scope="col">البرنامج</th>
-                    <th scope="col">المجال</th>
-                    <th scope="col">المؤسسة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {programs.map((p) => (
-                    <tr key={p.id}>
-                      <td className="font-semibold text-slate-900">{p.name}</td>
-                      <td>{p.field}</td>
-                      <td className="text-[var(--color-muted)]">{p.institution ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
         </section>
       ) : null}
 

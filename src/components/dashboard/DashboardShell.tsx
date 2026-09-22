@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/client";
 import { NotificationBell } from "./NotificationBell";
+import { PartnersStrip } from "@/components/public/PartnersStrip";
 
 interface NavItem {
   href: string;
@@ -161,6 +162,11 @@ export function DashboardShell({
           </button>
         </div>
       </aside>
+
+      {/* شريط الشعارات الرسمي، بإزاحة الشريط الجانبي على الشاشات الكبيرة */}
+      <div className="lg:mr-64">
+        <PartnersStrip />
+      </div>
 
       {/* ترويسة الجوال */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--color-line)] bg-white px-4 lg:hidden">
