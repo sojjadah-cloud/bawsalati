@@ -97,11 +97,11 @@ function cookieOf(res) {
   const v6 = await req("POST", "/api/appointments", { body: { specialistId: "x", studentName: "طالب الفحص", grade: "10", phone: "91234567", date: "2026-09-20", startTime: "10:00", topicId: "t", extraField: "حقل دخيل" } });
   check("حقل دخيل يُرفض (strict)", v6.status === 400, "status " + v6.status);
 
-  console.log("\n── جويب ──");
+  console.log("\n── «اسألني» ──");
   const ask1 = await req("POST", "/api/ask", { body: { question: "كيف أحجز موعداً؟" } });
-  check("جويب يجيب عن سؤال معروف", ask1.status === 200 && ask1.json?.matched === true, "status " + ask1.status);
+  check("«اسألني» يجيب عن سؤال معروف", ask1.status === 200 && ask1.json?.matched === true, "status " + ask1.status);
   const ask2 = await req("POST", "/api/ask", { body: { question: "متى ينزل راتب المعلمين" } });
-  check("جويب يحيل السؤال المجهول", ask2.status === 200 && ask2.json?.matched === false, "status " + ask2.status);
+  check("«اسألني» يحيل السؤال المجهول", ask2.status === 200 && ask2.json?.matched === false, "status " + ask2.status);
   const ask3 = await req("POST", "/api/ask", { body: { question: "' OR 1=1 --" } });
   check("محاولة حقن SQL لا تكسر الخادم", ask3.status === 200 || ask3.status === 400, "status " + ask3.status);
   const ask4 = await req("POST", "/api/ask", { body: { question: "x".repeat(5000) } });
@@ -122,7 +122,7 @@ function cookieOf(res) {
     const r = await req("POST", "/api/ask", { body: { question: "سؤال تحميل رقم " + i } });
     if (r.status === 429) limited++;
   }
-  check("تحديد المعدّل يعمل على جويب", limited > 0, limited + " مرفوضاً من 40");
+  check("تحديد المعدّل يعمل على «اسألني»", limited > 0, limited + " مرفوضاً من 40");
 
   const codes = [];
   for (let i = 0; i < 12; i++) {

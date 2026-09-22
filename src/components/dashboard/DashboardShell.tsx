@@ -52,7 +52,7 @@ const NAV: Record<DashboardArea, { label: string; items: NavItem[] }> = {
       { href: "/specialist/appointments", label: "الحجوزات", icon: CalendarDays, primary: true },
       { href: "/specialist/library", label: "المكتبة الرقمية", icon: BookOpenText, primary: true },
       { href: "/specialist/categories", label: "تصنيفات المكتبة", icon: FolderTree },
-      { href: "/specialist/faq", label: "بنك أسئلة جويب", icon: MessageSquare },
+      { href: "/specialist/faq", label: "بنك أسئلة اسألني", icon: MessageSquare },
       { href: "/specialist/availability", label: "الأوقات المتاحة", icon: Clock },
       { href: "/specialist/profile", label: "الملف الشخصي", icon: UserRound },
     ],

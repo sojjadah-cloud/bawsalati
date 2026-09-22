@@ -50,7 +50,7 @@ export default async function AssessmentsPage({
     <>
       <PageHeading
         title="نتائج الاختبارات"
-        description="سجلّات الطلاب الذين أكملوا اختبار بوصلتي."
+        description="سجلّات الطلاب الذين أكملوا مقياس السمات والميول المهنية."
       />
 
       <div className="mt-5">

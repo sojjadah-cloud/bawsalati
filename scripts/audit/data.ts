@@ -117,7 +117,7 @@ async function main() {
 
   console.log("\n── المحتوى ──");
   const faqTotal = await prisma.faqEntry.count({ where: { active: true } });
-  check("بنك أسئلة جويب مملوء", faqTotal >= 300, faqTotal + " سؤالاً");
+  check("بنك أسئلة «اسألني» مملوء", faqTotal >= 300, faqTotal + " سؤالاً");
   const dupFaq = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
     `SELECT COUNT(*)::bigint AS count FROM (SELECT lower(question) q FROM faq_entries GROUP BY 1 HAVING COUNT(*) > 1) t`
   );

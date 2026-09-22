@@ -6,7 +6,7 @@ import { FilterBar, Pagination } from "@/components/dashboard/FilterBar";
 import { FaqManager } from "@/components/dashboard/FaqManager";
 
 export const metadata: Metadata = {
-  title: "بنك أسئلة جويب",
+  title: "بنك أسئلة اسألني",
   robots: { index: false, follow: false },
 };
 
@@ -37,8 +37,8 @@ export default async function SpecialistFaqPage({
   return (
     <>
       <PageHeading
-        title="بنك أسئلة جويب"
-        description="الأسئلة التي يجيب عنها جويب للطلاب. جويب لا يؤلّف إجابة، بل يعرض ما تكتبه هنا."
+        title="بنك أسئلة اسألني"
+        description="الأسئلة التي يجيب عنها «اسألني» للطلاب. «اسألني» لا يؤلّف إجابة، بل يعرض ما تكتبه هنا."
       />
 
       <div className="mt-5">

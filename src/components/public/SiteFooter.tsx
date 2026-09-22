@@ -3,7 +3,7 @@ import { Compass, Mail, MapPin, Phone } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
 const SERVICES = [
-  { href: "/assessment", label: "اختبار بوصلتي" },
+  { href: "/assessment", label: "مقياس السمات والميول" },
   { href: "/library", label: "المكتبة الرقمية" },
   { href: "/booking", label: "حجز موعد" },
   { href: "/guide", label: "دليل الطالب" },
@@ -18,7 +18,7 @@ const SERVICES = [
 export function SiteFooter() {
   return (
     <footer className="mt-14 border-t border-[var(--color-line)] bg-white">
-      {/* مساحة سفلية إضافية كي لا تغطّي أيقونة جويب العائمة آخر سطر في التذييل. */}
+      {/* مساحة سفلية إضافية كي لا تغطّي أيقونة «اسألني» العائمة آخر سطر في التذييل. */}
       <div className="container-x pt-7 pb-24">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
           <Link href="/" className="flex shrink-0 items-center gap-2">

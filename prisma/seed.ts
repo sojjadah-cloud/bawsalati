@@ -256,7 +256,7 @@ async function seedLibrary() {
 const TOPICS = [
   { slug: "major-choice", name: "اختيار التخصص الجامعي", displayOrder: 1 },
   { slug: "scholarships", name: "البعثات والمنح الدراسية", displayOrder: 2 },
-  { slug: "assessment-result", name: "تفسير نتيجة اختبار بوصلتي", displayOrder: 3 },
+  { slug: "assessment-result", name: "تفسير نتيجة مقياس السمات والميول المهنية", displayOrder: 3 },
   { slug: "career-path", name: "المسارات المهنية وسوق العمل", displayOrder: 4 },
   { slug: "study-skills", name: "مهارات الدراسة والاستعداد للامتحانات", displayOrder: 5 },
   { slug: "other", name: "أخرى", displayOrder: 99, requiresDetails: true },

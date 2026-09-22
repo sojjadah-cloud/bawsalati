@@ -1,6 +1,6 @@
 "use client";
 
-// «جويب» — يبحث في بنك أسئلة معدّ مسبقاً ويعيد الجواب المطابق.
+// «اسألني» — يبحث في بنك أسئلة معدّ مسبقاً ويعيد الجواب المطابق.
 // لا يولّد نصاً: ما لا يجده يحيله إلى مختص التوجيه المهني.
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -32,7 +32,7 @@ type Message =
 const FALLBACK =
   "لم أجد إجابة لهذا السؤال في بنك الأسئلة. تواصل مع مختص التوجيه المهني، فهو الأقدر على الإجابة، وسنضيف السؤال إلى البنك.";
 
-export function JawibChat() {
+export function AskChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
@@ -108,7 +108,7 @@ export function JawibChat() {
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-700">
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
-            <p className="mt-4 text-base font-bold text-slate-900">اسأل جويب</p>
+            <p className="mt-4 text-base font-bold text-slate-900">اسألني</p>
             <p className="mt-1.5 max-w-sm text-sm text-[var(--color-muted)]">
               اكتب سؤالك بأي صيغة. إن لم أجد الإجابة سأدلّك على مختص التوجيه المهني.
             </p>
@@ -191,7 +191,7 @@ export function JawibChat() {
         {pending ? (
           <p className="flex items-center justify-end gap-2 text-xs text-[var(--color-muted)]">
             <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-            جويب يبحث…
+            جارٍ البحث…
           </p>
         ) : null}
 
@@ -207,7 +207,7 @@ export function JawibChat() {
         className="flex items-center gap-2 border-t border-[var(--color-line)] p-3"
       >
         <label htmlFor="jawib-input" className="sr-only">
-          اكتب سؤالك لجويب
+          اكتب سؤالك
         </label>
         <div className="relative flex-1">
           <UserRound

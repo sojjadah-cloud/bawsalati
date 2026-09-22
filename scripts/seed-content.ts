@@ -1,5 +1,5 @@
 /**
- * تهيئة محتوى المنصة: المختصون، وفهرس المكتبة، وبنك أسئلة جويب.
+ * تهيئة محتوى المنصة: المختصون، وفهرس المكتبة، وبنك أسئلة «اسألني».
  *
  *   npm run seed:content
  *
@@ -156,14 +156,37 @@ async function seedLibrary() {
   console.log(`  ✔ المكتبة: ${added} مورداً جديداً، الإجمالي المنشور ${total}`);
 }
 
-/* ───────────────────────── بنك أسئلة جويب ───────────────────────── */
+/* ───────────────────────── بنك أسئلة «اسألني» ───────────────────────── */
 
 interface FaqFile {
   entries: { topic: string; q: string; a: string; k?: string[] }[];
 }
 
+/**
+ * تسميتان تغيّرتا بعد أن امتلأ بنك الأسئلة: «اختبار بوصلتي» صار «مقياس السمات
+ * والميول المهنية»، و«جويب» صار «اسألني». المطابقة بنصّ السؤال، فلولا هذا
+ * التصحيح لبقيت الأجوبة القديمة ولأُنشئ لها نظيرٌ جديد. آمن عند التكرار.
+ */
+async function renameOldTerms() {
+  const renames: [string, string][] = [
+    ["اختبار بوصلتي", "مقياس السمات والميول المهنية"],
+    ["جويب", "اسألني"],
+  ];
+  for (const [from, to] of renames) {
+    await prisma.$executeRawUnsafe(
+      `UPDATE faq_entries
+         SET question = replace(question, $1, $2),
+             answer   = replace(answer,   $1, $2)
+       WHERE question LIKE '%' || $1 || '%' OR answer LIKE '%' || $1 || '%'`,
+      from,
+      to
+    );
+  }
+}
+
 async function seedFaq() {
   const { entries } = readJson<FaqFile>("faq.json");
+  await renameOldTerms();
 
   let added = 0;
   for (const e of entries) {
@@ -193,7 +216,7 @@ async function seedFaq() {
   }
 
   const total = await prisma.faqEntry.count({ where: { active: true } });
-  console.log(`  ✔ بنك أسئلة جويب: ${added} سؤالاً جديداً، الإجمالي ${total}`);
+  console.log(`  ✔ بنك أسئلة «اسألني»: ${added} سؤالاً جديداً، الإجمالي ${total}`);
 }
 
 async function main() {

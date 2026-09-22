@@ -7,7 +7,7 @@ import { PageHero } from "@/components/public/PageHero";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "اختبار بوصلتي",
+  title: "مقياس السمات والميول المهنية",
   description:
     "اختبار ميول مهنية من 54 عبارة يساعدك على التعرّف على المجالات الأقرب إلى شخصيتك واهتماماتك.",
 };

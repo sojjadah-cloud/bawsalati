@@ -1,6 +1,6 @@
 "use client";
 
-// إدارة بنك أسئلة جويب: إضافة وتعديل وحذف، ومراجعة ما لم يجد له جواباً.
+// إدارة بنك أسئلة «اسألني»: إضافة وتعديل وحذف، ومراجعة ما لم يجد له جواباً.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
@@ -144,10 +144,10 @@ export function FaqManager({
       {unanswered.length > 0 ? (
         <section className="mb-8" aria-labelledby="unanswered-title">
           <h2 id="unanswered-title" className="text-base font-bold text-slate-900">
-            أسئلة لم يجد جويب لها جواباً ({unanswered.length})
+            أسئلة لم يجد «اسألني» لها جواباً ({unanswered.length})
           </h2>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            سألها الطلاب فعلاً. أضف جواباً ليجدها جويب في المرة القادمة.
+            سألها الطلاب فعلاً. أضف جواباً ليجدها «اسألني» في المرة القادمة.
           </p>
 
           <ul className="card mt-3 divide-y divide-[var(--color-line)]">
@@ -194,7 +194,7 @@ export function FaqManager({
         <div className="mt-4">
           <EmptyState
             title="بنك الأسئلة فارغ"
-            description="أضف سؤالاً وجوابه ليبدأ جويب بالإجابة على الطلاب."
+            description="أضف سؤالاً وجوابه ليبدأ «اسألني» بالإجابة على الطلاب."
           />
         </div>
       ) : (
@@ -284,7 +284,7 @@ export function FaqManager({
             label="صيغ أخرى للسؤال"
             value={draft.keywords}
             onChange={(e) => setDraft({ ...draft, keywords: e.target.value })}
-            hint="صيغة في كل سطر. تساعد جويب على التعرّف على السؤال مهما اختلفت كلماته."
+            hint="صيغة في كل سطر. تساعد «اسألني» على التعرّف على السؤال مهما اختلفت كلماته."
             maxLength={1000}
             rows={4}
           />
@@ -299,7 +299,7 @@ export function FaqManager({
 
           <div className="rounded-[var(--radius-md)] bg-slate-50 p-4">
             <CheckboxField
-              label="فعّال — يجيب به جويب على الطلاب"
+              label="فعّال — يجيب به «اسألني» على الطلاب"
               checked={draft.active}
               onChange={(v) => setDraft({ ...draft, active: v })}
             />

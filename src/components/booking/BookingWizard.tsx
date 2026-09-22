@@ -234,7 +234,7 @@ export function BookingWizard({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/assessment" className="btn-primary">
-            جرّب اختبار بوصلتي
+            جرّب مقياس السمات والميول
           </Link>
           <Link href="/" className="btn-outline">
             الرئيسية

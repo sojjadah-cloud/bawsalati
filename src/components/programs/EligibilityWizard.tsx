@@ -7,7 +7,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, TriangleAlert } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
-import { GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
+import {
+  ELIGIBILITY_GRADES,
+  SUBJECTS,
+  SUBJECT_GROUPS,
+  SUBJECT_PLAN,
+} from "@/lib/constants";
 import { Alert, EmptyState } from "@/components/ui/primitives";
 
 type Subject = (typeof SUBJECTS)[number];
@@ -170,7 +175,7 @@ export function EligibilityWizard() {
             طالب الحادي عشر والثاني عشر يدخل درجاته أيضاً، فيُحتسب معدّله التنافسي.
           </p>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {GRADES.map((g) => (
+            {ELIGIBILITY_GRADES.map((g) => (
               <li key={g.value}>
                 <button
                   type="button"

@@ -38,7 +38,7 @@ export default async function ResultPage({
   return (
     <div className="container-x py-10 sm:py-14">
       <header className="flex flex-col items-center border-b border-[var(--color-line)] pb-6 text-center">
-        <p className="section-kicker">نتيجة اختبار بوصلتي</p>
+        <p className="section-kicker">نتيجة مقياس السمات والميول المهنية</p>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
           {session.studentName}
         </h1>

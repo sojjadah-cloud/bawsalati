@@ -13,7 +13,7 @@ const SERVICES = [
   {
     href: "/assessment",
     icon: ClipboardList,
-    title: "اختبار بوصلتي",
+    title: "مقياس السمات والميول المهنية",
     description: "54 عبارة تكشف ميولك المهنية والمجالات الأقرب إليك.",
     cta: "ابدأ الاختبار",
   },
