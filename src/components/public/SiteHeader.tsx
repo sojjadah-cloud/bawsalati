@@ -27,18 +27,19 @@ export function SiteHeader() {
       <PartnersStrip />
       <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-white/95 backdrop-blur-sm">
         <div className="container-x">
-          {/* ثلاثة أعمدة متساوية الطرفين: اسم المنصة يبقى في المنتصف تماماً */}
-          <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3">
+          {/* الطرفان على حافتي الترويسة، واسم المنصة مثبّت في منتصفها تماماً
+              مهما اختلف عرض الطرفين */}
+          <div className="relative flex h-16 items-center justify-between gap-3">
             {/* اليمين: التنقّل على الشاشات الكبيرة، وزرّ القائمة على الجوال */}
-            <div className="flex items-center justify-self-start">
+            <div className="flex items-center">
               <nav aria-label="التنقّل الرئيسي" className="hidden lg:block">
-                <ul className="flex items-center gap-1">
+                <ul className="flex items-center gap-0.5">
                   {NAV.map((item) => (
                     <li key={item.href}>
                       <Link
                         href={item.href}
                         aria-current={isActive(item.href) ? "page" : undefined}
-                        className={`inline-flex h-10 items-center rounded-[var(--radius-md)] px-3 text-sm font-bold transition-colors ${
+                        className={`inline-flex h-10 items-center rounded-[var(--radius-md)] px-2.5 text-sm font-bold whitespace-nowrap transition-colors ${
                           isActive(item.href)
                             ? "bg-brand-50 text-brand-800"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -70,7 +71,7 @@ export function SiteHeader() {
             {/* المنتصف: اسم المنصة */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 justify-self-center rounded-[var(--radius-md)] py-1 font-bold text-slate-900"
+              className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2.5 rounded-[var(--radius-md)] py-1 font-bold whitespace-nowrap text-slate-900"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-brand-700 text-white">
                 <Compass className="h-5 w-5" aria-hidden="true" />
@@ -79,7 +80,7 @@ export function SiteHeader() {
             </Link>
 
             {/* اليسار: دخول المختصين. بابٌ للمختصين لا للطلبة، فيتميّز بلونه ويبقى هادئاً */}
-            <div className="justify-self-end">
+            <div className="flex items-center">
               <Link
                 href="/login"
                 className="btn-sm hidden items-center rounded-[var(--radius-md)] border border-brand-200 bg-brand-50 px-3 font-bold text-brand-800 transition-colors hover:border-brand-300 hover:bg-brand-100 lg:inline-flex"
