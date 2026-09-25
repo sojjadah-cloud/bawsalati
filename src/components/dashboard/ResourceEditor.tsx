@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Upload } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
+import { pdfFirstPageCover } from "@/lib/pdf-cover";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { useToast } from "@/components/ui/Toast";
 import { Dialog } from "@/components/ui/Dialog";
@@ -34,8 +35,8 @@ export interface ResourceDraft {
   externalUrl: string;
   fileId: string;
   audioFileId: string;
+  coverFileId: string;
   downloadable: boolean;
-  featured: boolean;
   published: boolean;
 }
 
@@ -50,8 +51,8 @@ const EMPTY = (categoryId: string): ResourceDraft => ({
   externalUrl: "",
   fileId: "",
   audioFileId: "",
-  downloadable: false,
-  featured: false,
+  coverFileId: "",
+  downloadable: true,
   published: true,
 });
 
@@ -100,6 +101,19 @@ export function ResourceEditor({
       if (kind === "LIBRARY" || kind === "BULLETIN") {
         set("fileId", res.file.id);
         setFileLabel(res.file.originalName);
+        // غلاف الكتاب أوّل صفحة منه، يُولَّد هنا ويُرفع صورةً
+        if (file.type === "application/pdf") {
+          const cover = await pdfFirstPageCover(file);
+          if (cover) {
+            const coverForm = new FormData();
+            coverForm.append("kind", "COVER");
+            coverForm.append("file", cover);
+            const uploaded = await api
+              .upload<{ file: { id: string } }>("/api/specialist/uploads", coverForm)
+              .catch(() => null);
+            if (uploaded) set("coverFileId", uploaded.file.id);
+          }
+        }
       } else {
         set("audioFileId", res.file.id);
         setAudioLabel(res.file.originalName);
@@ -130,8 +144,8 @@ export function ResourceEditor({
       externalUrl: draft.externalUrl.trim(),
       fileId: draft.fileId,
       audioFileId: draft.audioFileId,
+      coverFileId: draft.coverFileId,
       downloadable: draft.downloadable,
-      featured: draft.featured,
       published: draft.published,
     };
 
@@ -356,11 +370,6 @@ export function ResourceEditor({
               label="السماح للطلاب بتنزيل الملف"
               checked={draft.downloadable}
               onChange={(v) => set("downloadable", v)}
-            />
-            <CheckboxField
-              label="إبراز المورد في صفحة المكتبة"
-              checked={draft.featured}
-              onChange={(v) => set("featured", v)}
             />
             <CheckboxField
               label="منشور ويظهر للطلاب"

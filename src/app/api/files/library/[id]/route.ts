@@ -16,7 +16,8 @@ export async function GET(
     const { id } = await params;
     const url = new URL(req.url);
     const mode = url.searchParams.get("mode") === "download" ? "download" : "view";
-    const kind = url.searchParams.get("kind") === "audio" ? "audio" : "file";
+    const raw = url.searchParams.get("kind");
+    const kind = raw === "audio" ? "audio" : raw === "cover" ? "cover" : "file";
 
     const found = await getResourceFile(id, kind);
     if (!found) throw new ApiError("الملف غير موجود", 404);
@@ -40,7 +41,8 @@ export async function GET(
     const headers = new Headers({
       "Content-Type": found.file.mimeType,
       "Content-Length": String(buffer.length),
-      "Cache-Control": "private, max-age=300",
+      // الغلاف صورة ثابتة تُطلب مع كل بطاقة، فتُخزَّن أطول
+      "Cache-Control": kind === "cover" ? "private, max-age=86400" : "private, max-age=300",
       "X-Content-Type-Options": "nosniff",
       "Content-Disposition": `${mode === "download" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(filename)}`,
     });

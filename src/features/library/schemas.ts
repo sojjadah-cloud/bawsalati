@@ -42,6 +42,7 @@ export const resourceSchema = z
       .optional(),
     language: z.string().trim().max(20).optional().or(z.literal("")),
     coverUrl: optionalUrl,
+    coverFileId: z.string().cuid().optional().or(z.literal("")),
     externalUrl: optionalUrl,
     fileId: z.string().trim().max(60).optional().or(z.literal("")),
     audioFileId: z.string().trim().max(60).optional().or(z.literal("")),

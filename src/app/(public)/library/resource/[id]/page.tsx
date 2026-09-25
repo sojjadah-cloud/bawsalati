@@ -6,6 +6,7 @@ import { getPublicResource } from "@/features/library/service";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { ResourceViewer } from "@/components/library/ResourceViewer";
 import { CoverArt } from "@/components/library/CoverArt";
+import { coverSrc } from "@/components/library/coverSrc";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function ResourcePage({
 
   const downloadKind = resource.hasAudio ? "audio" : "file";
   const canDownload = resource.downloadable && (resource.hasFile || resource.hasAudio);
+  const cover = coverSrc(resource);
 
   return (
     <div className="container-x py-10 sm:py-14">
@@ -98,9 +100,9 @@ export default async function ResourcePage({
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="card overflow-hidden">
             <div className="aspect-[5/7] w-full">
-              {resource.coverUrl ? (
+              {cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={resource.coverUrl} alt="" className="h-full w-full object-cover" />
+                <img src={cover} alt="" className="h-full w-full object-cover" />
               ) : (
                 <CoverArt
                   title={resource.title}

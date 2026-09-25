@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, BookOpenText, Library } from "lucide-react";
-import { listCategories, listPublicResources } from "@/features/library/service";
+import { listCategories } from "@/features/library/service";
 import { EmptyState } from "@/components/ui/primitives";
-import { ResourceCard } from "@/components/library/ResourceCard";
 import { PageHero } from "@/components/public/PageHero";
 
 export const dynamic = "force-dynamic";
@@ -15,10 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LibraryPage() {
-  const [categories, featured] = await Promise.all([
-    listCategories(),
-    listPublicResources({ featuredOnly: true, take: 3 }),
-  ]);
+  const categories = await listCategories();
 
   const totalResources = categories.reduce((n, c) => n + c.resourceCount, 0);
 
@@ -78,18 +74,6 @@ export default async function LibraryPage() {
             ))}
           </ul>
 
-          {featured.items.length > 0 ? (
-            <section className="mt-14" aria-labelledby="featured-title">
-              <h2 id="featured-title" className="section-title">
-                موارد مختارة
-              </h2>
-              <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.items.map((r) => (
-                  <ResourceCard key={r.id} resource={r} />
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </>
       )}
       </div>

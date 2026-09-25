@@ -461,12 +461,14 @@ model LibraryResource {
   publishedYear Int?
   language      String       @default("ar")
   coverUrl      String?
+  /// غلاف مولَّد من الملف نفسه (أول صفحة من الكتاب)، يُقدَّم كبقية الملفات
+  coverFileId   String?
   /// الملف الرئيسي (PDF/مستند) — يُقدَّم عبر مسار مُصرَّح، لا عبر مسار تخزين مكشوف
   fileId        String?
   /// ملف صوتي للكتب المسموعة
   audioFileId   String?
   externalUrl   String?
-  downloadable  Boolean      @default(false)
+  downloadable  Boolean      @default(true)
   featured      Boolean      @default(false)
   published     Boolean      @default(true)
   archivedAt    DateTime?
@@ -478,6 +480,7 @@ model LibraryResource {
   category  LibraryCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   file      StoredFile?     @relation("ResourceFile", fields: [fileId], references: [id], onDelete: SetNull)
   audioFile StoredFile?     @relation("ResourceAudio", fields: [audioFileId], references: [id], onDelete: SetNull)
+  coverFile StoredFile?     @relation("ResourceCover", fields: [coverFileId], references: [id], onDelete: SetNull)
   createdBy User?           @relation("ResourceAuthor", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([categoryId, published, archivedAt])
@@ -501,6 +504,7 @@ model StoredFile {
   uploadedBy       User?             @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
   resourcesAsFile  LibraryResource[] @relation("ResourceFile")
   resourcesAsAudio LibraryResource[] @relation("ResourceAudio")
+  resourcesAsCover LibraryResource[] @relation("ResourceCover")
   guideDocuments   GuideDocument[]
 
   @@index([kind])

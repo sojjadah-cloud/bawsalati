@@ -113,8 +113,8 @@ export default async function SpecialistLibraryPage({
                   externalUrl: r.externalUrl ?? "",
                   fileId: r.fileId ?? "",
                   audioFileId: r.audioFileId ?? "",
+                  coverFileId: r.coverFileId ?? "",
                   downloadable: r.downloadable,
-                  featured: r.featured,
                   published: r.published,
                 };
                 return (

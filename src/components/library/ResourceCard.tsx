@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { CoverArt } from "./CoverArt";
+import { coverSrc } from "./coverSrc";
 import type { PublicResource } from "@/features/library/service";
 
 const TYPE_ICON = {
@@ -23,6 +24,7 @@ const TYPE_ICON = {
 
 export function ResourceCard({ resource }: { resource: PublicResource }) {
   const Icon = TYPE_ICON[resource.type] ?? FileText;
+  const cover = coverSrc(resource);
 
   return (
     <li>
@@ -31,10 +33,10 @@ export function ResourceCard({ resource }: { resource: PublicResource }) {
         className="card card-interactive flex h-full gap-4 p-4"
       >
         <span className="h-32 w-22 shrink-0 overflow-hidden rounded-[var(--radius-md)] shadow-[var(--shadow-sm)]">
-          {resource.coverUrl ? (
+          {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={resource.coverUrl}
+              src={cover}
               alt=""
               className="h-full w-full object-cover"
               loading="lazy"

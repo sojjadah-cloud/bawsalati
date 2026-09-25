@@ -22,6 +22,7 @@ const publicSelect = {
   // وجود ملف فقط — لا المفتاح
   fileId: true,
   audioFileId: true,
+  coverFileId: true,
 } satisfies Prisma.LibraryResourceSelect;
 
 type RawResource = Prisma.LibraryResourceGetPayload<{ select: typeof publicSelect }>;
@@ -41,13 +42,15 @@ export interface PublicResource {
   featured: boolean;
   hasFile: boolean;
   hasAudio: boolean;
+  /** غلاف مولَّد من الملف، يُقدَّم من المنصة نفسها */
+  hasCover: boolean;
   category: { id: string; slug: string; name: string };
   createdAt: Date;
 }
 
 function toPublic(r: RawResource): PublicResource {
-  const { fileId, audioFileId, ...rest } = r;
-  return { ...rest, hasFile: !!fileId, hasAudio: !!audioFileId };
+  const { fileId, audioFileId, coverFileId, ...rest } = r;
+  return { ...rest, hasFile: !!fileId, hasAudio: !!audioFileId, hasCover: !!coverFileId };
 }
 
 export async function listCategories(includeCounts = true) {
@@ -141,7 +144,7 @@ export function touchResource(id: string): void {
  */
 export async function getResourceFile(
   resourceId: string,
-  which: "file" | "audio"
+  which: "file" | "audio" | "cover"
 ) {
   const resource = await prisma.libraryResource.findFirst({
     where: { id: resourceId, archivedAt: null },
@@ -152,10 +155,12 @@ export async function getResourceFile(
       downloadable: true,
       file: { select: { storageKey: true, mimeType: true, size: true } },
       audioFile: { select: { storageKey: true, mimeType: true, size: true } },
+      coverFile: { select: { storageKey: true, mimeType: true, size: true } },
     },
   });
   if (!resource) return null;
-  const file = which === "audio" ? resource.audioFile : resource.file;
+  const file =
+    which === "audio" ? resource.audioFile : which === "cover" ? resource.coverFile : resource.file;
   if (!file) return null;
   return { resource, file };
 }
@@ -200,6 +205,7 @@ export async function listManagedResources(filters: {
         updatedAt: true,
         fileId: true,
         audioFileId: true,
+        coverFileId: true,
         externalUrl: true,
         category: { select: { id: true, name: true } },
       },
