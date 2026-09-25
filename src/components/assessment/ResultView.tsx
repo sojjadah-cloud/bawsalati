@@ -47,47 +47,6 @@ function rangeIn(section: ResultSectionData, from: number, to: number): string {
     : `${numbers[0]}–${numbers[numbers.length - 1]}`;
 }
 
-/**
- * توزيع عبارات المقياس على البيئات الست، كما في كرّاسة المقياس:
- * لكل بيئة أرقام عباراتها في صفحات المقياس الثلاث.
- */
-export function DistributionTable({ sections }: { sections: ResultSectionData[] }) {
-  const ordered = [...sections].sort((a, b) => a.displayOrder - b.displayOrder);
-  return (
-    <div className="table-wrap">
-      <table className="table">
-        <caption className="sr-only">
-          توزيع عبارات المقياس على البيئات المهنية الست
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">البيئة المهنية</th>
-            {PAGES.map((p) => (
-              <th key={p.number} scope="col" className="text-center">
-                صفحة {p.number}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {ordered.map((s) => (
-            <tr key={s.dimensionCode}>
-              <th scope="row" className="font-bold text-slate-900">
-                {s.dimensionLabel} ({s.dimensionCode})
-              </th>
-              {PAGES.map((p) => (
-                <td key={p.number} className="text-center tabular-nums">
-                  {rangeIn(s, p.from, p.to)}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 /** جدول الدرجات: الرمز والدرجة الخام والرتبة المئينية لكل بيئة. */
 export function ScoreTable({ sections }: { sections: ResultSectionData[] }) {
   const ordered = [...sections].sort((a, b) => a.displayOrder - b.displayOrder);

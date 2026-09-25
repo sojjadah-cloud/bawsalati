@@ -6,7 +6,6 @@ import { getResultByToken } from "@/features/assessment/service";
 import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/time";
 import {
-  DistributionTable,
   ResultTables,
   ScoreTable,
   type ResultSectionData,
@@ -89,16 +88,6 @@ export default async function ResultPage({
         </p>
         <div className="mt-5">
           <ScoreTable sections={sections} />
-        </div>
-      </section>
-
-      <section className="mt-12" aria-labelledby="dist-title">
-        <h2 id="dist-title" className="section-title">
-          توزيع عبارات المقياس على البيئات الست
-        </h2>
-        <p className="section-lead">أرقام العبارات في صفحات المقياس الثلاث.</p>
-        <div className="mt-5">
-          <DistributionTable sections={sections} />
         </div>
       </section>
 
