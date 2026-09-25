@@ -7,12 +7,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, TriangleAlert } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
-import {
-  ELIGIBILITY_GRADES,
-  SUBJECTS,
-  SUBJECT_GROUPS,
-  SUBJECT_PLAN,
-} from "@/lib/constants";
+import { GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
 import { Alert, EmptyState } from "@/components/ui/primitives";
 
 type Subject = (typeof SUBJECTS)[number];
@@ -63,6 +58,8 @@ export function EligibilityWizard() {
   const [math, setMath] = useState<Subject | "">("");
   const [electives, setElectives] = useState<Subject[]>([]);
   const [marks, setMarks] = useState<Partial<Record<Subject, string>>>({});
+  /** يُرفع عند محاولة المتابعة بدرجات ناقصة، فتُوسم الخانات الفارغة بوضوح */
+  const [showMarkErrors, setShowMarkErrors] = useState(false);
   const [result, setResult] = useState<MatchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,12 +102,14 @@ export function EligibilityWizard() {
     electives.length === SUBJECT_PLAN.electiveCount &&
     scienceCount >= SUBJECT_PLAN.minScience;
 
-  const marksComplete = chosen.every((s) => {
+  const markMissing = (s: Subject) => {
     const value = marks[s];
-    if (value === undefined || value === "") return false;
+    if (value === undefined || value.trim() === "") return true;
     const n = Number(value);
-    return n >= 0 && n <= 100;
-  });
+    return !Number.isFinite(n) || n < 0 || n > 100;
+  };
+  const missingMarks = needsMarks ? chosen.filter(markMissing) : [];
+  const marksComplete = missingMarks.length === 0;
 
   const ready = planComplete && (!needsMarks || marksComplete);
 
@@ -175,7 +174,7 @@ export function EligibilityWizard() {
             طالب الحادي عشر والثاني عشر يدخل درجاته أيضاً، فيُحتسب معدّله التنافسي.
           </p>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {ELIGIBILITY_GRADES.map((g) => (
+            {GRADES.map((g) => (
               <li key={g.value}>
                 <button
                   type="button"
@@ -217,6 +216,7 @@ export function EligibilityWizard() {
             needsMarks={needsMarks}
             marks={marks}
             setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+            missingMarks={showMarkErrors ? missingMarks : []}
           />
 
           <SubjectGroup
@@ -228,6 +228,7 @@ export function EligibilityWizard() {
             needsMarks={needsMarks}
             marks={marks}
             setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+            missingMarks={showMarkErrors ? missingMarks : []}
           />
 
           <SubjectGroup
@@ -243,12 +244,20 @@ export function EligibilityWizard() {
             needsMarks={needsMarks}
             marks={marks}
             setMark={(s, v) => setMarks((m) => ({ ...m, [s]: v }))}
+            missingMarks={showMarkErrors ? missingMarks : []}
           />
 
           {electives.length > 0 && scienceCount < SUBJECT_PLAN.minScience ? (
             <Alert tone="warning" title="ينقصك مادة علمية">
               يجب أن تكون واحدة من الثلاث على الأقل مادة علمية: الفيزياء أو الكيمياء أو
               الأحياء أو العلوم البيئية.
+            </Alert>
+          ) : null}
+
+          {showMarkErrors && missingMarks.length > 0 ? (
+            <Alert tone="danger" title="أدخل درجاتك أولاً">
+              اكتب درجتك من 100 في {missingMarks.length === 1 ? "المادة" : "المواد"}:{" "}
+              {missingMarks.join("، ")}.
             </Alert>
           ) : null}
 
@@ -259,8 +268,17 @@ export function EligibilityWizard() {
             </button>
             <button
               type="button"
-              onClick={submit}
-              disabled={!ready || loading}
+              onClick={() => {
+                if (needsMarks && !marksComplete) {
+                  setShowMarkErrors(true);
+                  document
+                    .querySelector<HTMLInputElement>("[data-mark-missing='true']")
+                    ?.focus();
+                  return;
+                }
+                void submit();
+              }}
+              disabled={!planComplete || loading}
               className="btn-primary"
             >
               {loading ? (
@@ -304,6 +322,7 @@ function SubjectGroup({
   scienceSet,
   needsMarks,
   marks,
+  missingMarks = [],
   setMark,
 }: {
   title: string;
@@ -316,6 +335,8 @@ function SubjectGroup({
   scienceSet?: readonly Subject[];
   needsMarks: boolean;
   marks: Partial<Record<Subject, string>>;
+  /** المواد التي لم تُكتب درجتها بعد محاولة المتابعة، تُوسم بالأحمر */
+  missingMarks?: Subject[];
   setMark: (subject: Subject, value: string) => void;
 }) {
   return (
@@ -330,6 +351,7 @@ function SubjectGroup({
           const picked = isPicked(subject);
           const disabled = !locked && (disabledWhen?.(subject) ?? false);
           const isScience = scienceSet?.includes(subject) ?? false;
+          const missing = picked && missingMarks.includes(subject);
 
           return (
             <li
@@ -359,18 +381,26 @@ function SubjectGroup({
               </label>
 
               {needsMarks && picked ? (
-                <span className="flex items-center gap-1">
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <span className="text-xs font-bold text-[var(--color-muted)]">الدرجة</span>
                   <input
                     type="number"
                     min={0}
                     max={100}
                     inputMode="numeric"
+                    placeholder="—"
                     value={marks[subject] ?? ""}
                     onChange={(e) => setMark(subject, e.target.value)}
-                    aria-label={`درجتك في ${subject}`}
-                    className="input h-11 w-20 text-center tabular-nums"
+                    aria-label={`درجتك في ${subject} من 100`}
+                    aria-invalid={missing ? true : undefined}
+                    data-mark-missing={missing ? "true" : undefined}
+                    className={`input h-12 w-24 text-center text-base font-bold tabular-nums ${
+                      missing
+                        ? "border-2 border-danger-600 bg-danger-50 text-danger-700"
+                        : "border-2 border-brand-300 bg-white"
+                    }`}
                   />
-                  <span className="text-xs text-[var(--color-muted)]">٪</span>
+                  <span className="text-sm font-bold text-[var(--color-muted)]">٪</span>
                 </span>
               ) : null}
             </li>

@@ -16,17 +16,10 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const GRADES = [
-  { value: "9", label: "الصف التاسع" },
   { value: "10", label: "الصف العاشر" },
   { value: "11", label: "الصف الحادي عشر" },
   { value: "12", label: "الصف الثاني عشر" },
 ] as const;
-
-/**
- * صفوف قسم «اعرف تخصصك». الصف التاسع خارجه: الخطة الدراسية تبدأ من العاشر،
- * فلا مواد ولا درجات تُطابَق بها شروط البرامج.
- */
-export const ELIGIBILITY_GRADES = GRADES.filter((g) => g.value !== "9");
 
 /** الجنس مطلوب لأن الجداول المعيارية تختلف بين الذكور والإناث. */
 export const GENDERS = [

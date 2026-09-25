@@ -2,11 +2,11 @@ import { z } from "zod";
 import { json, errorResponse, parseBody, ApiError } from "@/lib/api";
 import { consume, LIMITS } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/audit";
-import { ELIGIBILITY_GRADES } from "@/lib/constants";
+import { GRADES } from "@/lib/constants";
 import { matchPrograms } from "@/features/programs/eligibility";
 import { SUBJECTS, type Marks, type Subject } from "@/features/programs/requirements";
 
-const gradeValues = ELIGIBILITY_GRADES.map((g) => g.value) as [string, ...string[]];
+const gradeValues = GRADES.map((g) => g.value) as [string, ...string[]];
 const subjectValues = [...SUBJECTS] as [string, ...string[]];
 
 const schema = z.object({
