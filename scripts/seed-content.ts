@@ -1,5 +1,6 @@
 /**
- * تهيئة محتوى المنصة: الأخصائيون، وفهرس المكتبة، وبنك أسئلة «اسألني».
+ * تهيئة محتوى المنصة: الأخصائيون وبنك أسئلة «اسألني».
+ * المكتبة لا تُزرع: كتبها ونشراتها يرفعها أخصائيو التوجيه المهني.
  *
  *   npm run seed:content
  *
@@ -112,59 +113,6 @@ async function seedAvailability(specialistId: string) {
   });
 }
 
-/* ───────────────────────── فهرس المكتبة ───────────────────────── */
-
-interface CatalogFile {
-  resources: {
-    category: string;
-    title: string;
-    author: string;
-    year?: number;
-    description: string;
-  }[];
-}
-
-async function seedLibrary() {
-  const { resources } = readJson<CatalogFile>("library-catalog.json");
-
-  const categories = await prisma.libraryCategory.findMany({
-    select: { id: true, slug: true },
-  });
-  const bySlug = new Map(categories.map((c) => [c.slug, c.id]));
-
-  let added = 0;
-  for (const r of resources) {
-    const categoryId = bySlug.get(r.category);
-    if (!categoryId) throw new Error(`تصنيف غير معروف: ${r.category}. شغّل npm run seed أولاً.`);
-
-    const existing = await prisma.libraryResource.findFirst({
-      where: { title: r.title, categoryId },
-      select: { id: true },
-    });
-    if (existing) continue;
-
-    await prisma.libraryResource.create({
-      data: {
-        categoryId,
-        title: r.title,
-        author: r.author,
-        description: r.description,
-        publishedYear: r.year ?? null,
-        type: "READABLE",
-        language: "ar",
-        published: true,
-        downloadable: false,
-      },
-    });
-    added++;
-  }
-
-  const total = await prisma.libraryResource.count({
-    where: { published: true, archivedAt: null },
-  });
-  console.log(`  ✔ المكتبة: ${added} مورداً جديداً، الإجمالي المنشور ${total}`);
-}
-
 /* ───────────────────────── بنك أسئلة «اسألني» ───────────────────────── */
 
 interface FaqFile {
@@ -258,7 +206,6 @@ async function seedFaq() {
 async function main() {
   console.log("\n📚 تهيئة محتوى بوصلتي\n");
   await seedSpecialists();
-  await seedLibrary();
   await seedFaq();
   console.log("\n✅ اكتملت التهيئة.\n");
 }

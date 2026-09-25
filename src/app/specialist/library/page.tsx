@@ -106,7 +106,8 @@ export default async function SpecialistLibraryPage({
                   categoryId: r.category.id,
                   title: r.title,
                   description: "",
-                  type: r.type,
+                  // الأنواع القديمة (مسموع/رابط) تُفتح في المحرّر ككتاب مقروء
+                  type: r.type === "IMAGE" || r.type === "VIDEO" ? r.type : "READABLE",
                   author: r.author,
                   publisher: "",
                   publishedYear: "",

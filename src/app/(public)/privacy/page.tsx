@@ -53,6 +53,7 @@ export default function PrivacyPage() {
   return (
     <>
       <PageHero
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="إشعار الخصوصية"
         description="هذه المنصة تتعامل مع بيانات طلاب، ولذلك نوضّح بدقة ما نجمعه ولماذا."
       />

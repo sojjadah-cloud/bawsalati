@@ -33,7 +33,6 @@ npm run dev         # http://localhost:3000
 
 ```bash
 npm run norms:build              # اشتقاق الجداول المعيارية من نتائج الطلبة
-npm run library:files -- <مجلد>  # إرفاق نسخ الكتب بعناوين المكتبة
 ```
 
 حسابات التطوير التي ينشئها `npm run seed`:

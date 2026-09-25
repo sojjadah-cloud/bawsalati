@@ -464,6 +464,10 @@ function Results({
   needsMarks: boolean;
   onRestart: () => void;
 }) {
+  /** مجال واحد مختار: تُعرض برامجه وحدها بدل تصفّح القائمة كلها. */
+  const [field, setField] = useState<string>("");
+  const eligible = field ? result.eligible.filter((m) => m.field === field) : result.eligible;
+
   return (
     <div className="space-y-6">
       {needsMarks && result.overall !== null ? (
@@ -482,19 +486,61 @@ function Results({
       {result.fields.length > 0 ? (
         <section className="card card-pad">
           <h2 className="text-base font-bold text-slate-900">المجالات المتاحة لك</h2>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">
+            اضغط مجالاً لترى برامجه وحدها.
+          </p>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {result.fields.map((f) => (
-              <li
-                key={f.field}
-                className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-line)] px-3 py-2 text-sm font-bold text-slate-700"
+            <li>
+              <button
+                type="button"
+                onClick={() => setField("")}
+                aria-pressed={field === ""}
+                className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border px-3 text-sm font-bold transition-colors ${
+                  field === ""
+                    ? "border-brand-700 bg-brand-700 text-white"
+                    : "border-[var(--color-line)] bg-white text-slate-700 hover:border-brand-300 hover:bg-brand-50"
+                }`}
               >
-                <Check className="h-4 w-4 text-brand-700" aria-hidden="true" />
-                {f.field}
-                <span className="rounded-full bg-slate-100 px-1.5 text-xs tabular-nums text-slate-500">
-                  {f.count}
+                كل المجالات
+                <span
+                  className={`rounded-full px-1.5 text-xs tabular-nums ${
+                    field === "" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {result.eligible.length}
                 </span>
-              </li>
-            ))}
+              </button>
+            </li>
+            {result.fields.map((f) => {
+              const active = field === f.field;
+              return (
+                <li key={f.field}>
+                  <button
+                    type="button"
+                    onClick={() => setField(active ? "" : f.field)}
+                    aria-pressed={active}
+                    className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border px-3 text-sm font-bold transition-colors ${
+                      active
+                        ? "border-brand-700 bg-brand-700 text-white"
+                        : "border-[var(--color-line)] bg-white text-slate-700 hover:border-brand-300 hover:bg-brand-50"
+                    }`}
+                  >
+                    <Check
+                      className={`h-4 w-4 ${active ? "text-white" : "text-brand-700"}`}
+                      aria-hidden="true"
+                    />
+                    {f.field}
+                    <span
+                      className={`rounded-full px-1.5 text-xs tabular-nums ${
+                        active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {f.count}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}
@@ -503,7 +549,9 @@ function Results({
         <h2 className="text-center text-xl font-bold text-slate-900">
           {result.eligible.length === 0
             ? "لا يوجد برنامج تنطبق عليه شروطك"
-            : `${result.eligible.length} برنامجاً تنطبق عليك شروطه`}
+            : field
+              ? `${eligible.length} برنامجاً في ${field}`
+              : `${result.eligible.length} برنامجاً تنطبق عليك شروطه`}
         </h2>
         {needsMarks && result.eligible.length > 0 ? (
           <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
@@ -526,7 +574,7 @@ function Results({
           </div>
         ) : (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {result.eligible.slice(0, 60).map((m) => (
+            {eligible.slice(0, 60).map((m) => (
               <MatchCard key={m.id} match={m} showCompetitive={needsMarks} />
             ))}
           </ul>

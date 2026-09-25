@@ -229,20 +229,21 @@ const CATEGORIES = [
     displayOrder: 2,
   },
   {
-    slug: "science",
-    name: "كتب علمية",
-    description: "مراجع علمية تثري معرفتك وتوسّع اهتماماتك البحثية.",
-    displayOrder: 3,
-  },
-  {
     slug: "bulletins",
     name: "نشرات التوجيه المهني",
-    description: "نشرات يرفعها أخصائيو التوجيه المهني: مقاطع مرئية وصور وروابط مختارة.",
-    displayOrder: 4,
+    description: "نشرات يرفعها أخصائيو التوجيه المهني: صور ومقاطع مرئية.",
+    displayOrder: 3,
   },
 ];
 
+/** التصنيفات وحدها تُهيَّأ، والمحتوى كلّه يرفعه أخصائيو التوجيه المهني. */
 async function seedLibrary() {
+  // تصنيف أُلغي: يُعطَّل ولا يُحذف كي لا تضيع موارد قد تكون مرتبطة به
+  await prisma.libraryCategory.updateMany({
+    where: { slug: "science" },
+    data: { active: false },
+  });
+
   for (const c of CATEGORIES) {
     await prisma.libraryCategory.upsert({
       where: { slug: c.slug },

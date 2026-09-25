@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarCheck, GraduationCap, Printer } from "lucide-react";
+import { ArrowRight, CalendarCheck, GraduationCap, Printer } from "lucide-react";
 import { getResultByToken } from "@/features/assessment/service";
 import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/time";
-import { ResultTables, type ResultSectionData } from "@/components/assessment/ResultView";
+import {
+  DistributionTable,
+  ResultTables,
+  ScoreTable,
+  type ResultSectionData,
+} from "@/components/assessment/ResultView";
 
 // نتيجة طالب — لا تُفهرس ولا تُخزَّن.
 export const metadata: Metadata = {
@@ -37,6 +42,14 @@ export default async function ResultPage({
 
   return (
     <div className="container-x py-10 sm:py-14">
+      <Link
+        href="/"
+        className="no-print mb-4 inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-md)] px-2 text-sm font-bold text-brand-800 transition-colors hover:bg-brand-50"
+      >
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        رجوع إلى الرئيسية
+      </Link>
+
       <header className="flex flex-col items-center border-b border-[var(--color-line)] pb-6 text-center">
         <p className="section-kicker">نتيجة مقياس السمات والميول المهنية</p>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
@@ -64,6 +77,28 @@ export default async function ResultPage({
 
         <div className="mt-5">
           <ResultTables sections={sections} showScores={false} />
+        </div>
+      </section>
+
+      <section className="mt-12" aria-labelledby="scores-title">
+        <h2 id="scores-title" className="section-title">
+          جدول الدرجات
+        </h2>
+        <p className="section-lead">
+          درجتك الخام في كل بيئة ورتبتها المئينية، يقرؤها معك أخصائي التوجيه المهني.
+        </p>
+        <div className="mt-5">
+          <ScoreTable sections={sections} />
+        </div>
+      </section>
+
+      <section className="mt-12" aria-labelledby="dist-title">
+        <h2 id="dist-title" className="section-title">
+          توزيع عبارات المقياس على البيئات الست
+        </h2>
+        <p className="section-lead">أرقام العبارات في صفحات المقياس الثلاث.</p>
+        <div className="mt-5">
+          <DistributionTable sections={sections} />
         </div>
       </section>
 

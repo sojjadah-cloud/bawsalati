@@ -41,6 +41,7 @@ export default async function AssessmentIntroPage() {
   return (
     <>
       <PageHero
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title={assessment.title}
         description="اقرأ المقدّمة، ثم أدخل بياناتك وابدأ."
       />

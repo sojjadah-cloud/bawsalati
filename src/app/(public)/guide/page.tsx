@@ -77,6 +77,7 @@ export default async function GuidePage({
   return (
     <>
       <PageHero
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title={guide?.title ?? "دليل الطالب"}
         description={`${total} برنامجاً دراسياً من الدليل الرسمي، مرتّبة حسب المجال ونوع البرنامج والمؤسسة.`}
         action={

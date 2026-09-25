@@ -66,6 +66,7 @@ export default async function ProgramPage({
   return (
     <>
       <PageHero
+        back={{ href: "/guide", label: "رجوع إلى دليل الطالب" }}
         title={program.name}
         description={`رمز البرنامج ${program.code}`}
         breadcrumb={

@@ -76,6 +76,7 @@ export default async function CategoryPage({
   return (
     <>
       <PageHero
+        back={{ href: "/library", label: "رجوع إلى المكتبة" }}
         title={category.name}
         description={category.description || undefined}
         breadcrumb={

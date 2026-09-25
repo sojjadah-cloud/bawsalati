@@ -12,6 +12,7 @@ export default function AskPage() {
   return (
     <>
       <PageHero
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="اسألني"
         description="اكتب سؤالك بأي صيغة. «اسألني» يبحث في بنك أسئلة أعدّه أخصائي التوجيه المهني، وما لا يجده يحيلك إليه."
       />

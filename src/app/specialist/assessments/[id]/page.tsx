@@ -8,6 +8,7 @@ import { GENDER_LABELS, GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate, utcToIsoDate } from "@/lib/time";
 import {
   AnalysisTable,
+  DistributionTable,
   InterestCode,
   ResultTables,
   type AnalysisRowData,
@@ -98,6 +99,9 @@ export default async function AssessmentDetailPage({
         </h2>
         <div className="mt-4">
           <ResultTables sections={sections} />
+        <div className="mt-6">
+          <DistributionTable sections={sections} />
+        </div>
         </div>
       </section>
 

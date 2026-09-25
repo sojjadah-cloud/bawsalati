@@ -21,6 +21,7 @@ export default async function LibraryPage() {
   return (
     <>
       <PageHero
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="المكتبة الرقمية"
         description="كتب مقروءة ومسموعة وموارد تعليمية، اقرأها أو استمع إليها مباشرة داخل المنصة."
       />

@@ -123,8 +123,13 @@ async function main() {
   );
   check("لا سؤال مكرّر", Number(dupFaq[0].count) === 0, dupFaq[0].count + " مكرّراً");
 
+  // المكتبة يرفعها أخصائيو التوجيه المهني، فخلوّها ليس خللاً. المطلوب أن كل
+  // مورد منشور يحمل ملفه فعلاً، فلا يرى الطالب عنواناً بلا نسخة.
   const lib = await prisma.libraryResource.count({ where: { published: true, archivedAt: null } });
-  check("المكتبة مملوءة", lib >= 60, lib + " مورداً");
+  const libNoFile = await prisma.libraryResource.count({
+    where: { published: true, archivedAt: null, fileId: null, externalUrl: null },
+  });
+  check("كل مورد منشور له ملف", libNoFile === 0, `${lib} مورداً، ${libNoFile} بلا ملف`);
 
   const cats = await prisma.libraryCategory.count({ where: { active: true } });
   check("تصنيفات المكتبة موجودة", cats >= 3, cats + " تصنيفاً");

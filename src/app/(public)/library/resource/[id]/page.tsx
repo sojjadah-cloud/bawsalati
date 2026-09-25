@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download } from "lucide-react";
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import { getPublicResource } from "@/features/library/service";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { ResourceViewer } from "@/components/library/ResourceViewer";
@@ -41,12 +41,19 @@ export default async function ResourcePage({
     { label: "اللغة", value: resource.language === "ar" ? "العربية" : resource.language },
   ].filter(Boolean) as { label: string; value: string }[];
 
-  const downloadKind = resource.hasAudio ? "audio" : "file";
   const canDownload = resource.downloadable && (resource.hasFile || resource.hasAudio);
   const cover = coverSrc(resource);
 
   return (
     <div className="container-x py-10 sm:py-14">
+      <Link
+        href={`/library/${resource.category.slug}`}
+        className="no-print mb-4 inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-md)] px-2 text-sm font-bold text-brand-800 transition-colors hover:bg-brand-50"
+      >
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        رجوع إلى {resource.category.name}
+      </Link>
+
       <nav aria-label="مسار التنقّل" className="mb-4">
         <ol className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-[var(--color-muted)]">
           <li>
@@ -91,8 +98,7 @@ export default async function ResourcePage({
               title={resource.title}
               type={resource.type}
               hasFile={resource.hasFile}
-              hasAudio={resource.hasAudio}
-              externalUrl={resource.externalUrl}
+              downloadable={resource.downloadable}
             />
           </div>
         </div>
@@ -124,19 +130,11 @@ export default async function ResourcePage({
               ))}
             </dl>
 
-            {canDownload ? (
-              <a
-                href={`/api/files/library/${resource.id}?kind=${downloadKind}&mode=download`}
-                className="btn-outline btn-block mt-5"
-              >
-                <Download className="h-5 w-5" aria-hidden="true" />
-                تنزيل الملف
-              </a>
-            ) : (
+            {!canDownload ? (
               <p className="mt-5 rounded-[var(--radius-md)] bg-slate-50 p-3 text-xs text-[var(--color-muted)]">
-                هذا المورد متاح للقراءة داخل المنصة فقط.
+                هذا المورد متاح للتصفّح داخل المنصة فقط.
               </p>
-            )}
+            ) : null}
           </div>
         </aside>
       </div>

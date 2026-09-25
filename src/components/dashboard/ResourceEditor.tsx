@@ -1,7 +1,7 @@
 "use client";
 
 // إضافة/تعديل مورد مكتبة، مع رفع الملفات والتحقق من الحقول.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Upload } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
@@ -28,7 +28,7 @@ export interface ResourceDraft {
   categoryId: string;
   title: string;
   description: string;
-  type: "READABLE" | "AUDIO" | "VIDEO" | "IMAGE" | "LINK" | "OTHER";
+  type: "READABLE" | "IMAGE" | "VIDEO";
   author: string;
   publisher: string;
   publishedYear: string;
@@ -76,7 +76,17 @@ export function ResourceEditor({
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<"file" | "audio" | null>(null);
   const [fileLabel, setFileLabel] = useState("");
-  const [audioLabel, setAudioLabel] = useState("");
+  /**
+   * الحقول النصّية غير محكومة بالحالة: الكتابة فيها لا تُعيد رسم النموذج،
+   * فلا يتقطّع الإدخال في الأوصاف الطويلة. تُقرأ قيمها من النموذج عند الحفظ.
+   */
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formKey, setFormKey] = useState(0);
+
+  function textValue(name: string): string {
+    const el = formRef.current?.elements.namedItem(name);
+    return el && "value" in el ? String((el as unknown as { value: unknown }).value ?? "") : "";
+  }
 
   function set<K extends keyof ResourceDraft>(key: K, value: ResourceDraft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -116,7 +126,6 @@ export function ResourceEditor({
         }
       } else {
         set("audioFileId", res.file.id);
-        setAudioLabel(res.file.originalName);
       }
       toast.success("اكتمل رفع الملف");
     } catch (e) {
@@ -134,14 +143,14 @@ export function ResourceEditor({
 
     const payload = {
       categoryId: draft.categoryId,
-      title: draft.title.trim(),
-      description: draft.description.trim(),
+      title: textValue("title").trim(),
+      description: textValue("description").trim(),
       type: draft.type,
-      author: draft.author.trim(),
-      publisher: draft.publisher.trim(),
-      publishedYear: draft.publishedYear,
+      author: textValue("author").trim(),
+      publisher: textValue("publisher").trim(),
+      publishedYear: textValue("publishedYear"),
       language: "ar",
-      externalUrl: draft.externalUrl.trim(),
+      externalUrl: textValue("externalUrl").trim(),
       fileId: draft.fileId,
       audioFileId: draft.audioFileId,
       coverFileId: draft.coverFileId,
@@ -162,7 +171,8 @@ export function ResourceEditor({
         toast.success("أُضيف المورد");
         setDraft(EMPTY(categories[0]?.id ?? ""));
         setFileLabel("");
-        setAudioLabel("");
+        // إعادة تركيب النموذج تُفرغ الحقول غير المحكومة
+        setFormKey((k) => k + 1);
       }
       setOpen(false);
       router.refresh();
@@ -201,12 +211,12 @@ export function ResourceEditor({
         title={draft.id ? "تعديل المورد" : "إضافة مورد جديد"}
         size="lg"
       >
-        <form onSubmit={save} noValidate className="space-y-5">
+        <form ref={formRef} key={formKey} onSubmit={save} noValidate className="space-y-5">
           <TextField
             label="العنوان"
             required
-            value={draft.title}
-            onChange={(e) => set("title", e.target.value)}
+            name="title"
+            defaultValue={draft.title}
             error={errors.title}
             maxLength={250}
           />
@@ -225,7 +235,7 @@ export function ResourceEditor({
               required
               value={draft.type}
               onChange={(e) => set("type", e.target.value as ResourceDraft["type"])}
-              options={(["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"] as const).map((t) => ({
+              options={(["READABLE", "IMAGE", "VIDEO"] as const).map((t) => ({
                 value: t,
                 label: RESOURCE_TYPE_LABELS[t],
               }))}
@@ -234,8 +244,8 @@ export function ResourceEditor({
 
           <TextAreaField
             label="الوصف"
-            value={draft.description}
-            onChange={(e) => set("description", e.target.value)}
+            name="description"
+            defaultValue={draft.description}
             maxLength={3000}
             rows={4}
           />
@@ -243,14 +253,14 @@ export function ResourceEditor({
           <div className="grid gap-5 sm:grid-cols-3">
             <TextField
               label="المؤلف"
-              value={draft.author}
-              onChange={(e) => set("author", e.target.value)}
+              name="author"
+              defaultValue={draft.author}
               maxLength={160}
             />
             <TextField
               label="الناشر"
-              value={draft.publisher}
-              onChange={(e) => set("publisher", e.target.value)}
+              name="publisher"
+              defaultValue={draft.publisher}
               maxLength={160}
             />
             <TextField
@@ -258,13 +268,13 @@ export function ResourceEditor({
               type="number"
               inputMode="numeric"
               dir="ltr"
-              value={draft.publishedYear}
-              onChange={(e) => set("publishedYear", e.target.value)}
+              name="publishedYear"
+              defaultValue={draft.publishedYear}
             />
           </div>
 
           {/* الملفات */}
-          {draft.type === "READABLE" || draft.type === "OTHER" ? (
+          {draft.type === "READABLE" ? (
             <div>
               <span className="label">ملف المستند (PDF)</span>
               <div className="flex flex-wrap items-center gap-3">
@@ -325,42 +335,13 @@ export function ResourceEditor({
             </div>
           ) : null}
 
-          {draft.type === "AUDIO" ? (
-            <div>
-              <span className="label">الملف الصوتي (MP3 / M4A)</span>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="btn-outline btn-sm cursor-pointer">
-                  {uploading === "audio" ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <Upload className="h-4 w-4" aria-hidden="true" />
-                  )}
-                  اختر ملفاً
-                  <input
-                    type="file"
-                    accept="audio/mpeg,audio/mp4"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void upload("AUDIO", f);
-                    }}
-                  />
-                </label>
-                <span className="text-xs text-[var(--color-muted)]">
-                  {audioLabel || (draft.audioFileId ? "ملف مرفق" : `حتى ${MAX_MB.AUDIO} ميغابايت`)}
-                </span>
-              </div>
-              {errors.audioFileId ? <p className="field-error">{errors.audioFileId}</p> : null}
-            </div>
-          ) : null}
 
           <TextField
-            label={draft.type === "LINK" ? "الرابط الخارجي" : "رابط خارجي (اختياري)"}
-            required={draft.type === "LINK"}
+            label="رابط خارجي (اختياري)"
             type="url"
             dir="ltr"
-            value={draft.externalUrl}
-            onChange={(e) => set("externalUrl", e.target.value)}
+            name="externalUrl"
+            defaultValue={draft.externalUrl}
             error={errors.externalUrl}
             placeholder="https://"
           />

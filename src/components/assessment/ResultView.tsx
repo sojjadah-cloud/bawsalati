@@ -26,6 +26,116 @@ export interface AnalysisRowData {
   rank: number;
 }
 
+
+/** صفحات المقياس الثلاث: كل صفحة ثماني عشرة عبارة. */
+const PAGES = [
+  { number: 1, from: 1, to: 18 },
+  { number: 2, from: 19, to: 36 },
+  { number: 3, from: 37, to: 54 },
+];
+
+/** أرقام عبارات بيئة في صفحة واحدة، مكتوبةً مدىً: «1–3». */
+function rangeIn(section: ResultSectionData, from: number, to: number): string {
+  const numbers = section.cells
+    .flat()
+    .map((c) => c.questionNumber)
+    .filter((n) => n >= from && n <= to)
+    .sort((a, b) => a - b);
+  if (numbers.length === 0) return "—";
+  return numbers.length === 1
+    ? String(numbers[0])
+    : `${numbers[0]}–${numbers[numbers.length - 1]}`;
+}
+
+/**
+ * توزيع عبارات المقياس على البيئات الست، كما في كرّاسة المقياس:
+ * لكل بيئة أرقام عباراتها في صفحات المقياس الثلاث.
+ */
+export function DistributionTable({ sections }: { sections: ResultSectionData[] }) {
+  const ordered = [...sections].sort((a, b) => a.displayOrder - b.displayOrder);
+  return (
+    <div className="table-wrap">
+      <table className="table">
+        <caption className="sr-only">
+          توزيع عبارات المقياس على البيئات المهنية الست
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">البيئة المهنية</th>
+            {PAGES.map((p) => (
+              <th key={p.number} scope="col" className="text-center">
+                صفحة {p.number}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {ordered.map((s) => (
+            <tr key={s.dimensionCode}>
+              <th scope="row" className="font-bold text-slate-900">
+                {s.dimensionLabel} ({s.dimensionCode})
+              </th>
+              {PAGES.map((p) => (
+                <td key={p.number} className="text-center tabular-nums">
+                  {rangeIn(s, p.from, p.to)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** جدول الدرجات: الرمز والدرجة الخام والرتبة المئينية لكل بيئة. */
+export function ScoreTable({ sections }: { sections: ResultSectionData[] }) {
+  const ordered = [...sections].sort((a, b) => a.displayOrder - b.displayOrder);
+  return (
+    <div className="table-wrap">
+      <table className="table">
+        <caption className="sr-only">جدول الدرجات في البيئات الست</caption>
+        <thead>
+          <tr>
+            <th scope="col">البيئة</th>
+            {ordered.map((s) => (
+              <th key={s.dimensionCode} scope="col" className="text-center">
+                {s.dimensionLabel}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">الرمز</th>
+            {ordered.map((s) => (
+              <td key={s.dimensionCode} className="text-center font-bold text-brand-800">
+                ({s.dimensionCode})
+              </td>
+            ))}
+          </tr>
+          <tr>
+            <th scope="row">الدرجة الخام</th>
+            {ordered.map((s) => (
+              <td key={s.dimensionCode} className="text-center font-bold tabular-nums">
+                {s.rawScore}
+              </td>
+            ))}
+          </tr>
+          <tr>
+            <th scope="row">الرتبة المئينية</th>
+            {ordered.map((s) => (
+              <td key={s.dimensionCode} className="text-center tabular-nums">
+                {s.percentile}٪
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 /** جدول واحد: 3 أعمدة × 3 صفوف لعبارات بيئة واحدة. */
 function SectionTable({
   section,
@@ -40,9 +150,14 @@ function SectionTable({
   return (
     <section className="card p-5" aria-labelledby={captionId}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h3 id={captionId} className="text-base font-bold text-slate-900">
-          {section.dimensionLabel}
-        </h3>
+        <div>
+          <h3 id={captionId} className="text-base font-bold text-slate-900">
+            {section.dimensionLabel} ({section.dimensionCode})
+          </h3>
+          <p className="mt-0.5 text-xs tabular-nums text-[var(--color-muted)]">
+            العبارات {PAGES.map((p) => rangeIn(section, p.from, p.to)).join("، ")}
+          </p>
+        </div>
         {showScores ? (
           <span className="badge-brand shrink-0">
             {section.rawScore} من {maxScore}

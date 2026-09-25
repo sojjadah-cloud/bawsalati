@@ -43,7 +43,11 @@ export default async function BookingStatusPage({
 
   return (
     <>
-      <PageHero title="متابعة حجزك" description="حالة موعدك مع أخصائي التوجيه المهني." />
+      <PageHero
+        title="متابعة حجزك"
+        description="حالة موعدك مع أخصائي التوجيه المهني."
+        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
+      />
 
       <div className="container-narrow py-10 sm:py-14">
         <div className="card card-pad">
