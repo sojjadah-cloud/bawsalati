@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, TriangleAlert } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
 import { GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
+import { StepBack } from "@/components/ui/StepBack";
 import { Alert, EmptyState } from "@/components/ui/primitives";
 
 type Subject = (typeof SUBJECTS)[number];
@@ -140,8 +141,16 @@ export function EligibilityWizard() {
     setError(null);
   }
 
+  const STEP_LABELS = ["", "الصف", needsMarks ? "المواد والدرجات" : "المواد"];
+
   return (
     <div className="space-y-6">
+      <StepBack
+        label={STEP_LABELS[step - 1] ?? ""}
+        onBack={step > 1 && !loading ? () => setStep(step === 3 ? 2 : 1) : undefined}
+        exit={{ href: "/", label: "الرئيسية" }}
+      />
+
       <ol className="flex flex-wrap items-center justify-center gap-2 text-sm">
         {[
           { n: 1, label: "الصف" },

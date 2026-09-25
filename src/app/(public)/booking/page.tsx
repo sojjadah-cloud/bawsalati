@@ -20,7 +20,6 @@ export default async function BookingPage() {
   return (
     <>
       <PageHero
-        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="حجز موعد"
         description="اختر أخصائياً ووقتاً متاحاً وموضوع الاستشارة. لا يحتاج حساباً."
       />

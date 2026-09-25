@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { api, ApiClientError, messageOf } from "@/lib/client";
 import { GRADES, GRADE_LABELS } from "@/lib/constants";
+import { StepBack } from "@/components/ui/StepBack";
 import { formatArabicDate, formatArabicTime, WEEKDAY_LABELS } from "@/lib/time";
 import { Alert, EmptyState, Skeleton } from "@/components/ui/primitives";
 import {
@@ -261,6 +262,12 @@ export function BookingWizard({
 
   return (
     <form onSubmit={submit} noValidate>
+      <StepBack
+        label={STEPS[step - 1] ?? ""}
+        onBack={step > 0 && !submitting ? () => setStep((v) => Math.max(0, v - 1)) : undefined}
+        exit={{ href: "/", label: "الرئيسية" }}
+      />
+
       {/* مؤشّر الخطوات */}
       <ol className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
         {STEPS.map((label, i) => (

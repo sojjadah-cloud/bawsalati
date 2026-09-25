@@ -68,6 +68,23 @@ export default async function GuidePage({
   const matched = browse ? browse[1].total : 0;
   const totalPages = Math.max(1, Math.ceil(matched / PAGE_SIZE));
 
+  /**
+   * الرجوع يصعد مرحلةً واحدة في التصفية: من المؤسسة إلى النوع، ومن النوع إلى
+   * المجال، ومن المجال إلى أول الدليل، وفي البحث إلى الدليل بلا بحث.
+   */
+  const back = query
+    ? { href: "/guide", label: "رجوع إلى الدليل" }
+    : filters.institution
+      ? {
+          href: buildHref({ field: filters.field, programType: filters.programType }),
+          label: "رجوع إلى اختيار المؤسسة",
+        }
+      : filters.programType
+        ? { href: buildHref({ field: filters.field }), label: "رجوع إلى اختيار النوع" }
+        : filters.field || showAll
+          ? { href: "/guide", label: "رجوع إلى اختيار المجال" }
+          : { href: "/", label: "رجوع إلى الرئيسية" };
+
   const pageHref = (n: number) => {
     const base = buildHref(filters, showAll);
     if (n <= 1) return base;
@@ -77,7 +94,7 @@ export default async function GuidePage({
   return (
     <>
       <PageHero
-        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
+        back={back}
         title={guide?.title ?? "دليل الطالب"}
         description={`${total} برنامجاً دراسياً من الدليل الرسمي، مرتّبة حسب المجال ونوع البرنامج والمؤسسة.`}
         action={

@@ -17,7 +17,6 @@ export default async function EligibilityPage() {
   return (
     <>
       <PageHero
-        back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="اعرف تخصصك"
         description={`اختر صفّك وموادك، فتُطابَق شروط ${total} برنامجاً في الدليل بما تدرسه ودرجاتك.`}
       />
