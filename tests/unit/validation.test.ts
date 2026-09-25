@@ -40,8 +40,10 @@ describe("بيانات الطالب", () => {
       gender: "MALE" as const,
       phone: "92112233",
     };
+    expect(startSessionSchema.safeParse({ ...base, grade: "10" }).success).toBe(true);
     expect(startSessionSchema.safeParse({ ...base, grade: "12" }).success).toBe(true);
-    expect(startSessionSchema.safeParse({ ...base, grade: "9" }).success).toBe(true);
+    // المنصة للصفوف 10–12: الخطة الدراسية تبدأ من العاشر
+    expect(startSessionSchema.safeParse({ ...base, grade: "9" }).success).toBe(false);
     expect(startSessionSchema.safeParse({ ...base, grade: "8" }).success).toBe(false);
   });
 });
