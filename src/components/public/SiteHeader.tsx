@@ -26,20 +26,20 @@ export function SiteHeader() {
     <>
       <PartnersStrip />
       <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-white/95 backdrop-blur-sm">
-        <div className="container-x">
+        <div className="container-header">
           {/* الطرفان على حافتي الترويسة، واسم المنصة مثبّت في منتصفها تماماً
               مهما اختلف عرض الطرفين */}
           <div className="relative flex h-16 items-center justify-between gap-3">
             {/* اليمين: التنقّل على الشاشات الكبيرة، وزرّ القائمة على الجوال */}
             <div className="flex items-center">
-              <nav aria-label="التنقّل الرئيسي" className="hidden lg:block">
+              <nav aria-label="التنقّل الرئيسي" className="hidden xl:block xl:pl-6">
                 <ul className="flex items-center gap-0.5">
                   {NAV.map((item) => (
                     <li key={item.href}>
                       <Link
                         href={item.href}
                         aria-current={isActive(item.href) ? "page" : undefined}
-                        className={`inline-flex h-10 items-center rounded-[var(--radius-md)] px-2.5 text-sm font-bold whitespace-nowrap transition-colors ${
+                        className={`inline-flex h-10 items-center rounded-[var(--radius-md)] px-2 text-[13px] font-bold whitespace-nowrap transition-colors 2xl:px-2.5 2xl:text-sm ${
                           isActive(item.href)
                             ? "bg-brand-50 text-brand-800"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -58,7 +58,7 @@ export function SiteHeader() {
                 aria-expanded={open}
                 aria-controls="mobile-nav"
                 aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
-                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-slate-700 transition-colors hover:bg-slate-100 lg:hidden"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-slate-700 transition-colors hover:bg-slate-100 xl:hidden"
               >
                 {open ? (
                   <X className="h-6 w-6" aria-hidden="true" />
@@ -83,7 +83,7 @@ export function SiteHeader() {
             <div className="flex items-center">
               <Link
                 href="/login"
-                className="btn-sm hidden items-center rounded-[var(--radius-md)] border border-brand-200 bg-brand-50 px-3 font-bold text-brand-800 transition-colors hover:border-brand-300 hover:bg-brand-100 lg:inline-flex"
+                className="btn-sm hidden items-center rounded-[var(--radius-md)] border border-brand-200 bg-brand-50 px-3 font-bold text-brand-800 transition-colors hover:border-brand-300 hover:bg-brand-100 xl:inline-flex"
               >
                 دخول الأخصائيين
               </Link>
@@ -95,9 +95,9 @@ export function SiteHeader() {
           <nav
             id="mobile-nav"
             aria-label="التنقّل الرئيسي"
-            className="animate-in border-t border-[var(--color-line)] bg-white lg:hidden"
+            className="animate-in border-t border-[var(--color-line)] bg-white xl:hidden"
           >
-            <ul className="container-x flex flex-col py-2">
+            <ul className="container-header flex flex-col py-2">
               {NAV.map((item) => (
                 <li key={item.href}>
                   <Link
