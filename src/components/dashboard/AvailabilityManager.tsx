@@ -1,6 +1,6 @@
 "use client";
 
-// إدارة أوقات المختص: نوافذ دوام أسبوعية + أيام غير متاحة.
+// إدارة أوقات الأخصائي: نوافذ دوام أسبوعية + أيام غير متاحة.
 import { useCallback, useEffect, useState } from "react";
 import { CalendarOff, Clock, Plus, Trash2 } from "lucide-react";
 import { api, messageOf } from "@/lib/client";

@@ -30,7 +30,7 @@ export default async function AssessmentIntroPage() {
     return (
       <div className="container-narrow py-16">
         <Alert tone="warning" title="الاختبار غير متاح حالياً">
-          لم يُفعّل أي مقياس بعد. يرجى المحاولة لاحقاً أو التواصل مع مختص التوجيه المهني.
+          لم يُفعّل أي مقياس بعد. يرجى المحاولة لاحقاً أو التواصل مع أخصائي التوجيه المهني.
         </Alert>
       </div>
     );

@@ -35,7 +35,7 @@ export default async function LibraryPage() {
           <EmptyState
             icon={<Library className="h-6 w-6" />}
             title="المكتبة قيد الإعداد"
-            description="لم تُنشر موارد بعد. احجز موعداً مع مختص التوجيه المهني للحصول على مراجع تناسبك."
+            description="لم تُنشر موارد بعد. احجز موعداً مع أخصائي التوجيه المهني للحصول على مراجع تناسبك."
             action={
               <Link href="/booking" className="btn-primary">
                 احجز موعداً

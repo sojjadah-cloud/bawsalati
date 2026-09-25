@@ -1,7 +1,7 @@
 "use client";
 
 // «اسألني» — يبحث في بنك أسئلة معدّ مسبقاً ويعيد الجواب المطابق.
-// لا يولّد نصاً: ما لا يجده يحيله إلى مختص التوجيه المهني.
+// لا يولّد نصاً: ما لا يجده يحيله إلى أخصائي التوجيه المهني.
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarCheck, Loader2, Send, Sparkles, UserRound } from "lucide-react";
@@ -30,7 +30,7 @@ type Message =
     };
 
 const FALLBACK =
-  "لم أجد إجابة لهذا السؤال في بنك الأسئلة. تواصل مع مختص التوجيه المهني، فهو الأقدر على الإجابة، وسنضيف السؤال إلى البنك.";
+  "لم أجد إجابة لهذا السؤال في بنك الأسئلة. تواصل مع أخصائي التوجيه المهني، فهو الأقدر على الإجابة، وسنضيف السؤال إلى البنك.";
 
 export function AskChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -110,7 +110,7 @@ export function AskChat() {
             </span>
             <p className="mt-4 text-base font-bold text-slate-900">اسألني</p>
             <p className="mt-1.5 max-w-sm text-sm text-[var(--color-muted)]">
-              اكتب سؤالك بأي صيغة. إن لم أجد الإجابة سأدلّك على مختص التوجيه المهني.
+              اكتب سؤالك بأي صيغة. إن لم أجد الإجابة سأدلّك على أخصائي التوجيه المهني.
             </p>
 
             {starters.length > 0 ? (
@@ -157,7 +157,7 @@ export function AskChat() {
                     {!m.matched ? (
                       <Link href="/booking" className="btn-secondary btn-sm mt-3">
                         <CalendarCheck className="h-4 w-4" aria-hidden="true" />
-                        احجز موعداً مع المختص
+                        احجز موعداً مع الأخصائي
                       </Link>
                     ) : null}
                   </div>

@@ -55,7 +55,7 @@ interface Confirmation {
   topicName: string;
 }
 
-const STEPS = ["بياناتك", "المختص", "الموعد", "الموضوع", "المراجعة"] as const;
+const STEPS = ["بياناتك", "الأخصائي", "الموعد", "الموضوع", "المراجعة"] as const;
 
 export function BookingWizard({
   specialists,
@@ -194,14 +194,14 @@ export function BookingWizard({
           <div>
             <h2 className="text-xl font-extrabold text-slate-900">تم تأكيد طلب حجزك</h2>
             <p className="mt-1.5 text-sm text-[var(--color-muted)]">
-              وصل إشعار بحجزك إلى المختص. سيتواصل معك عند الحاجة على الرقم الذي أدخلته.
+              وصل إشعار بحجزك إلى الأخصائي. سيتواصل معك عند الحاجة على الرقم الذي أدخلته.
             </p>
           </div>
         </div>
 
         <dl className="mt-6 space-y-3 rounded-[var(--radius-md)] bg-slate-50 p-4 text-sm">
           {[
-            { label: "المختص", value: confirmation.specialistName },
+            { label: "الأخصائي", value: confirmation.specialistName },
             { label: "التاريخ", value: formatArabicDate(confirmation.date) },
             {
               label: "الوقت",
@@ -220,7 +220,7 @@ export function BookingWizard({
           <div className="mt-5 rounded-[var(--radius-md)] border border-brand-100 bg-brand-50 p-4">
             <p className="text-sm font-bold text-brand-900">تابع حالة موعدك</p>
             <p className="mt-1 text-xs leading-relaxed text-brand-800">
-              احفظ هذا الرابط لمعرفة إن أكّد المختص موعدك.
+              احفظ هذا الرابط لمعرفة إن أكّد الأخصائي موعدك.
             </p>
             <Link
               href={`/booking/${encodeURIComponent(trackingToken)}`}
@@ -248,7 +248,7 @@ export function BookingWizard({
     return (
       <EmptyState
         icon={<UserRound className="h-6 w-6" />}
-        title="لا يوجد مختصون متاحون للحجز حالياً"
+        title="لا يوجد أخصائيون متاحون للحجز حالياً"
         description="يمكنك المحاولة لاحقاً، أو الاستفادة من المكتبة الرقمية ودليل الطالب في هذه الأثناء."
         action={
           <Link href="/library" className="btn-outline">
@@ -337,12 +337,12 @@ export function BookingWizard({
           </>
         ) : null}
 
-        {/* الخطوة 2 — المختص */}
+        {/* الخطوة 2 — الأخصائي */}
         {step === 1 ? (
           <>
             <h2 className="text-lg font-bold text-slate-900">اختر الأخصائي</h2>
             <fieldset className="mt-5">
-              <legend className="sr-only">قائمة المختصين المتاحين</legend>
+              <legend className="sr-only">قائمة الأخصائيين المتاحين</legend>
               <div className="grid gap-3">
                 {specialists.map((s) => {
                   const active = specialistId === s.id;
@@ -408,7 +408,7 @@ export function BookingWizard({
             ) : days && days.length === 0 ? (
               <div className="mt-6">
                 <Alert tone="warning" title="لا توجد أوقات متاحة حالياً">
-                  لم يُتِح المختص فترات في الأيام القادمة. حاول لاحقاً أو اختر مختصاً آخر.
+                  لم يُتِح الأخصائي فترات في الأيام القادمة. حاول لاحقاً أو اختر أخصائياً آخر.
                 </Alert>
               </div>
             ) : days ? (
@@ -563,7 +563,7 @@ export function BookingWizard({
                 { label: "الاسم", value: studentName },
                 { label: "الصف", value: GRADE_LABELS[grade] ?? grade },
                 { label: "الهاتف", value: phone },
-                { label: "المختص", value: selectedSpecialist?.name ?? "" },
+                { label: "الأخصائي", value: selectedSpecialist?.name ?? "" },
                 { label: "التاريخ", value: formatArabicDate(date) },
                 { label: "الوقت", value: formatArabicTime(startTime) },
                 { label: "الموضوع", value: selectedTopic?.name ?? "" },

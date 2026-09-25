@@ -1,5 +1,5 @@
 // فحص التدفّق الكامل: اختبار من البداية إلى النتيجة، وحجز موعد مع منع الازدواج،
-// وإدارة المكتبة من حساب المختص، وبثّ الملفات ومحاولات الخروج من المسار.
+// وإدارة المكتبة من حساب الأخصائي، وبثّ الملفات ومحاولات الخروج من المسار.
 const http = require("node:http");
 const PORT = Number(process.env.PORT || 51602);
 const HOST = "localhost";
@@ -109,35 +109,35 @@ function check(name, pass, detail = "") {
   const missingFile = await req("GET", "/api/files/library/does-not-exist-id");
   check("ملف غير موجود يعيد 404", missingFile.status === 404, "status " + missingFile.status);
 
-  console.log("\n── إدارة المكتبة من حساب المختص ──");
+  console.log("\n── إدارة المكتبة من حساب الأخصائي ──");
   if (specCookie) {
     const create = await req("POST", "/api/specialist/library/resources", {
       cookie: specCookie,
       body: { title: "مورد فحص مؤقّت", description: "يُحذف بعد الفحص", categoryId: args.CATEGORY_ID, type: "READABLE", language: "ar", published: false, downloadable: false },
     });
-    check("المختص ينشئ مورداً", create.status === 201 || create.status === 200, "status " + create.status + " " + (create.json?.error || ""));
+    check("الأخصائي ينشئ مورداً", create.status === 201 || create.status === 200, "status " + create.status + " " + (create.json?.error || ""));
     const id = create.json?.resource?.id || create.json?.id;
     if (id) {
       const patch = await req("PATCH", "/api/specialist/library/resources/" + id, {
         cookie: specCookie,
         body: { kind: "full", categoryId: args.CATEGORY_ID, title: "مورد فحص معدّل", type: "READABLE", language: "ar", published: false, downloadable: false },
       });
-      check("المختص يعدّل المورد", patch.status === 200, "status " + patch.status + " " + (patch.json?.error || ""));
+      check("الأخصائي يعدّل المورد", patch.status === 200, "status " + patch.status + " " + (patch.json?.error || ""));
 
       const publish = await req("PATCH", "/api/specialist/library/resources/" + id, { cookie: specCookie, body: { kind: "publish", published: true } });
-      check("المختص ينشر المورد", publish.status === 200, "status " + publish.status);
+      check("الأخصائي ينشر المورد", publish.status === 200, "status " + publish.status);
 
       const archive = await req("PATCH", "/api/specialist/library/resources/" + id, { cookie: specCookie, body: { kind: "archive", archived: true } });
-      check("المختص يؤرشف المورد", archive.status === 200, "status " + archive.status);
+      check("الأخصائي يؤرشف المورد", archive.status === 200, "status " + archive.status);
 
       const anonPatch = await req("PATCH", "/api/specialist/library/resources/" + id, { body: { kind: "publish", published: true } });
       check("زائر لا يعدّل المورد", anonPatch.status === 401 || anonPatch.status === 403, "status " + anonPatch.status);
 
       const del = await req("DELETE", "/api/specialist/library/resources/" + id, { cookie: specCookie });
-      check("المختص يحذف المورد", del.status === 200 || del.status === 204, "status " + del.status);
+      check("الأخصائي يحذف المورد", del.status === 200 || del.status === 204, "status " + del.status);
     }
   } else {
-    console.log("(تخطّي: لم يُمرَّر كوكي المختص)");
+    console.log("(تخطّي: لم يُمرَّر كوكي الأخصائي)");
   }
 
   console.log("\nملخص: " + results.filter((r) => r.pass).length + "/" + results.length);

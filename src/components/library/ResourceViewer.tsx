@@ -87,7 +87,7 @@ export function ResourceViewer({
         {audioError ? (
           <div className="mt-4">
             <Alert tone="danger" title="تعذّر تشغيل الملف">
-              حاول تحديث الصفحة، أو تواصل مع مختص التوجيه المهني إذا استمرت المشكلة.
+              حاول تحديث الصفحة، أو تواصل مع أخصائي التوجيه المهني إذا استمرت المشكلة.
             </Alert>
           </div>
         ) : null}
@@ -175,11 +175,11 @@ export function ResourceViewer({
     <div className="card card-pad">
       <h2 className="text-base font-bold text-slate-900">مُدرَج في الفهرس</h2>
       <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-        هذا العنوان مسجّل في المكتبة ولم تُرفق نسخته بعد. اطلبه من مختص التوجيه
+        هذا العنوان مسجّل في المكتبة ولم تُرفق نسخته بعد. اطلبه من أخصائي التوجيه
         المهني ليرفعه أو يدلّك على نسخة متاحة.
       </p>
       <Link href="/booking" className="btn-outline mt-4">
-        اسأل المختص عن هذا الكتاب
+        اسأل الأخصائي عن هذا الكتاب
       </Link>
     </div>
   );

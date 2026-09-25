@@ -72,7 +72,7 @@ export function StartAssessmentForm() {
     <form onSubmit={onSubmit} noValidate className="card card-pad">
       <h2 className="text-lg font-bold text-slate-900">بياناتك</h2>
       <p className="mt-1.5 text-sm text-[var(--color-muted)]">
-        نحتاج هذه البيانات لربط النتيجة بك ولمتابعتها مع مختص التوجيه المهني.
+        نحتاج هذه البيانات لربط النتيجة بك ولمتابعتها مع أخصائي التوجيه المهني.
       </p>
 
       <div className="mt-6 space-y-5">

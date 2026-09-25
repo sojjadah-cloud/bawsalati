@@ -130,13 +130,13 @@ async function main() {
   check("تصنيفات المكتبة موجودة", cats >= 3, cats + " تصنيفاً");
 
   const specialists = await prisma.specialistProfile.count();
-  check("ثلاثة مختصين", specialists === 3, specialists + "");
+  check("ثلاثة أخصائيين", specialists === 3, specialists + "");
 
   const withBio = await prisma.specialistProfile.count({ where: { NOT: { bio: "" } } });
-  check("لكل مختص نبذة في ملفه", withBio === 3, withBio + " من 3");
+  check("لكل أخصائي نبذة في ملفه", withBio === 3, withBio + " من 3");
 
   const withSlots = await prisma.specialistProfile.count({ where: { availability: { some: { active: true } } } });
-  check("لكل مختص أوقات استقبال", withSlots === 3, withSlots + " من 3");
+  check("لكل أخصائي أوقات استقبال", withSlots === 3, withSlots + " من 3");
 
   const programs = await prisma.studyProgram.count({ where: { active: true } });
   check("دليل التخصصات مُدخَل", programs > 500, programs + " برنامجاً");

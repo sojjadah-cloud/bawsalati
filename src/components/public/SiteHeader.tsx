@@ -79,13 +79,13 @@ export function SiteHeader() {
               <span className="text-lg">بوصلتي</span>
             </Link>
 
-            {/* اليسار: دخول المختصين. بابٌ للمختصين لا للطلبة، فيتميّز بلونه ويبقى هادئاً */}
+            {/* اليسار: دخول الأخصائيين. بابٌ للأخصائيين لا للطلبة، فيتميّز بلونه ويبقى هادئاً */}
             <div className="flex items-center">
               <Link
                 href="/login"
                 className="btn-sm hidden items-center rounded-[var(--radius-md)] border border-brand-200 bg-brand-50 px-3 font-bold text-brand-800 transition-colors hover:border-brand-300 hover:bg-brand-100 lg:inline-flex"
               >
-                دخول المختصين
+                دخول الأخصائيين
               </Link>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function SiteHeader() {
                   onClick={() => setOpen(false)}
                   className="flex min-h-12 items-center rounded-[var(--radius-md)] px-3 text-base font-bold text-slate-500"
                 >
-                  دخول المختصين
+                  دخول الأخصائيين
                 </Link>
               </li>
             </ul>

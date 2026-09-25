@@ -14,7 +14,7 @@ import { formatArabicDate, formatArabicTime } from "@/lib/time";
 import { isSlotOffered } from "./availability";
 import type { CreateAppointmentInput } from "./schemas";
 
-/** المختصون المتاحون للحجز — بلا أي بيانات تواصل خاصة. */
+/** الأخصائيون المتاحون للحجز — بلا أي بيانات تواصل خاصة. */
 export async function listBookableSpecialists() {
   const rows = await prisma.specialistProfile.findMany({
     where: { bookable: true, user: { active: true } },
@@ -60,7 +60,7 @@ export interface CreatedAppointment {
  * ثلاث طبقات تمنع الحجز المزدوج:
  *   1. الفترات المعروضة تُولَّد في الخادم وتستثني المحجوز.
  *   2. إعادة تحقق من العرض لحظة الإرسال.
- *   3. قيد فريد في قاعدة البيانات على (المختص، التاريخ، وقت البداية) — الفاصل الحاسم عند التزاحم.
+ *   3. قيد فريد في قاعدة البيانات على (الأخصائي، التاريخ، وقت البداية) — الفاصل الحاسم عند التزاحم.
  */
 export async function createAppointment(
   input: CreateAppointmentInput
@@ -73,7 +73,7 @@ export async function createAppointment(
       user: { select: { name: true } },
     },
   });
-  if (!specialist) throw new ApiError("المختص غير متاح للحجز", 404);
+  if (!specialist) throw new ApiError("الأخصائي غير متاح للحجز", 404);
 
   const topic = await prisma.consultationTopic.findFirst({
     where: { id: input.topicId, active: true },
@@ -190,7 +190,7 @@ export interface StatusChange {
   actorId: string;
 }
 
-/** تغيير الحالة — مقصور على المختص صاحب الحجز، ومسجّل في سجل الحالات. */
+/** تغيير الحالة — مقصور على الأخصائي صاحب الحجز، ومسجّل في سجل الحالات. */
 export async function changeStatus(change: StatusChange) {
   const current = await prisma.appointment.findUnique({
     where: { id: change.appointmentId },

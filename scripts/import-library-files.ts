@@ -52,7 +52,7 @@ function similarity(fileName: string, title: string): number {
   return (shared / a.size) * 0.5 + (shared / b.size) * 0.5;
 }
 
-/** أدنى تشابه يُقبل. دونه يُترك الملف للمختص يرفعه بنفسه. */
+/** أدنى تشابه يُقبل. دونه يُترك الملف للأخصائي يرفعه بنفسه. */
 const THRESHOLD = 0.6;
 
 const READABLE = ["application/pdf"];
@@ -146,7 +146,7 @@ async function main() {
 
   console.log(`\n${apply ? "أُرفق" : "سيُرفق"}: ${attached} ملفاً`);
   if (unmatched.length) {
-    console.log(`\nبلا تطابق مؤكّد (${unmatched.length}) — ارفعها من لوحة المختص أو أعد تسميتها بعنوان الكتاب:`);
+    console.log(`\nبلا تطابق مؤكّد (${unmatched.length}) — ارفعها من لوحة الأخصائي أو أعد تسميتها بعنوان الكتاب:`);
     for (const u of unmatched) console.log("  - " + u);
   }
   if (!apply) console.log("\nأعد الأمر مع --apply للتنفيذ.\n");

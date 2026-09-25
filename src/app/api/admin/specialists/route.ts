@@ -37,7 +37,7 @@ export async function POST(req: Request) {
           ? {
               specialistProfile: {
                 create: {
-                  title: input.title || "مختص التوجيه المهني",
+                  title: input.title || "أخصائي التوجيه المهني",
                   notifyPhone: input.notifyPhone || null,
                 },
               },

@@ -1,4 +1,4 @@
-// استعلامات لوحة المختص. كل دالة تُصفّي بمعرّف المختص أو تقتصر على بيانات مصرّح بها.
+// استعلامات لوحة الأخصائي. كل دالة تُصفّي بمعرّف الأخصائي أو تقتصر على بيانات مصرّح بها.
 import type { AppointmentStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isoDateToUtc, todayIso } from "@/lib/time";

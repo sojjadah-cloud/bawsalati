@@ -102,7 +102,7 @@ export function AppointmentActions({
       >
         <form onSubmit={saveNotes}>
           <TextAreaField
-            label="ملاحظات المختص"
+            label="ملاحظات الأخصائي"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={4000}

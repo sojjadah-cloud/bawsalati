@@ -192,7 +192,7 @@ export function SpecialistManager({
         open={addOpen}
         onClose={() => setAddOpen(false)}
         title="إضافة حساب جديد"
-        description="حسابات المختصين والمديرين فقط. الطلاب لا يحتاجون حسابات."
+        description="حسابات الأخصائيين والمديرين فقط. الطلاب لا يحتاجون حسابات."
       >
         <form onSubmit={create} noValidate className="space-y-5">
           <TextField
@@ -226,7 +226,7 @@ export function SpecialistManager({
             value={role}
             onChange={(e) => setRole(e.target.value)}
             options={[
-              { value: "SPECIALIST", label: "مختص التوجيه المهني" },
+              { value: "SPECIALIST", label: "أخصائي التوجيه المهني" },
               { value: "ADMIN", label: "مدير النظام" },
             ]}
           />
@@ -239,7 +239,7 @@ export function SpecialistManager({
               value={notifyPhone}
               onChange={(e) => setNotifyPhone(e.target.value.replace(/\D/gu, ""))}
               error={errors.notifyPhone}
-              hint="بصيغة دولية بلا رمز +. يمكن للمختص تغييره لاحقاً."
+              hint="بصيغة دولية بلا رمز +. يمكن للأخصائي تغييره لاحقاً."
               maxLength={15}
             />
           ) : null}

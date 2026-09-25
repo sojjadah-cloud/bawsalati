@@ -55,7 +55,7 @@ export const MAX_UPLOAD_BYTES = {
   LIBRARY: 30 * 1024 * 1024, // 30MB
   GUIDE: 60 * 1024 * 1024, // 60MB
   AUDIO: 60 * 1024 * 1024, // 60MB
-  /** نشرات المختصين: صورة أو مقطع مرئي قصير */
+  /** نشرات الأخصائيين: صورة أو مقطع مرئي قصير */
   BULLETIN: 60 * 1024 * 1024, // 60MB
 } as const;
 
@@ -154,7 +154,7 @@ export async function readStoredFile(storageKey: string): Promise<Buffer> {
   } catch (e) {
     // السجلّ موجود والملف مفقود: قرص مُسح مع النشر، لا عطل في الخادم
     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
-      throw new UploadError("الملف لم يعد متاحاً. يُرجى إبلاغ المختص لإعادة رفعه.", 404);
+      throw new UploadError("الملف لم يعد متاحاً. يُرجى إبلاغ الأخصائي لإعادة رفعه.", 404);
     }
     throw e;
   }

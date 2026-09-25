@@ -151,7 +151,7 @@ export function ResultTables({
   showScores = true,
 }: {
   sections: ResultSectionData[];
-  /** صفحة الطالب تعرض إجاباته فقط، والدرجات والرتب تبقى للمختص */
+  /** صفحة الطالب تعرض إجاباته فقط، والدرجات والرتب تبقى للأخصائي */
   showScores?: boolean;
 }) {
   return (

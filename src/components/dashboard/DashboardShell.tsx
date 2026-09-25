@@ -45,7 +45,7 @@ export type DashboardArea = "specialist" | "admin";
  */
 const NAV: Record<DashboardArea, { label: string; items: NavItem[] }> = {
   specialist: {
-    label: "لوحة المختص",
+    label: "لوحة الأخصائي",
     items: [
       { href: "/specialist", label: "الرئيسية", icon: LayoutDashboard, primary: true },
       { href: "/specialist/assessments", label: "نتائج الاختبارات", icon: ClipboardList, primary: true },
@@ -61,7 +61,7 @@ const NAV: Record<DashboardArea, { label: string; items: NavItem[] }> = {
     label: "إدارة المنصة",
     items: [
       { href: "/admin", label: "الرئيسية", icon: LayoutDashboard, primary: true },
-      { href: "/admin/specialists", label: "المختصون", icon: Users, primary: true },
+      { href: "/admin/specialists", label: "الأخصائيون", icon: Users, primary: true },
       { href: "/admin/questions", label: "أسئلة المقياس", icon: ListChecks, primary: true },
       { href: "/admin/topics", label: "مواضيع الاستشارة", icon: MessageSquare, primary: true },
       { href: "/admin/library", label: "تصنيفات المكتبة", icon: BookOpenText },

@@ -8,7 +8,7 @@ import { formatArabicDate, formatArabicTime, utcToIsoDate } from "@/lib/time";
 import { Badge, EmptyState, PageHeading, StatCard, type BadgeTone } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
-  title: "لوحة المختص",
+  title: "لوحة الأخصائي",
   robots: { index: false, follow: false },
 };
 

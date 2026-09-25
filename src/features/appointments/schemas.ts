@@ -14,7 +14,7 @@ export const hhmm = z.string().trim().refine(isValidHhMm, "وقت غير صحي�
 
 export const createAppointmentSchema = z
   .object({
-    specialistId: z.string().trim().min(1, "اختر المختص"),
+    specialistId: z.string().trim().min(1, "اختر الأخصائي"),
     studentName: studentNameSchema,
     grade: z.enum(gradeValues, { errorMap: () => ({ message: "اختر الصف الدراسي" }) }),
     phone: phoneSchema,

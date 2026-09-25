@@ -31,7 +31,7 @@ export default async function AdminLibraryPage() {
     <>
       <PageHeading
         title="تصنيفات المكتبة"
-        description="أقسام المكتبة كما يراها الطالب. الموارد نفسها يديرها المختص من لوحته."
+        description="أقسام المكتبة كما يراها الطالب. الموارد نفسها يديرها الأخصائي من لوحته."
       />
       <div className="mt-6">
         <CategoryManager

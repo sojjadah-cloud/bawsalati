@@ -1,4 +1,4 @@
-// إرسال إشعار الحجز للمختص + تسجيل حالة التسليم بشكل مستقل.
+// إرسال إشعار الحجز للأخصائي + تسجيل حالة التسليم بشكل مستقل.
 // القاعدة: فشل الإشعار لا يلغي حجزاً صحيحاً ولا يُفشل طلب الطالب.
 import { prisma } from "../prisma";
 import { maskPhone } from "../audit";
@@ -18,7 +18,7 @@ export interface BookingNotice {
 
 /**
  * الرسالة تحمل الحد الأدنى: من، ومتى، وموضوع عام.
- * التفاصيل تبقى داخل لوحة المختص خلف تسجيل الدخول.
+ * التفاصيل تبقى داخل لوحة الأخصائي خلف تسجيل الدخول.
  */
 function composeBookingText(n: BookingNotice): string {
   return [
@@ -27,7 +27,7 @@ function composeBookingText(n: BookingNotice): string {
     `التاريخ: ${n.date}`,
     `الوقت: ${n.time}`,
     `الموضوع: ${n.topic}`,
-    "التفاصيل في لوحة المختص.",
+    "التفاصيل في لوحة الأخصائي.",
   ].join("\n");
 }
 
@@ -41,7 +41,7 @@ export async function sendBookingNotification(n: BookingNotice): Promise<void> {
       recipientMasked: "—",
       template,
       status: "SKIPPED",
-      lastError: "لا يوجد رقم إشعار مُعدّ للمختص",
+      lastError: "لا يوجد رقم إشعار مُعدّ للأخصائي",
       appointmentId: n.appointmentId,
       attempts: 0,
     });
@@ -69,7 +69,7 @@ export function composeBookingSummary(n: BookingSummary): string {
     `الطالب: ${n.studentName}`,
     `الصف: ${n.grade}`,
     `هاتف الطالب: ${n.studentPhone}`,
-    `المختص: ${n.specialistName}`,
+    `الأخصائي: ${n.specialistName}`,
     `التاريخ: ${n.date}`,
     `الوقت: ${n.time}`,
     `الموضوع: ${n.topic}`,
@@ -149,7 +149,7 @@ async function recordDelivery(rec: DeliveryRecord) {
   }
 }
 
-/** تنبيه داخل لوحة المختص — مستقل عن الرسالة الخارجية. */
+/** تنبيه داخل لوحة الأخصائي — مستقل عن الرسالة الخارجية. */
 export async function notifySpecialistInApp(input: {
   specialistId: string | null;
   type: string;

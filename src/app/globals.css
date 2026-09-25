@@ -98,6 +98,21 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* شعار المدرسة علامةً مائية خافتة خلف المحتوى: يُرى ولا يُزاحم القراءة،
+     ولا يلتقط نقرة، ولا يُطبع على الورق. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: url("/school-mark.webp");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: min(58vmin, 460px);
+    opacity: 0.045;
+    pointer-events: none;
+  }
+
   h1,
   h2,
   h3,
@@ -405,6 +420,9 @@
   }
   body {
     background: #fff;
+  }
+  body::before {
+    display: none;
   }
   .card {
     box-shadow: none;

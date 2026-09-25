@@ -78,7 +78,7 @@ export async function PATCH(
   }
 }
 
-/** حذف نهائي. متاح للمختص والمدير معاً. */
+/** حذف نهائي. متاح للأخصائي والمدير معاً. */
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

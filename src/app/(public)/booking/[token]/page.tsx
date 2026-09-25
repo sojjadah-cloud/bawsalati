@@ -24,7 +24,7 @@ const TONE: Record<string, BadgeTone> = {
 };
 
 const NOTE: Record<string, string> = {
-  PENDING: "وصل طلبك إلى المختص، وسيؤكّده قريباً.",
+  PENDING: "وصل طلبك إلى الأخصائي، وسيؤكّده قريباً.",
   CONFIRMED: "موعدك مؤكّد. احضر في الوقت المحدّد.",
   COMPLETED: "تمّت الاستشارة. يمكنك حجز موعد آخر متى احتجت.",
   CANCELLED: "أُلغي هذا الموعد. يمكنك حجز موعد جديد.",
@@ -43,7 +43,7 @@ export default async function BookingStatusPage({
 
   return (
     <>
-      <PageHero title="متابعة حجزك" description="حالة موعدك مع مختص التوجيه المهني." />
+      <PageHero title="متابعة حجزك" description="حالة موعدك مع أخصائي التوجيه المهني." />
 
       <div className="container-narrow py-10 sm:py-14">
         <div className="card card-pad">
@@ -68,7 +68,7 @@ export default async function BookingStatusPage({
               },
               {
                 icon: UserRound,
-                label: "المختص",
+                label: "الأخصائي",
                 value: `${appointment.specialist.user.name} · ${appointment.specialist.title}`,
               },
             ].map((row) => (
@@ -94,7 +94,7 @@ export default async function BookingStatusPage({
 
         <p className="mt-6 text-sm text-[var(--color-muted)]">
           احتفظ برابط هذه الصفحة لمتابعة حالة موعدك. لتعديل الموعد أو إلغائه تواصل مع
-          مختص التوجيه المهني.
+          أخصائي التوجيه المهني.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">

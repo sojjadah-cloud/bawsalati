@@ -2,7 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { noStore, json, errorResponse, parseBody, requireSpecialist } from "@/lib/api";
 
-/** تنبيهات المختص: الموجّهة له، والعامة لكل المختصين. */
+/** تنبيهات الأخصائي: الموجّهة له، والعامة لكل الأخصائيين. */
 function audienceFilter(specialistId: string) {
   return { OR: [{ specialistId }, { specialistId: null }] };
 }

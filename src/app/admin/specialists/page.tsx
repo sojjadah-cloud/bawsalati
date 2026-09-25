@@ -5,7 +5,7 @@ import { PageHeading } from "@/components/ui/primitives";
 import { SpecialistManager } from "@/components/admin/SpecialistManager";
 
 export const metadata: Metadata = {
-  title: "المختصون",
+  title: "الأخصائيون",
   robots: { index: false, follow: false },
 };
 
@@ -30,7 +30,7 @@ export default async function AdminSpecialistsPage() {
   return (
     <>
       <PageHeading
-        title="المختصون وحسابات الإدارة"
+        title="الأخصائيون وحسابات الإدارة"
         description="إنشاء الحسابات وتفعيلها وإعادة ضبط كلمات المرور."
       />
       <div className="mt-6">

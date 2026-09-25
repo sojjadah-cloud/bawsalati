@@ -90,10 +90,10 @@ export async function requireRole(roles: Role[]): Promise<SessionUser> {
 export const requireAdmin = () => requireRole(["ADMIN"]);
 export const requireStaff = () => requireRole(["ADMIN", "SPECIALIST"]);
 
-/** المختص الذي يملك ملفاً؛ المدير يمرّ بلا specialistId. */
+/** الأخصائي الذي يملك ملفاً؛ المدير يمرّ بلا specialistId. */
 export async function requireSpecialist(): Promise<SessionUser & { specialistId: string }> {
   const session = await requireRole(["SPECIALIST"]);
-  if (!session.specialistId) throw new ApiError("حساب المختص غير مكتمل", 403);
+  if (!session.specialistId) throw new ApiError("حساب الأخصائي غير مكتمل", 403);
   return session as SessionUser & { specialistId: string };
 }
 

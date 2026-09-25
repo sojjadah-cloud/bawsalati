@@ -10,7 +10,7 @@ export interface SessionUser {
   name: string;
   email: string;
   role: Role;
-  /** معرّف ملف المختص — موجود فقط لدور SPECIALIST */
+  /** معرّف ملف الأخصائي — موجود فقط لدور SPECIALIST */
   specialistId?: string;
 }
 

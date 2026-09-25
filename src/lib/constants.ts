@@ -4,7 +4,7 @@ export const BRAND = {
   name: "بوصلتي",
   tagline: "منصة التوجيه المهني",
   description:
-    "منصة التوجيه المهني: اختبار ميول، مكتبة رقمية، دليل الطالب، وموعد مع مختص.",
+    "منصة التوجيه المهني: اختبار ميول، مكتبة رقمية، دليل الطالب، وموعد مع أخصائي.",
   email: "bawsalati@soharboys.edu.om",
   phone: "+968 92549426",
   location: "سلطنة عُمان — صحار",
@@ -12,7 +12,7 @@ export const BRAND = {
 
 export const ROLE_LABELS: Record<string, string> = {
   ADMIN: "مدير النظام",
-  SPECIALIST: "مختص التوجيه المهني",
+  SPECIALIST: "أخصائي التوجيه المهني",
 };
 
 export const GRADES = [

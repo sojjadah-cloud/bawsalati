@@ -15,7 +15,7 @@ datasource db {
 
 // ─────────────────────────── Enums ───────────────────────────
 
-/// مستويان فقط لهما حساب: مدير النظام ومختص التوجيه المهني.
+/// مستويان فقط لهما حساب: مدير النظام وأخصائي التوجيه المهني.
 /// الطالب لا يحتاج حساباً لاستخدام المنصة.
 enum Role {
   ADMIN
@@ -90,11 +90,11 @@ model User {
   @@map("users")
 }
 
-/// بيانات المختص المهنية. رقم الإشعار خاص ولا يُعرض للطلاب أبداً.
+/// بيانات الأخصائي المهنية. رقم الإشعار خاص ولا يُعرض للطلاب أبداً.
 model SpecialistProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
-  title       String   @default("مختص التوجيه المهني")
+  title       String   @default("أخصائي التوجيه المهني")
   bio         String   @default("")
   photoUrl    String?
   /// رقم التواصل الذي يصله إشعار الحجز (خاص — لا يُرسل للواجهة العامة)
@@ -549,7 +549,7 @@ model ConsultationTopic {
   @@map("consultation_topics")
 }
 
-/// نافذة دوام أسبوعية متكرّرة للمختص.
+/// نافذة دوام أسبوعية متكرّرة للأخصائي.
 model SpecialistAvailability {
   id           String   @id @default(cuid())
   specialistId String
@@ -658,10 +658,10 @@ model NotificationDelivery {
   @@map("notification_deliveries")
 }
 
-/// تنبيهات داخل لوحة المختص.
+/// تنبيهات داخل لوحة الأخصائي.
 model InAppNotification {
   id           String   @id @default(cuid())
-  /// معرّف المختص المستهدف، أو null لكل المختصين
+  /// معرّف الأخصائي المستهدف، أو null لكل الأخصائيين
   specialistId String?
   type         String
   title        String
@@ -685,7 +685,7 @@ model FaqEntry {
   keywords   String[] @default([])
   topic      String   @default("")
   active     Boolean  @default(true)
-  /// مصدر الجواب: "guide" لما استُخرج من دليل الطالب، وفارغ لما كتبه المختص
+  /// مصدر الجواب: "guide" لما استُخرج من دليل الطالب، وفارغ لما كتبه الأخصائي
   source     String   @default("")
   /// صفحة الدليل التي أُخذ منها الجواب، إن وُجدت
   page       Int?
@@ -702,7 +702,7 @@ model FaqEntry {
   @@map("faq_entries")
 }
 
-/// سؤال لم يجد له المساعد إجابة. يراجعه المختص ليضيف جواباً.
+/// سؤال لم يجد له المساعد إجابة. يراجعه الأخصائي ليضيف جواباً.
 model UnansweredQuestion {
   id         String   @id @default(cuid())
   text       String

@@ -60,7 +60,7 @@ export default async function AdminHome() {
   ]);
 
   const warnings: string[] = [];
-  if (specialists === 0) warnings.push("لا يوجد مختص فعّال — لن يتمكّن الطلاب من حجز موعد.");
+  if (specialists === 0) warnings.push("لا يوجد أخصائي فعّال — لن يتمكّن الطلاب من حجز موعد.");
   if (!activeAssessment) warnings.push("لا يوجد مقياس فعّال — شغّل تهيئة قاعدة البيانات.");
   if (!activeRuleSet || activeRuleSet._count.rules === 0) {
     warnings.push(
@@ -96,7 +96,7 @@ export default async function AdminHome() {
       ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="مختصون فعّالون" value={specialists} icon={<Users className="h-5 w-5" />} />
+        <StatCard label="أخصائيون فعّالون" value={specialists} icon={<Users className="h-5 w-5" />} />
         <StatCard
           label="عبارات المقياس"
           value={activeQuestions}
@@ -123,7 +123,7 @@ export default async function AdminHome() {
         </h2>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {[
-            { href: "/admin/specialists", label: "إدارة المختصين", icon: Users },
+            { href: "/admin/specialists", label: "إدارة الأخصائيين", icon: Users },
             { href: "/admin/questions", label: "مراجعة أسئلة المقياس", icon: ListChecks },
             { href: "/admin/topics", label: "مواضيع الاستشارة", icon: FileText },
             { href: "/admin/guide", label: "نشر دليل الطالب", icon: BookOpenText },

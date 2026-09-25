@@ -486,7 +486,7 @@ function Results({
             <EmptyState
               icon={<TriangleAlert className="h-6 w-6" />}
               title="لم نجد برنامجاً مطابقاً"
-              description="راجع موادك ودرجاتك، أو تصفّح الدليل كاملاً، وناقش خياراتك مع مختص التوجيه المهني."
+              description="راجع موادك ودرجاتك، أو تصفّح الدليل كاملاً، وناقش خياراتك مع أخصائي التوجيه المهني."
               action={
                 <Link href="/guide" className="btn-primary">
                   تصفّح الدليل
@@ -522,7 +522,7 @@ function Results({
           <h2 className="text-center text-lg font-bold text-slate-900">تحتاج مواد أخرى</h2>
           <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
             برامج تشترط مواد ليست ضمن خطتك. إن كنت في الحادي عشر فما زال بإمكانك تعديل
-            اختيارك، وناقش ذلك مع مختص التوجيه المهني.
+            اختيارك، وناقش ذلك مع أخصائي التوجيه المهني.
           </p>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {result.needsSubjects.map((m) => (
@@ -545,7 +545,7 @@ function Results({
             ابدأ من جديد
           </button>
           <Link href="/booking" className="btn-primary">
-            ناقش خياراتك مع مختص
+            ناقش خياراتك مع أخصائي
           </Link>
         </div>
       </div>

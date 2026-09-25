@@ -22,7 +22,7 @@ function devAccounts(): DevAccount[] {
   const password = process.env.SEED_PASSWORD || "Bawsalati@2026";
   return [
     { label: "مدير النظام", email: "admin@bawsalati.om", password },
-    { label: "مختص التوجيه", email: "naeem@bawsalati.om", password },
+    { label: "أخصائي التوجيه", email: "naeem@bawsalati.om", password },
   ];
 }
 
@@ -58,10 +58,10 @@ export default async function LoginPage({
 
           <div className="card p-6 sm:p-8">
             <h1 className="text-xl font-extrabold text-slate-900">
-              تسجيل دخول المختصين
+              تسجيل دخول الأخصائيين
             </h1>
             <p className="mt-1.5 text-sm text-[var(--color-muted)]">
-              هذه الصفحة مخصّصة لمختصي التوجيه المهني وإدارة المنصة. الطلاب لا
+              هذه الصفحة مخصّصة لأخصائيي التوجيه المهني وإدارة المنصة. الطلاب لا
               يحتاجون حساباً لاستخدام خدمات بوصلتي.
             </p>
 

@@ -71,7 +71,7 @@ export function SiteFooter() {
               الخصوصية
             </Link>
             <Link href="/login" className="transition-colors hover:text-brand-700">
-              دخول المختصين
+              دخول الأخصائيين
             </Link>
           </div>
         </div>

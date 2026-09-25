@@ -50,7 +50,7 @@ export default async function ResultPage({
         </p>
         <Link href="/booking" className="btn-primary no-print mt-5">
           <CalendarCheck className="h-5 w-5" aria-hidden="true" />
-          ناقش نتيجتك مع مختص
+          ناقش نتيجتك مع أخصائي
         </Link>
       </header>
 
@@ -59,7 +59,7 @@ export default async function ResultPage({
           إجاباتك في البيئات الست
         </h2>
         <p className="section-lead">
-          هذه إجاباتك كما سجّلتها. يقرؤها مختص التوجيه المهني ويحلّلها معك.
+          هذه إجاباتك كما سجّلتها. يقرؤها أخصائي التوجيه المهني ويحلّلها معك.
         </p>
 
         <div className="mt-5">
@@ -71,7 +71,7 @@ export default async function ResultPage({
       {result.approvedAt && (result.specialistNotes || result.recommendation) ? (
         <section className="mt-12" aria-labelledby="specialist-title">
           <h2 id="specialist-title" className="section-title">
-            قراءة مختص التوجيه المهني
+            قراءة أخصائي التوجيه المهني
           </h2>
           <div className="card card-pad mt-5 space-y-5">
             {result.specialistNotes ? (

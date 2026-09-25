@@ -28,7 +28,7 @@ const SERVICES = [
     href: "/booking",
     icon: CalendarCheck,
     title: "حجز موعد",
-    description: "استشارة فردية مع مختص التوجيه المهني في وقت يناسبك.",
+    description: "استشارة فردية مع أخصائي التوجيه المهني في وقت يناسبك.",
     cta: "احجز موعداً",
   },
   {
@@ -61,7 +61,7 @@ export default function HomePage() {
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-pretty text-brand-100 sm:text-lg">
               بوصلتي منصة التوجيه المهني في المدرسة. تساعدك على فهم ميولك، وتضع
-              بين يديك المراجع والدليل الرسمي ومختصاً تناقشه.
+              بين يديك المراجع والدليل الرسمي وأخصائياً تناقشه.
             </p>
           </div>
         </div>

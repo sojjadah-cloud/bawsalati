@@ -197,7 +197,7 @@ export default async function ProgramPage({
             <div className="card card-pad">
               <h2 className="text-sm font-bold text-slate-900">تحتاج رأياً؟</h2>
               <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-                ناقش هذا البرنامج مع مختص التوجيه المهني قبل أن ترتّب رغباتك.
+                ناقش هذا البرنامج مع أخصائي التوجيه المهني قبل أن ترتّب رغباتك.
               </p>
               <Link href="/booking" className="btn-primary btn-block mt-4">
                 <CalendarCheck className="h-5 w-5" aria-hidden="true" />

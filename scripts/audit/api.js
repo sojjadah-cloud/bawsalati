@@ -56,7 +56,7 @@ function cookieOf(res) {
   check("طلب بلا ترويسة مصدر", noOrigin.status === 403 || noOrigin.status === 200, "status " + noOrigin.status);
 
   const login = await req("POST", "/api/auth/login", { body: { email: "naeem@bawsalati.om", password: PW } });
-  check("دخول المختص ينجح", login.status === 200, "status " + login.status);
+  check("دخول الأخصائي ينجح", login.status === 200, "status " + login.status);
   const specCookie = cookieOf(login);
   const raw = (login.headers["set-cookie"] || []).join(" | ");
   check("كوكي الجلسة HttpOnly", /HttpOnly/i.test(raw));
@@ -69,7 +69,7 @@ function cookieOf(res) {
 
   console.log("\n── الصلاحيات ──");
   const specOnAdmin = await req("POST", "/api/admin/specialists", { cookie: specCookie, body: { name: "اختراق", email: "x@y.om", password: "Aa123456!" } });
-  check("المختص يُمنع من إنشاء حسابات (واجهة المدير)", specOnAdmin.status === 403, "status " + specOnAdmin.status);
+  check("الأخصائي يُمنع من إنشاء حسابات (واجهة المدير)", specOnAdmin.status === 403, "status " + specOnAdmin.status);
 
   const anonSpec = await req("POST", "/api/specialist/faq", { body: { question: "س", answer: "ج" } });
   check("زائر بلا جلسة يُمنع من بنك الأسئلة", anonSpec.status === 401 || anonSpec.status === 403, "status " + anonSpec.status);
@@ -81,7 +81,7 @@ function cookieOf(res) {
   check("جلسة مزوّرة تُرفض", forged.status === 401 || forged.status === 403, "status " + forged.status);
 
   const adminOnSpec = await req("POST", "/api/specialist/faq", { cookie: adminCookie, body: { question: "س", answer: "ج" } });
-  check("المدير لا ينتحل دور المختص", adminOnSpec.status === 403 || adminOnSpec.status === 401, "status " + adminOnSpec.status);
+  check("المدير لا ينتحل دور الأخصائي", adminOnSpec.status === 403 || adminOnSpec.status === 401, "status " + adminOnSpec.status);
 
   console.log("\n── التحقّق من المدخلات ──");
   const v1 = await req("POST", "/api/assessment/sessions", { body: { studentName: "ط", grade: "10", gender: "MALE", phone: "91234567" } });

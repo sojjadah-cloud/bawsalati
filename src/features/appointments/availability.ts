@@ -1,4 +1,4 @@
-// حساب الفترات المتاحة للمختص.
+// حساب الفترات المتاحة للأخصائي.
 // الطالب لا يكتب موعداً حرّاً — يختار من فترات يولّدها الخادم فقط.
 import { prisma } from "@/lib/prisma";
 import {
@@ -39,7 +39,7 @@ interface BlockedPeriod {
   endTime: string | null;
 }
 
-/** كل الفترات الحرّة للمختص خلال المدى المسموح، مرتّبة بالتاريخ. */
+/** كل الفترات الحرّة للأخصائي خلال المدى المسموح، مرتّبة بالتاريخ. */
 export async function getAvailability(
   specialistId: string,
   options: { fromDate?: string; days?: number } = {}
