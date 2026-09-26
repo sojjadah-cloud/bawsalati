@@ -16,8 +16,12 @@ import {
   type Subject,
   type SubjectRule,
 } from "./requirements";
+import { offeredTo, type Audience } from "./audience";
 
-export interface MatchInput {
+export { SUPPORT_CATEGORIES, OPEN_TO_ALL, programGender, offeredTo } from "./audience";
+export type { Support, SupportKey, Gender, Audience } from "./audience";
+
+export interface MatchInput extends Audience {
   grade: string;
   /** المواد التي يدرسها الطالب */
   subjects: Subject[];
@@ -34,6 +38,8 @@ export interface ProgramMatch {
   institution: string;
   country: string;
   guidePage: number | null;
+  /** فئة الاستحقاق: تُعرض شارةً على البرامج غير المفتوحة للجميع */
+  eligibility: string;
   minOverall: number | null;
   /** المعدل التنافسي لهذا البرنامج بدرجات الطالب */
   competitive: number | null;
@@ -58,6 +64,8 @@ export interface MatchResult {
   overall: number | null;
   /** برامج لم تُقرأ شروطها آلياً فلا يُحكم عليها */
   unchecked: number;
+  /** برامج أُخفيت لأنها مقصورة على الجنس الآخر أو على فئة لم يخترها الطالب */
+  filteredOut: number;
 }
 
 const SELECT = {
@@ -69,6 +77,7 @@ const SELECT = {
   institution: true,
   country: true,
   guidePage: true,
+  eligibility: true,
   minOverall: true,
   subjectRules: true,
 } as const;
@@ -96,11 +105,15 @@ export function overallAverage(marks: Marks): number | null {
 }
 
 export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
-  const rows = await prisma.studyProgram.findMany({
+  const all = await prisma.studyProgram.findMany({
     where: { active: true },
     select: SELECT,
     orderBy: { code: "asc" },
   });
+
+  // التصفية بالجنس والفئة تسبق قراءة الشروط: برنامجٌ ليس معروضاً له لا يُحكم عليه
+  const rows = all.filter((row) => offeredTo(row, input));
+  const filteredOut = all.length - rows.length;
 
   const marks = input.marks ?? {};
   const hasMarks = Object.keys(marks).length > 0;
@@ -131,6 +144,7 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
       institution: row.institution,
       country: row.country,
       guidePage: row.guidePage,
+      eligibility: row.eligibility,
       minOverall: row.minOverall,
     };
 
@@ -199,6 +213,7 @@ export async function matchPrograms(input: MatchInput): Promise<MatchResult> {
       .sort((a, b) => b.count - a.count),
     overall,
     unchecked,
+    filteredOut,
   };
 }
 

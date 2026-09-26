@@ -7,7 +7,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, TriangleAlert } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
-import { GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
+import { GENDERS, GRADES, SUBJECTS, SUBJECT_GROUPS, SUBJECT_PLAN } from "@/lib/constants";
+import {
+  OPEN_TO_ALL,
+  SUPPORT_CATEGORIES,
+  type Support,
+  type SupportKey,
+} from "@/features/programs/audience";
 import { StepBack } from "@/components/ui/StepBack";
 import { Alert, EmptyState } from "@/components/ui/primitives";
 
@@ -28,6 +34,8 @@ interface ProgramMatch {
   institution: string;
   country: string;
   guidePage: number | null;
+  /** فئة الاستحقاق: تظهر شارةً على البرامج غير المفتوحة للجميع */
+  eligibility: string;
   minOverall: number | null;
   competitive: number | null;
   unmetRules: SubjectRule[];
@@ -43,6 +51,8 @@ interface MatchResult {
   fields: { field: string; count: number }[];
   overall: number | null;
   unchecked: number;
+  /** برامج أُخفيت لأنها مقصورة على الجنس الآخر أو على فئة لم تخترها */
+  filteredOut: number;
 }
 
 /** الصفّان الحادي عشر والثاني عشر يدخلان الدرجات، وما دونهما المواد فقط. */
@@ -56,6 +66,10 @@ const ELECTIVES = [...SUBJECT_GROUPS.science, ...SUBJECT_GROUPS.elective] as rea
 export function EligibilityWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [grade, setGrade] = useState("");
+  /** الجنس يُخفي البرامج المقصورة على الجنس الآخر */
+  const [gender, setGender] = useState("");
+  /** الفئات الخاصة: تُضاف برامجها لمن قال إنه منها */
+  const [support, setSupport] = useState<Support>({});
   const [math, setMath] = useState<Subject | "">("");
   const [electives, setElectives] = useState<Subject[]>([]);
   const [marks, setMarks] = useState<Partial<Record<Subject, string>>>({});
@@ -118,9 +132,14 @@ export function EligibilityWizard() {
     setLoading(true);
     setError(null);
     try {
+      const audience = { gender: gender || undefined, support };
       const body = needsMarks
-        ? { grade, marks: chosen.map((s) => ({ subject: s, mark: Number(marks[s]) })) }
-        : { grade, subjects: chosen };
+        ? {
+            grade,
+            ...audience,
+            marks: chosen.map((s) => ({ subject: s, mark: Number(marks[s]) })),
+          }
+        : { grade, ...audience, subjects: chosen };
       const data = await api.post<MatchResult>("/api/eligibility", body);
       setResult(data);
       setStep(3);
@@ -134,6 +153,8 @@ export function EligibilityWizard() {
   function restart() {
     setStep(1);
     setGrade("");
+    setGender("");
+    setSupport({});
     setMath("");
     setElectives([]);
     setMarks({});
@@ -141,7 +162,12 @@ export function EligibilityWizard() {
     setError(null);
   }
 
-  const STEP_LABELS = ["", "الصف", needsMarks ? "المواد والدرجات" : "المواد"];
+  const STEP_LABELS = ["", "بياناتك", needsMarks ? "المواد والدرجات" : "المواد"];
+  const canStart = grade !== "" && gender !== "";
+
+  function toggleSupport(key: SupportKey) {
+    setSupport((s) => ({ ...s, [key]: !s[key] }));
+  }
 
   return (
     <div className="space-y-6">
@@ -153,7 +179,7 @@ export function EligibilityWizard() {
 
       <ol className="flex flex-wrap items-center justify-center gap-2 text-sm">
         {[
-          { n: 1, label: "الصف" },
+          { n: 1, label: "بياناتك" },
           { n: 2, label: needsMarks ? "المواد والدرجات" : "المواد" },
           { n: 3, label: "التخصصات المتاحة" },
         ].map((s) => (
@@ -177,31 +203,96 @@ export function EligibilityWizard() {
       ) : null}
 
       {step === 1 ? (
-        <section className="card card-pad">
-          <h2 className="text-base font-bold text-slate-900">في أي صف أنت؟</h2>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            طالب الحادي عشر والثاني عشر يدخل درجاته أيضاً، فيُحتسب معدّله التنافسي.
-          </p>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {GRADES.map((g) => (
-              <li key={g.value}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setGrade(g.value);
-                    setStep(2);
-                  }}
-                  className={`inline-flex min-h-12 items-center rounded-[var(--radius-md)] border px-4 text-sm font-bold transition-colors ${
-                    grade === g.value
-                      ? "border-brand-700 bg-brand-700 text-white"
-                      : "border-[var(--color-line)] bg-white text-slate-700 hover:border-brand-300 hover:bg-brand-50"
-                  }`}
-                >
-                  {g.label}
-                </button>
-              </li>
-            ))}
-          </ul>
+        <section className="space-y-4">
+          <div className="card card-pad">
+            <h2 className="text-base font-bold text-slate-900">في أي صف أنت؟</h2>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">
+              طالب الحادي عشر والثاني عشر يدخل درجاته أيضاً، فيُحتسب معدّله التنافسي.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {GRADES.map((g) => (
+                <li key={g.value}>
+                  <Chip
+                    label={g.label}
+                    active={grade === g.value}
+                    onClick={() => setGrade(g.value)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card card-pad">
+            <h2 className="text-base font-bold text-slate-900">ذكر أم أنثى؟</h2>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">
+              بعض برامج الدليل مقصورة على أحد الجنسين، فلا تُعرض عليك برامج لا تستطيع
+              التقدّم لها.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {GENDERS.map((g) => (
+                <li key={g.value}>
+                  <Chip
+                    label={g.label}
+                    active={gender === g.value}
+                    onClick={() => setGender(g.value)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card card-pad">
+            <h2 className="text-base font-bold text-slate-900">هل تنطبق عليك إحدى هذه الفئات؟</h2>
+            <p className="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">
+              للدليل برامج ومقاعد مخصّصة لهذه الفئات. اختر ما ينطبق عليك لتُضاف إلى نتيجتك،
+              واتركها فارغة إن لم ينطبق عليك شيء. لا تُخزَّن هذه الإجابة ولا تُرسل لأحد.
+            </p>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {SUPPORT_CATEGORIES.map((c) => {
+                const picked = support[c.key] === true;
+                return (
+                  <li
+                    key={c.key}
+                    className={`rounded-[var(--radius-md)] border p-2 ${
+                      picked ? "border-brand-300 bg-brand-50/60" : "border-[var(--color-line)]"
+                    }`}
+                  >
+                    <label className="flex min-h-11 cursor-pointer items-start gap-2 text-sm font-bold text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={picked}
+                        onChange={() => toggleSupport(c.key)}
+                        className="mt-1 h-5 w-5 accent-[var(--color-brand-700)]"
+                      />
+                      <span>
+                        {c.label}
+                        <span className="mt-0.5 block text-xs font-normal text-[var(--color-muted)]">
+                          {c.hint}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="card card-pad flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              disabled={!canStart}
+              className="btn-primary"
+            >
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+              التالي — موادي
+            </button>
+            {!canStart ? (
+              <span className="text-xs text-[var(--color-muted)]">
+                {!grade ? "اختر صفّك" : "اختر ذكر أو أنثى"}
+              </span>
+            ) : null}
+          </div>
         </section>
       ) : null}
 
@@ -319,6 +410,32 @@ export function EligibilityWizard() {
   );
 }
 
+/** خيار واحد من مجموعة: الصف أو الجنس. */
+function Chip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex min-h-12 cursor-pointer items-center rounded-[var(--radius-md)] border px-4 text-sm font-bold transition-colors ${
+        active
+          ? "border-brand-700 bg-brand-700 text-white"
+          : "border-[var(--color-line)] bg-white text-slate-700 hover:border-brand-300 hover:bg-brand-50"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 /** مجموعة مواد من الخطة: إلزامية مقفلة، أو خيار واحد، أو اختيار محدود. */
 function SubjectGroup({
   title,
@@ -432,6 +549,9 @@ function MatchCard({ match, showCompetitive }: { match: ProgramMatch; showCompet
           <span className="badge-success tabular-nums">
             معدّلك التنافسي {match.competitive}٪
           </span>
+        ) : null}
+        {match.eligibility && match.eligibility !== OPEN_TO_ALL ? (
+          <span className="badge-info">{match.eligibility}</span>
         ) : null}
       </div>
 
@@ -625,6 +745,9 @@ function Results({
           يحدّده مركز القبول الموحد بحسب المقاعد وترتيب المتقدّمين.
           {result.unchecked > 0
             ? ` و${result.unchecked} برنامجاً لم تُقرأ شروطه آلياً، فراجعها في الدليل بنفسك.`
+            : null}
+          {result.filteredOut > 0
+            ? ` وأُخفي ${result.filteredOut} برنامجاً مقصوراً على الجنس الآخر أو على فئة لم تخترها.`
             : null}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">

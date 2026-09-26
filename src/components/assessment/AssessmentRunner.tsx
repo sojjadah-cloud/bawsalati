@@ -3,7 +3,15 @@
 // واجهة الإجابة: سؤال واحد في بؤرة الشاشة، حفظ تلقائي بعد كل اختيار.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ArrowLeft, ArrowRight, Check, CloudOff, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronsLeft,
+  CloudOff,
+  Loader2,
+} from "lucide-react";
 import { api, messageOf } from "@/lib/client";
 import { Alert, ErrorState, ProgressBar, SkeletonList } from "@/components/ui/primitives";
 
@@ -33,6 +41,9 @@ interface SessionPayload {
   answers: Record<string, number>;
 }
 
+/** أقصى عدد إجابات في الطلب الواحد — حدُّ الخادم ستون. */
+const SAVE_BATCH = 50;
+
 type SaveState = "idle" | "saving" | "saved" | "failed";
 type Phase = "loading" | "error" | "answering" | "review" | "submitting";
 
@@ -45,6 +56,9 @@ export function AssessmentRunner() {
   const [index, setIndex] = useState(0);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  /** طلب التخطّي معروضٌ للتأكيد — التخطّي يمسح ما أُجيب فلا يقع بنقرة واحدة. */
+  const [askSkip, setAskSkip] = useState(false);
+  const [skipping, setSkipping] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   /** الإجابات التي لم تصل الخادم بعد — تُعاد محاولتها قبل الإرسال. */
   const pendingRef = useRef<Map<string, number>>(new Map());
@@ -88,6 +102,16 @@ export function AssessmentRunner() {
 
   const total = questions.length;
   const current = questions[index];
+
+  /**
+   * خيار النفي: «لا أفضّل هذا النشاط» — أدنى قيمة في خيارات المقياس.
+   * يُقرأ من الخيارات نفسها لا يُكتب هنا، فلو تغيّرت صياغتها بقي الزرّ صحيحاً.
+   */
+  const declineOption = useMemo<Option | null>(() => {
+    const options = data?.assessment.options ?? [];
+    if (options.length === 0) return null;
+    return options.reduce((low, o) => (o.value < low.value ? o : low));
+  }, [data]);
   const answeredCount = useMemo(
     () => questions.filter((q) => answers[q.id] !== undefined).length,
     [questions, answers]
@@ -143,6 +167,42 @@ export function AssessmentRunner() {
   async function goToReview() {
     await flushPending();
     setPhase("review");
+  }
+
+  /**
+   * تخطّي الأسئلة: تُملأ كل العبارات بخيار النفي ثم يُنتقل إلى المراجعة.
+   * تُرسل على دفعات لأن الخادم يحدّ عدد الإجابات في الطلب الواحد.
+   */
+  async function skipAll() {
+    if (!declineOption || skipping) return;
+    const value = declineOption.value;
+
+    setSkipping(true);
+    setSubmitError(null);
+    const filled: Record<string, number> = {};
+    for (const q of questions) {
+      filled[q.id] = value;
+      pendingRef.current.set(q.id, value);
+    }
+    setAnswers(filled);
+    setSaveState("saving");
+
+    try {
+      const entries = questions.map((q) => ({ questionId: q.id, value }));
+      for (let i = 0; i < entries.length; i += SAVE_BATCH) {
+        const batch = entries.slice(i, i + SAVE_BATCH);
+        await api.post("/api/assessment/sessions/current/answers", { answers: batch });
+        for (const e of batch) pendingRef.current.delete(e.questionId);
+      }
+      setSaveState("saved");
+      setAskSkip(false);
+      setPhase("review");
+    } catch {
+      // الإجابات باقية في pendingRef، فتُعاد محاولتها قبل الإرسال
+      setSaveState("failed");
+    } finally {
+      setSkipping(false);
+    }
   }
 
   async function submit() {
@@ -346,6 +406,58 @@ export function AssessmentRunner() {
           ) : null}
         </p>
       </div>
+
+      {/* تخطّي الأسئلة — تُملأ كلها بخيار النفي */}
+      {declineOption ? (
+        <div className="mt-4">
+          {askSkip ? (
+            <Alert tone="warning" title="تخطّي كل الأسئلة؟">
+              <p className="leading-relaxed">
+                ستُضبَط الـ{total} عبارة كلها على «{declineOption.label}»، ويُستبدل ما أجبت عنه.
+                يمكنك تعديل أي عبارة قبل الإرسال، لكن نتيجةً كهذه لا تعبّر عن ميولك.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-primary btn-sm"
+                  onClick={() => void skipAll()}
+                  disabled={skipping}
+                  aria-busy={skipping || undefined}
+                >
+                  {skipping ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      جارِ التخطّي…
+                    </>
+                  ) : (
+                    <>
+                      <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+                      نعم، تخطَّ كل الأسئلة
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline btn-sm"
+                  onClick={() => setAskSkip(false)}
+                  disabled={skipping}
+                >
+                  تراجع
+                </button>
+              </div>
+            </Alert>
+          ) : (
+            <button
+              type="button"
+              className="btn-ghost btn-sm"
+              onClick={() => setAskSkip(true)}
+            >
+              <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+              تخطّي الأسئلة — تُملأ كلها بـ«{declineOption.label}»
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {/* التنقّل — ملتصق بأسفل الشاشة على الجوال ليسهل الوصول بيد واحدة */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--color-line)] bg-white/95 p-3 backdrop-blur-sm sm:static sm:mt-6 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
