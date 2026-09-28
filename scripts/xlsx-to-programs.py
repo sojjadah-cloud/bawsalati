@@ -258,7 +258,7 @@ def main() -> None:
     overrides = {}
     if overrides_file.exists():
         for o in json.loads(overrides_file.read_text(encoding="utf-8"))["overrides"]:
-            fixed = {k: v for k, v in o.items() if k in ("name", "requirements")}
+            fixed = {k: v for k, v in o.items() if k in ("name", "requirements", "institution")}
             if fixed:
                 overrides[o["code"]] = fixed
 

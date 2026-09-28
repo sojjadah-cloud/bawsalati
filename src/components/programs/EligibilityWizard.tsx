@@ -70,6 +70,8 @@ export function EligibilityWizard() {
   const [gender, setGender] = useState("");
   /** الفئات الخاصة: تُضاف برامجها لمن قال إنه منها */
   const [support, setSupport] = useState<Support>({});
+  /** «لا تنطبق عليّ أي فئة» — جوابٌ صريح، فلا يُمضى على سؤالٍ بلا إجابة */
+  const [noSupport, setNoSupport] = useState(false);
   const [math, setMath] = useState<Subject | "">("");
   const [electives, setElectives] = useState<Subject[]>([]);
   const [marks, setMarks] = useState<Partial<Record<Subject, string>>>({});
@@ -155,6 +157,7 @@ export function EligibilityWizard() {
     setGrade("");
     setGender("");
     setSupport({});
+    setNoSupport(false);
     setMath("");
     setElectives([]);
     setMarks({});
@@ -163,10 +166,19 @@ export function EligibilityWizard() {
   }
 
   const STEP_LABELS = ["", "بياناتك", needsMarks ? "المواد والدرجات" : "المواد"];
-  const canStart = grade !== "" && gender !== "";
+  const pickedSupport = SUPPORT_CATEGORIES.some((c) => support[c.key]);
+  const answeredSupport = noSupport || pickedSupport;
+  const canStart = grade !== "" && gender !== "" && answeredSupport;
 
   function toggleSupport(key: SupportKey) {
+    setNoSupport(false);
     setSupport((s) => ({ ...s, [key]: !s[key] }));
+  }
+
+  /** الفئات يستثني بعضها بعضاً: من قال «لا تنطبق عليّ» لا فئة له. */
+  function pickNoSupport() {
+    setSupport({});
+    setNoSupport(true);
   }
 
   return (
@@ -245,7 +257,7 @@ export function EligibilityWizard() {
             <h2 className="text-base font-bold text-slate-900">هل تنطبق عليك إحدى هذه الفئات؟</h2>
             <p className="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">
               للدليل برامج ومقاعد مخصّصة لهذه الفئات. اختر ما ينطبق عليك لتُضاف إلى نتيجتك،
-              واتركها فارغة إن لم ينطبق عليك شيء. لا تُخزَّن هذه الإجابة ولا تُرسل لأحد.
+              أو اختر «لا تنطبق عليّ أي فئة». لا تُخزَّن هذه الإجابة ولا تُرسل لأحد.
             </p>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {SUPPORT_CATEGORIES.map((c) => {
@@ -274,6 +286,27 @@ export function EligibilityWizard() {
                   </li>
                 );
               })}
+
+              <li
+                className={`rounded-[var(--radius-md)] border p-2 ${
+                  noSupport ? "border-brand-300 bg-brand-50/60" : "border-[var(--color-line)]"
+                }`}
+              >
+                <label className="flex min-h-11 cursor-pointer items-start gap-2 text-sm font-bold text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={noSupport}
+                    onChange={() => (noSupport ? setNoSupport(false) : pickNoSupport())}
+                    className="mt-1 h-5 w-5 accent-[var(--color-brand-700)]"
+                  />
+                  <span>
+                    لا تنطبق عليّ أي فئة
+                    <span className="mt-0.5 block text-xs font-normal text-[var(--color-muted)]">
+                      تُعرض عليك البرامج المفتوحة لجميع الطلبة
+                    </span>
+                  </span>
+                </label>
+              </li>
             </ul>
           </div>
 
@@ -289,7 +322,11 @@ export function EligibilityWizard() {
             </button>
             {!canStart ? (
               <span className="text-xs text-[var(--color-muted)]">
-                {!grade ? "اختر صفّك" : "اختر ذكر أو أنثى"}
+                {!grade
+                  ? "اختر صفّك"
+                  : !gender
+                    ? "اختر ذكر أو أنثى"
+                    : "أجب عن سؤال الفئات — ولو بـ«لا تنطبق عليّ أي فئة»"}
               </span>
             ) : null}
           </div>
@@ -574,7 +611,15 @@ function MatchCard({ match, showCompetitive }: { match: ProgramMatch; showCompet
             !match.overallMet && match.minOverall !== null
               ? `معدل عام ${match.minOverall}٪`
               : null,
-            ...match.unmetRules.map((r) => `${r.min}٪ في ${r.anyOf.join(" أو ")}`),
+            // نسبةٌ في مادة لا يدرسها الطالب مذكورةٌ في «دراسة …» قبلها، فلا تُكرَّر
+            ...match.unmetRules
+              .filter((r) => !r.anyOf.every((s) => match.missingSubjects.includes(s)))
+              // شرط بلا نسبة في الدليل: دراسة المادة فقط
+              .map((r) =>
+                r.min > 0
+                  ? `${r.min}٪ في ${r.anyOf.join(" أو ")}`
+                  : `دراسة ${r.anyOf.join(" أو ")}`
+              ),
           ]
             .filter(Boolean)
             .join("، ")}
