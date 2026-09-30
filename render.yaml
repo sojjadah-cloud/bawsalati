@@ -27,6 +27,7 @@ services:
       npm run norms:provisional &&
       npm run seed:content &&
       npm run guide:import content/StudentGuide2026.pdf "دليل الطالب 2026" &&
+      npm run library:import &&
       npm run programs:import &&
       npm run faq:guide &&
       npm run build
@@ -34,8 +35,11 @@ services:
 
     # ملاحظة التخزين:
     # ملفات المكتبة ودليل الطالب تُكتب على القرص. قرص خدمات الخطة المجانية
-    # مؤقّت، فتختفي الملفات المرفوعة عند كل نشر جديد. عند الترقية إلى خطة
-    # مدفوعة أزل التعليق عن الكتلة التالية واضبط STORAGE_DIR على /var/data.
+    # مؤقّت، فتختفي الملفات المرفوعة عند كل نشر جديد. ولذلك يُعاد في كل بناء
+    # إدخال الدليل وكتب content/library — وهي في المستودع فتعود كما كانت.
+    # أمّا ما يرفعه الأخصائي من لوحته فلا مصدر له في المستودع: يبقى سجلّه في
+    # القاعدة ويضيع ملفه. عند الترقية إلى خطة مدفوعة أزل التعليق عن الكتلة
+    # التالية واضبط STORAGE_DIR على /var/data فيثبت كل مرفوع.
     # disk:
     #   name: bawsalati-storage
     #   mountPath: /var/data

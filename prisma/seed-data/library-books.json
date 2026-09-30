@@ -1,0 +1,148 @@
+{
+  "note": "كتب المكتبة الرقمية. الملفات في content/library، والأغلفة مولَّدة من أوّل صفحة في كل كتاب. العناوين والمؤلفون منقولون عن أغلفة الكتب نفسها، وما لم يُذكر فيها تُرك فارغاً.",
+  "books": [
+    {
+      "slug": "choose-your-major",
+      "title": "كيف تختار تخصصك الجامعي؟ أساسيات هامة",
+      "author": "د. ياسر عبد الكريم بكار",
+      "publisher": "برنامج اكتشاف",
+      "publishedYear": 2009,
+      "category": "career-guidance",
+      "pages": 72,
+      "featured": true,
+      "description": "كتيّب يرافق برنامج «اكتشاف»، يعرض أسس اختيار التخصص الجامعي: الميول والقدرات وسوق العمل وطريقة المفاضلة بين الخيارات."
+    },
+    {
+      "slug": "decision-art",
+      "title": "فن وأسرار اتخاذ القرار",
+      "author": "د. إبراهيم الفقي",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "career-guidance",
+      "pages": 114,
+      "featured": true,
+      "description": "كيف يُتَّخذ القرار الصعب؟ خطوات عملية في ترتيب البدائل وموازنة المكاسب والمخاطر والتعامل مع التردّد."
+    },
+    {
+      "slug": "decision-craft",
+      "title": "صناعة واتخاذ القرار",
+      "author": "د. طارق عبد الرؤوف عامر، د. إيهاب عيسى المصري",
+      "publisher": "مؤسسة طيبة للنشر والتوزيع",
+      "publishedYear": null,
+      "category": "career-guidance",
+      "pages": 207,
+      "featured": false,
+      "description": "مرجع في مراحل صناعة القرار وأنواعه وأساليب المفاضلة بين البدائل، مع أمثلة إدارية تطبيقية."
+    },
+    {
+      "slug": "decision-making",
+      "title": "اتخاذ القرار",
+      "author": "إبراهيم علي ربابعة",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "career-guidance",
+      "pages": 10,
+      "featured": false,
+      "description": "ورقة مختصرة تعرّف عملية اتخاذ القرار وخطواتها والعوامل المؤثرة فيها — مدخل سريع لمن يبدأ."
+    },
+    {
+      "slug": "decision-participation",
+      "title": "أساليب المشاركة في اتخاذ القرار",
+      "author": "د. إبراهيم بكر",
+      "publisher": "",
+      "publishedYear": 2013,
+      "category": "career-guidance",
+      "pages": 62,
+      "featured": false,
+      "description": "مادة تدريبية عن إشراك الآخرين في القرار: متى يُستشار ومن يُستشار وكيف تُدار المشاركة."
+    },
+    {
+      "slug": "business-administration",
+      "title": "إدارة الأعمال",
+      "author": "محمد عقوني",
+      "publisher": "",
+      "publishedYear": 2023,
+      "category": "career-guidance",
+      "pages": 36,
+      "featured": false,
+      "description": "تعريف بمجال إدارة الأعمال ووظائفه وأهميته — مدخل لمن يفكّر في التخصصات الإدارية."
+    },
+    {
+      "slug": "know-yourself",
+      "title": "اعرف نفسك واكتشف شخصيتك",
+      "author": "أ.د. مدحت أبو النصر",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 414,
+      "featured": true,
+      "description": "كتاب موسّع في فهم الذات: السمات والقدرات وأنماط الشخصية، وكيف يُبنى عليها اختيار الدراسة والعمل."
+    },
+    {
+      "slug": "know-personalities",
+      "title": "اعرف شخصيتك وشخصية الآخرين",
+      "author": "باسكال مينارد",
+      "publisher": "Marabout",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 129,
+      "featured": false,
+      "description": "اعرف نفسك، واكتشف طاقاتك، وحدّد أهدافك — مقاييس مبسّطة لفهم شخصيتك وشخصيات من حولك."
+    },
+    {
+      "slug": "talking-skills-101",
+      "title": "101 طريقة فورية لتنمية مهارات التخاطب",
+      "author": "د. بيني بوف، جو كوندريل",
+      "publisher": "مكتبة جرير",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 119,
+      "featured": true,
+      "description": "مئة وطريقة عملية قصيرة لتحسين الحديث والإنصات والتقديم أمام الآخرين."
+    },
+    {
+      "slug": "persuasion",
+      "title": "الإقناع: فن الفوز بما تريد",
+      "author": "ديف لاكاني، ترجمة زينب عاطف",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 206,
+      "featured": false,
+      "description": "كيف تعرض فكرتك فتُقنع بها: بناء الثقة، وترتيب الحجّة، وقراءة من تخاطبه."
+    },
+    {
+      "slug": "student-excellence-guide",
+      "title": "دليل التفوق للطالب",
+      "author": "",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 78,
+      "featured": true,
+      "description": "عادات الدراسة المنظَّمة: تنظيم الوقت، وطرق المذاكرة، والاستعداد للاختبارات."
+    },
+    {
+      "slug": "overcoming-hardship",
+      "title": "تخطى الصعاب: لا سند إلا نفسك",
+      "author": "بيراي الحناوي",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 17,
+      "featured": false,
+      "description": "رسالة قصيرة في تجاوز الإحباط والحزن والعودة إلى العمل بعد الإخفاق."
+    },
+    {
+      "slug": "rise-on-your-own",
+      "title": "انهض لوحدك: شهادة إنسانية من قلب أفريقيا",
+      "author": "عثمان عسيل",
+      "publisher": "",
+      "publishedYear": null,
+      "category": "personal-skills",
+      "pages": 140,
+      "featured": false,
+      "description": "قصة إرادة من واقع أفريقيا، في النهوض بعد الشدّة والاعتماد على النفس."
+    }
+  ]
+}
