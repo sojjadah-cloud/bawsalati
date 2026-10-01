@@ -6,6 +6,7 @@ import { getPublicResource } from "@/features/library/service";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { ResourceViewer } from "@/components/library/ResourceViewer";
 import { CoverArt } from "@/components/library/CoverArt";
+import { CoverImage } from "@/components/library/CoverImage";
 import { coverSrc } from "@/components/library/coverSrc";
 
 export const dynamic = "force-dynamic";
@@ -107,8 +108,12 @@ export default async function ResourcePage({
           <div className="card overflow-hidden">
             <div className="aspect-[5/7] w-full">
               {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={cover} alt="" className="h-full w-full object-cover" />
+                <CoverImage
+                  src={cover}
+                  title={resource.title}
+                  author={resource.author}
+                  eager
+                />
               ) : (
                 <CoverArt
                   title={resource.title}

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { CoverArt } from "./CoverArt";
+import { CoverImage } from "./CoverImage";
 import { coverSrc } from "./coverSrc";
 import type { PublicResource } from "@/features/library/service";
 
@@ -34,13 +35,7 @@ export function ResourceCard({ resource }: { resource: PublicResource }) {
       >
         <span className="h-32 w-22 shrink-0 overflow-hidden rounded-[var(--radius-md)] shadow-[var(--shadow-sm)]">
           {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cover}
-              alt=""
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
+            <CoverImage src={cover} title={resource.title} author={resource.author} />
           ) : (
             <CoverArt title={resource.title} author={resource.author} className="h-full w-full" />
           )}
