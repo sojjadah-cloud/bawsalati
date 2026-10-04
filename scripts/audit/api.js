@@ -46,6 +46,17 @@ function cookieOf(res) {
 
   console.log("── المصادقة ──");
   const bad = await req("POST", "/api/auth/login", { body: { email: "naeem@bawsalati.om", password: "wrong-password-xyz" } });
+
+  // حدود المعدّل تعيش في ذاكرة الخادم: خمس محاولات دخول في عشر دقائق، وستون
+  // سؤالاً في «اسألني». تشغيلان متتاليان يستنفدانها فتظهر إخفاقات كاذبة.
+  if (bad.status === 429) {
+    console.error(
+      ["", "⚠ حدّ المحاولات مستنفد من تشغيل سابق — النتائج ستكون كاذبة.",
+       "  أعد تشغيل الخادم (الحدود في ذاكرته) أو انتظر عشر دقائق، ثم أعد الفحص.", ""].join("\n")
+    );
+    process.exit(2);
+  }
+
   check("كلمة مرور خاطئة تُرفض", bad.status === 401, "status " + bad.status);
   check("رسالة الخطأ لا تكشف وجود الحساب", !/غير موجود|لا يوجد حساب/.test(bad.body), bad.json?.error || "");
 
@@ -81,21 +92,23 @@ function cookieOf(res) {
   check("جلسة مزوّرة تُرفض", forged.status === 401 || forged.status === 403, "status " + forged.status);
 
   const adminOnSpec = await req("POST", "/api/specialist/faq", { cookie: adminCookie, body: { question: "س", answer: "ج" } });
-  check("المدير لا ينتحل دور الأخصائي", adminOnSpec.status === 403 || adminOnSpec.status === 401, "status " + adminOnSpec.status);
+  // بنك «اسألني» مشترك بين الأخصائي والمدير (requireStaff)، فالمدير مصرَّح له
+  // ويُردّ عليه 422 من التحقّق لا 403 من الصلاحية. المهم ألّا يُقبل بلا تحقّق.
+  check("المدير مصرَّح له ببنك الأسئلة ويمرّ بالتحقّق", adminOnSpec.status === 422, "status " + adminOnSpec.status);
 
   console.log("\n── التحقّق من المدخلات ──");
   const v1 = await req("POST", "/api/assessment/sessions", { body: { studentName: "ط", grade: "10", gender: "MALE", phone: "91234567" } });
-  check("اسم قصير يُرفض", v1.status === 400, "status " + v1.status);
+  check("اسم قصير يُرفض", v1.status === 422, "status " + v1.status);
   const v2 = await req("POST", "/api/assessment/sessions", { body: { studentName: "طالب الفحص", grade: "13", gender: "MALE", phone: "91234567" } });
-  check("صف غير موجود يُرفض", v2.status === 400, "status " + v2.status);
+  check("صف غير موجود يُرفض", v2.status === 422, "status " + v2.status);
   const v3 = await req("POST", "/api/assessment/sessions", { body: { studentName: "طالب الفحص", grade: "10", gender: "OTHER", phone: "91234567" } });
-  check("قيمة جنس غير مسموحة تُرفض", v3.status === 400, "status " + v3.status);
+  check("قيمة جنس غير مسموحة تُرفض", v3.status === 422, "status " + v3.status);
   const v4 = await req("POST", "/api/assessment/sessions", { body: { studentName: "طالب الفحص", grade: "10", gender: "MALE", phone: "12345678" } });
-  check("رقم هاتف غير عُماني يُرفض", v4.status === 400, "status " + v4.status);
+  check("رقم هاتف غير عُماني يُرفض", v4.status === 422, "status " + v4.status);
   const v5 = await req("POST", "/api/assessment/sessions", { body: { studentName: "<script>alert(1)</script>", grade: "10", gender: "MALE", phone: "91234567" } });
-  check("اسم يحوي وسم HTML يُرفض", v5.status === 400, "status " + v5.status);
+  check("اسم يحوي وسم HTML يُرفض", v5.status === 422, "status " + v5.status);
   const v6 = await req("POST", "/api/appointments", { body: { specialistId: "x", studentName: "طالب الفحص", grade: "10", phone: "91234567", date: "2026-09-20", startTime: "10:00", topicId: "t", extraField: "حقل دخيل" } });
-  check("حقل دخيل يُرفض (strict)", v6.status === 400, "status " + v6.status);
+  check("حقل دخيل يُرفض (strict)", v6.status === 422, "status " + v6.status);
 
   console.log("\n── «اسألني» ──");
   const ask1 = await req("POST", "/api/ask", { body: { question: "كيف أحجز موعداً؟" } });
@@ -105,7 +118,7 @@ function cookieOf(res) {
   const ask3 = await req("POST", "/api/ask", { body: { question: "' OR 1=1 --" } });
   check("محاولة حقن SQL لا تكسر الخادم", ask3.status === 200 || ask3.status === 400, "status " + ask3.status);
   const ask4 = await req("POST", "/api/ask", { body: { question: "x".repeat(5000) } });
-  check("سؤال طويل جداً يُرفض", ask4.status === 400, "status " + ask4.status);
+  check("سؤال طويل جداً يُرفض", ask4.status === 422, "status " + ask4.status);
 
   console.log("\n── تدفّق سيء الشكل ──");
   const malformed = await new Promise((res) => {
@@ -117,12 +130,14 @@ function cookieOf(res) {
   check("جسم غير صالح يُرفض بلا انهيار", malformed === 400, "status " + malformed);
 
   console.log("\n── تحديد المعدّل ──");
+  // حدّ «اسألني» ستون طلباً في عشر دقائق، فلا بدّ من تجاوزه لتظهر 429
+  const BURST = 70;
   let limited = 0;
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < BURST; i++) {
     const r = await req("POST", "/api/ask", { body: { question: "سؤال تحميل رقم " + i } });
     if (r.status === 429) limited++;
   }
-  check("تحديد المعدّل يعمل على «اسألني»", limited > 0, limited + " مرفوضاً من 40");
+  check("تحديد المعدّل يعمل على «اسألني»", limited > 0, limited + " مرفوضاً من " + BURST);
 
   const codes = [];
   for (let i = 0; i < 12; i++) {

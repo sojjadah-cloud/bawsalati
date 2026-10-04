@@ -9,7 +9,7 @@ import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 // الترتيب كما يراه الطالب. النشرات نوعان مستقلّان لا يندرجان تحت «مورد آخر».
 const TYPES = ["READABLE", "AUDIO", "VIDEO", "IMAGE", "LINK", "OTHER"] as const;
 
-export function LibraryFilters() {
+export function LibraryFilters({ available }: { available?: readonly string[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -17,6 +17,8 @@ export function LibraryFilters() {
 
   const currentQuery = params.get("q") ?? "";
   const currentType = params.get("type") ?? "";
+  /** النوع المختار يبقى ظاهراً ولو خلت منه النتيجة، كي يُمكن إلغاؤه */
+  const shown = TYPES.filter((t) => !available || available.includes(t) || currentType === t);
 
   function apply(next: { q?: string; type?: string }) {
     const sp = new URLSearchParams(params.toString());
@@ -73,7 +75,12 @@ export function LibraryFilters() {
         </button>
       </form>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="تصفية حسب نوع المورد">
+      {/* لا تُعرض إلا الأنواع الموجودة فعلاً في التصنيف: زرٌّ لا يعيد شيئاً ضجيج */}
+      <div
+        className={`flex-wrap gap-2 ${shown.length > 1 ? "flex" : "hidden"}`}
+        role="group"
+        aria-label="تصفية حسب نوع المورد"
+      >
         <button
           type="button"
           onClick={() => apply({ type: "" })}
@@ -86,7 +93,7 @@ export function LibraryFilters() {
         >
           الكل
         </button>
-        {TYPES.map((t) => (
+        {shown.map((t) => (
           <button
             key={t}
             type="button"

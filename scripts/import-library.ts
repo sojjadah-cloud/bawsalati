@@ -143,11 +143,16 @@ async function main() {
     // المطابقة بالعنوان: الكتاب الواحد لا يُكرَّر مهما أُعيد تشغيل السكربت
     const existing = await prisma.libraryResource.findFirst({
       where: { title: book.title },
-      select: { id: true },
+      select: { id: true, coverFileId: true },
     });
 
     if (existing) {
-      await prisma.libraryResource.update({ where: { id: existing.id }, data });
+      // ما عدّله الأخصائي من لوحته يبقى: لا يُستبدل وصفٌ ولا تصنيف ولا حالة نشر
+      // مع كل نشر. الذي يُضمن هنا أن يبقى الملف والغلاف موصولين بالمورد.
+      await prisma.libraryResource.update({
+        where: { id: existing.id },
+        data: { fileId: file.id, coverFileId: cover?.id ?? existing.coverFileId },
+      });
       updated++;
     } else {
       await prisma.libraryResource.create({ data: { ...data, title: book.title } });

@@ -63,6 +63,12 @@ export default async function CategoryPage({
     take: PAGE_SIZE,
   });
 
+  // أنواع الموارد الموجودة فعلاً في التصنيف — تُحسب قبل التصفية لا بعدها
+  const present = await prisma.libraryResource.groupBy({
+    by: ["type"],
+    where: { categoryId: category.id, published: true, archivedAt: null },
+  });
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const buildHref = (n: number) => {
     const q = new URLSearchParams();
@@ -95,7 +101,7 @@ export default async function CategoryPage({
       />
 
       <div className="container-x py-10 sm:py-14">
-        <LibraryFilters />
+        <LibraryFilters available={present.map((p) => p.type)} />
 
       <p className="mt-5 text-sm text-[var(--color-muted)]" aria-live="polite">
         {total === 0 ? "لا توجد نتائج" : `${total} مورداً`}
