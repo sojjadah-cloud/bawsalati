@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { api, messageOf } from "@/lib/client";
 import { Alert, ErrorState, ProgressBar, SkeletonList } from "@/components/ui/primitives";
+import { Dialog } from "@/components/ui/Dialog";
 
 interface Question {
   id: string;
@@ -407,56 +408,78 @@ export function AssessmentRunner() {
         </p>
       </div>
 
-      {/* تخطّي الأسئلة — تُملأ كلها بخيار النفي */}
+      {/* تخطّي الأسئلة — زرّ هادئ، والتفصيل في حوار التأكيد */}
       {declineOption ? (
-        <div className="mt-4">
-          {askSkip ? (
-            <Alert tone="warning" title="تخطّي كل الأسئلة؟">
-              <p className="leading-relaxed">
-                ستُضبَط الـ{total} عبارة كلها على «{declineOption.label}»، ويُستبدل ما أجبت عنه.
-                يمكنك تعديل أي عبارة قبل الإرسال، لكن نتيجةً كهذه لا تعبّر عن ميولك.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn-primary btn-sm"
-                  onClick={() => void skipAll()}
-                  disabled={skipping}
-                  aria-busy={skipping || undefined}
-                >
-                  {skipping ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      جارِ التخطّي…
-                    </>
-                  ) : (
-                    <>
-                      <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
-                      نعم، تخطَّ كل الأسئلة
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="btn-outline btn-sm"
-                  onClick={() => setAskSkip(false)}
-                  disabled={skipping}
-                >
-                  تراجع
-                </button>
-              </div>
-            </Alert>
-          ) : (
-            <button
-              type="button"
-              className="btn-ghost btn-sm"
-              onClick={() => setAskSkip(true)}
-            >
-              <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
-              تخطّي الأسئلة — تُملأ كلها بـ«{declineOption.label}»
-            </button>
-          )}
+        <div className="no-print mt-4">
+          <button
+            type="button"
+            className="btn-ghost btn-sm"
+            onClick={() => setAskSkip(true)}
+            aria-haspopup="dialog"
+          >
+            <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+            تخطّي الأسئلة
+          </button>
         </div>
+      ) : null}
+
+      {declineOption ? (
+        <Dialog
+          open={askSkip}
+          onClose={() => (skipping ? undefined : setAskSkip(false))}
+          title="تخطّي كل الأسئلة؟"
+          description="إجراء يملأ المقياس بإجابة واحدة بدل أن تجيب عبارةً عبارة."
+          size="sm"
+          footer={
+            <>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => setAskSkip(false)}
+                disabled={skipping}
+              >
+                تراجع
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => void skipAll()}
+                disabled={skipping}
+                aria-busy={skipping || undefined}
+              >
+                {skipping ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    جارِ التخطّي…
+                  </>
+                ) : (
+                  "تخطّي الأسئلة"
+                )}
+              </button>
+            </>
+          }
+        >
+          <dl className="divide-y divide-[var(--color-line)] overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] text-sm">
+            <div className="flex items-center justify-between gap-4 px-3 py-2.5">
+              <dt className="text-[var(--color-muted)]">العبارات</dt>
+              <dd className="font-bold tabular-nums text-slate-900">{total}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 px-3 py-2.5">
+              <dt className="text-[var(--color-muted)]">الإجابة التي ستُسجَّل</dt>
+              <dd className="font-bold text-slate-900">{declineOption.label}</dd>
+            </div>
+            {answeredCount > 0 ? (
+              <div className="flex items-center justify-between gap-4 px-3 py-2.5">
+                <dt className="text-[var(--color-muted)]">إجابات ستُستبدل</dt>
+                <dd className="font-bold tabular-nums text-warning-700">{answeredCount}</dd>
+              </div>
+            ) : null}
+          </dl>
+
+          <p className="mt-4 text-sm leading-relaxed text-[var(--color-muted)]">
+            يمكنك تعديل أي عبارة قبل الإرسال، لكن نتيجةً كهذه لا تعبّر عن ميولك.
+          </p>
+        </Dialog>
       ) : null}
 
       {/* التنقّل — ملتصق بأسفل الشاشة على الجوال ليسهل الوصول بيد واحدة */}
