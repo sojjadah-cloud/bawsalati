@@ -1,4 +1,4 @@
-/**
+﻿/**
  * تجهيز كتب المكتبة: نسخها بأسماء ثابتة وتوليد غلاف من أوّل صفحة.
  *
  *   npm i -g @napi-rs/canvas            # أو في أي مجلد، ويُمرَّر مساره
@@ -31,7 +31,52 @@ const BOOKS = [
   ["صناعة واتخاذ القرار", "decision-craft"],
   ["فن واسرار اتخاذ القرار", "decision-art"],
   ["كيف تختار تخصصك", "choose-your-major"],
-  ["الإقناع", "persuasion"],
+  ["الإقناع.pdf", "persuasion"],
+
+  // الدفعة الثانية
+  ["الوصفة الطبية للذاكرة", "memory-prescription"],
+  ["30 قانون للمذاكرة", "study-30-laws"],
+  ["اطرف الأقوال المأثورة", "business-quotes"],
+  ["الإدارة الذكية", "smart-management"],
+  ["الإدارة المالية", "financial-management"],
+  ["الاغتراب الوظيفي", "job-alienation"],
+  ["البحث عن ذاتك", "find-your-true-self"],
+  ["الصداقة الحقيقية", "true-friendship"],
+  ["المال الذي يكره", "money-that-hates"],
+  ["دليل الطالب الجامعي", "university-student-guide"],
+  ["كيف تصبح متعلما", "multiskilled-learner"],
+  ["كيف تنمي قدرتك", "grow-decision-skill"],
+  ["مقتطفات تعليمية", "rich-dad-excerpts"],
+  ["من صديقتي الحقيقية", "from-my-true-friend"],
+  ["com مهارات 3", "thinking-skills"],
+  ["مهارات العرض والتقديم 3", "presentation-skills-2"],
+  ["مهارات العرض والتقديم.pdf", "presentation-skills"],
+  ["مهارات في فن المذاكرة", "study-art-skills"],
+  ["مهارات لابد منها", "essential-skills"],
+  ["أخلاقيات_الذكاء", "ai-ethics"],
+  ["أسرار_التعلق", "brand-attachment"],
+  ["خرافة_في علم النفس", "psychology-myths"],
+  ["إغواء_العقل", "subconscious-seduction"],
+  ["الأسباب_الثلاثة", "three-signs-misery"],
+  ["الإعلانات_والتصميم", "advertising-design"],
+  ["الابتكار.pdf", "innovation"],
+  ["التحول_الإيجابي", "positive-shift"],
+  ["التسويق.pdf", "marketing"],
+  ["التفكير_الحوسبي", "computational-thinking"],
+  ["الشخصية_الناجعة", "effective-personality"],
+  ["الطباعة_الثلاثية", "3d-printing"],
+  ["الظرفاء.pdf", "the-witty"],
+  ["العمل_الجماعي", "teaming-innovation"],
+  ["الفيلسوف_الفارسي", "mulla-sadra"],
+  ["المؤسسون_في_عالم", "founders-at-work"],
+  ["الموظف_غير_المرئي", "invisible-employee"],
+  ["خطأ_في_السعر", "pricing-error"],
+  ["ذوات_الرداء", "women-in-white-coats"],
+  ["ريادة_الأعمال.pdf", "entrepreneurship"],
+  ["ستيف_جوبز", "steve-jobs"],
+  ["شركة_المستقبل", "firm-of-the-future"],
+  ["مذكرات_الليدي", "lady-hester-memoirs"],
+  ["مشيناها_خطى", "walked-step-by-step"],
 ];
 
 const canvasPath = process.env.CANVAS_PKG ?? "@napi-rs/canvas";

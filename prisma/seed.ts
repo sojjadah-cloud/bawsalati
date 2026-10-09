@@ -229,10 +229,40 @@ const CATEGORIES = [
     displayOrder: 2,
   },
   {
+    slug: "study-skills",
+    name: "مهارات الدراسة والتفوق",
+    description: "المذاكرة وتنظيم الوقت والذاكرة والاستعداد للامتحانات.",
+    displayOrder: 3,
+  },
+  {
+    slug: "business",
+    name: "الأعمال وريادة الأعمال",
+    description: "الإدارة والتسويق والمال وريادة الأعمال، لمن يتجه إلى تخصصاتها.",
+    displayOrder: 4,
+  },
+  {
+    slug: "science-tech",
+    name: "العلوم والتقنية",
+    description: "الذكاء الاصطناعي والتفكير الحوسبي والتقنيات الصناعية الحديثة.",
+    displayOrder: 5,
+  },
+  {
+    slug: "psychology",
+    name: "علم النفس وفهم الذات",
+    description: "كيف يفكّر الإنسان ويقرّر ويتغيّر، وما يصحّ وما يُشاع عن سلوكه.",
+    displayOrder: 6,
+  },
+  {
+    slug: "biographies",
+    name: "سير وتجارب",
+    description: "سير أشخاص صنعوا شيئاً، وما يُتعلَّم من طريقهم.",
+    displayOrder: 7,
+  },
+  {
     slug: "bulletins",
     name: "نشرات التوجيه المهني",
     description: "نشرات يرفعها أخصائيو التوجيه المهني: صور ومقاطع مرئية.",
-    displayOrder: 3,
+    displayOrder: 8,
   },
 ];
 

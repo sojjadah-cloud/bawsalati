@@ -81,37 +81,27 @@ export default async function ResultPage({
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
           {session.studentName}
         </h1>
-        <p className="mt-2 text-sm text-[var(--color-muted)]">
-          {GRADE_LABELS[session.grade] ?? session.grade}
-          {session.submittedAt
-            ? ` · ${formatArabicDate(session.submittedAt.toISOString().slice(0, 10))}`
-            : null}
-        </p>
         <Link href="/booking" className="btn-primary no-print mt-5">
           <CalendarCheck className="h-5 w-5" aria-hidden="true" />
           ناقش نتيجتك مع أخصائي
         </Link>
       </header>
 
+      {/* بيانات الطالب — بطاقة واحدة بدل سطورٍ متفرّقة، كصفحة كراسة الإجابة */}
       <section className="mt-8" aria-labelledby="student-title">
         <h2 id="student-title" className="sr-only">
           بيانات الطالب
         </h2>
-        <div className="table-wrap">
-          <table className="table">
-            <caption className="sr-only">بيانات الطالب كما سجّلها عند بدء المقياس</caption>
-            <tbody>
-              {student.map((row) => (
-                <tr key={row.label}>
-                  <th scope="row" className="w-40 whitespace-nowrap">
-                    {row.label}
-                  </th>
-                  <td className="font-semibold text-slate-900">{row.value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <dl className="card grid grid-cols-2 divide-x divide-x-reverse divide-y divide-[var(--color-line)] overflow-hidden sm:grid-cols-4 sm:divide-y-0">
+          {student.map((row) => (
+            <div key={row.label} className="px-4 py-3.5">
+              <dt className="text-xs font-semibold text-[var(--color-faint)]">{row.label}</dt>
+              <dd className="mt-1 truncate text-sm font-bold text-slate-900" title={row.value}>
+                {row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="mt-10" aria-labelledby="tables-title">
