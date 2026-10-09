@@ -160,6 +160,20 @@ export async function readStoredFile(storageKey: string): Promise<Buffer> {
   }
 }
 
+/**
+ * هل الملف المسجَّل موجودٌ على القرص فعلاً؟
+ * السجلّ في القاعدة والملف على القرص قد يفترقان حين يُمسح القرص مع النشر،
+ * فيُسأل قبل عرض أزرار تَعِد الطالب بما لا يُقدَّم.
+ */
+export async function fileOnDisk(storageKey: string): Promise<boolean> {
+  try {
+    await stat(safePath(storageKey));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function storedFileSize(storageKey: string): Promise<number> {
   const s = await stat(safePath(storageKey));
   return s.size;

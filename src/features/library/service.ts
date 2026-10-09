@@ -2,6 +2,7 @@
 // الاستعلامات العامة لا تُعيد مفاتيح التخزين ولا مسارات الملفات إطلاقاً.
 import type { Prisma, ResourceType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { fileOnDisk } from "@/lib/storage";
 
 /** الحقول الآمنة للعرض العام. */
 const publicSelect = {
@@ -129,6 +130,22 @@ export async function getPublicResource(id: string): Promise<PublicResource | nu
     select: publicSelect,
   });
   return row ? toPublic(row) : null;
+}
+
+/**
+ * هل نسخة المورد حاضرة على القرص؟
+ *
+ * السجلّ يبقى في القاعدة والملف يُمسح مع نشرٍ جديد على قرصٍ مؤقّت، فيصير
+ * المورد وعداً لا يُوفى. تُسأل صفحة المورد وحدها — قراءة قرصٍ واحدة — فلا
+ * تُعرض أزرار تصفّحٍ وتنزيل تنتهي إلى خطأ.
+ */
+export async function resourceFileReady(id: string): Promise<boolean> {
+  const row = await prisma.libraryResource.findFirst({
+    where: { id },
+    select: { file: { select: { storageKey: true } } },
+  });
+  if (!row?.file) return false;
+  return fileOnDisk(row.file.storageKey);
 }
 
 /** زيادة عدّاد المشاهدة دون إبطاء الاستجابة. */

@@ -12,14 +12,39 @@ interface Props {
   type: string;
   hasFile: boolean;
   downloadable: boolean;
+  /** سجلٌّ له ملف، لكنّ الملف غاب عن القرص */
+  fileMissing?: boolean;
 }
 
-export function ResourceViewer({ resourceId, title, type, hasFile, downloadable }: Props) {
+export function ResourceViewer({
+  resourceId,
+  title,
+  type,
+  hasFile,
+  downloadable,
+  fileMissing = false,
+}: Props) {
   const [openDoc, setOpenDoc] = useState(false);
   const [docLoading, setDocLoading] = useState(false);
 
   const fileUrl = `/api/files/library/${resourceId}?kind=file`;
   const downloadUrl = `${fileUrl}&mode=download`;
+
+  // الملف مسجّل وغائب عن القرص: يُقال للطالب الحقّ بدل أزرارٍ تنتهي إلى خطأ
+  if (fileMissing) {
+    return (
+      <div className="card card-pad">
+        <h2 className="text-base font-bold text-slate-900">النسخة غير متاحة حالياً</h2>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
+          هذا العنوان مسجّل في المكتبة ونسخته غير موجودة على الخادم الآن. أبلغ أخصائي
+          التوجيه المهني ليعيد رفعها.
+        </p>
+        <Link href="/booking" className="btn-outline mt-4">
+          احجز موعداً مع الأخصائي
+        </Link>
+      </div>
+    );
+  }
 
   if (!hasFile) {
     return (

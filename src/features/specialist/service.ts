@@ -52,7 +52,28 @@ export async function getDashboardSummary(specialistId: string) {
       }),
     ]);
 
-  return { newAssessments, todayCount, upcoming, recentAssessments, recentAppointments };
+  // ما يحتاج ضبطاً في ملف الأخصائي: بلا رقم إشعار لا يصله تنبيه حجزٍ أصلاً،
+  // وبلا مسمّى يظهر مكانه فراغٌ في صفحة الحجز.
+  const profile = await prisma.specialistProfile.findUnique({
+    where: { id: specialistId },
+    select: { notifyPhone: true, title: true, bio: true, bookable: true },
+  });
+
+  const setup = {
+    missingPhone: !profile?.notifyPhone,
+    missingTitle: !profile?.title?.trim(),
+    missingBio: !profile?.bio?.trim(),
+    notBookable: profile ? !profile.bookable : false,
+  };
+
+  return {
+    newAssessments,
+    todayCount,
+    upcoming,
+    recentAssessments,
+    recentAppointments,
+    setup,
+  };
 }
 
 /* ───────────────────────── الاختبارات ───────────────────────── */

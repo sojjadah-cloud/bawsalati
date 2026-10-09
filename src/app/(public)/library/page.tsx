@@ -9,21 +9,23 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "المكتبة الرقمية",
-  description:
-    "كتب مقروءة ومسموعة وموارد تعليمية في التوجيه المهني وتنمية المهارات الشخصية والعلوم.",
+  description: "كتب ومراجع ونشرات في التوجيه المهني وتنمية المهارات الشخصية.",
 };
 
 export default async function LibraryPage() {
-  const categories = await listCategories();
+  const all = await listCategories();
 
-  const totalResources = categories.reduce((n, c) => n + c.resourceCount, 0);
+  const totalResources = all.reduce((n, c) => n + c.resourceCount, 0);
+  // التصنيف الفارغ لا يُعرض للطالب: نقرةٌ تنتهي إلى لا شيء. يبقى في لوحة
+  // الأخصائي كما هو، ويظهر للطلاب فور نشر أوّل مورد فيه.
+  const categories = all.filter((c) => c.resourceCount > 0);
 
   return (
     <>
       <PageHero
         back={{ href: "/", label: "رجوع إلى الرئيسية" }}
         title="المكتبة الرقمية"
-        description="كتب مقروءة ومسموعة وموارد تعليمية، اقرأها أو استمع إليها مباشرة داخل المنصة."
+        description="كتب ومراجع ونشرات في التوجيه المهني وتنمية المهارات — تصفّحها داخل المنصة أو نزّلها."
       />
 
       <div className="container-x py-10 sm:py-14">

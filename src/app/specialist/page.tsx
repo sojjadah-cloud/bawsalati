@@ -5,7 +5,14 @@ import { requireSpecialist } from "@/lib/api";
 import { getDashboardSummary } from "@/features/specialist/service";
 import { APPOINTMENT_STATUS_LABELS, GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate, formatArabicTime, utcToIsoDate } from "@/lib/time";
-import { Badge, EmptyState, PageHeading, StatCard, type BadgeTone } from "@/components/ui/primitives";
+import {
+  Alert,
+  Badge,
+  EmptyState,
+  PageHeading,
+  StatCard,
+  type BadgeTone,
+} from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
   title: "لوحة الأخصائي",
@@ -25,12 +32,34 @@ export default async function SpecialistHome() {
   const session = await requireSpecialist();
   const summary = await getDashboardSummary(session.specialistId);
 
+  const setupNotes = [
+    summary.setup.missingPhone
+      ? "لم تضبط رقم إشعار الحجز، فلا يصلك تنبيه عند حجز طالب."
+      : null,
+    summary.setup.missingTitle ? "لم تكتب مسمّاك المهني، وهو يظهر للطلاب." : null,
+    summary.setup.missingBio ? "لم تكتب نبذتك التعريفية." : null,
+    summary.setup.notBookable ? "حسابك لا يستقبل حجوزات جديدة حالياً." : null,
+  ].filter((n): n is string => n !== null);
+
   return (
     <>
       <PageHeading
         title={`أهلاً، ${session.name}`}
         description="ملخّص سريع لما يحتاج انتباهك اليوم."
       />
+
+      {setupNotes.length > 0 ? (
+        <Alert tone="warning" title="ينقص ملفك شيء" className="mt-6">
+          <ul className="list-inside list-disc space-y-1">
+            {setupNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+          <Link href="/specialist/profile" className="mt-3 inline-block font-bold underline">
+            اضبطه من ملفك الشخصي
+          </Link>
+        </Alert>
+      ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <StatCard

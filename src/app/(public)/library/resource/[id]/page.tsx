@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "lucide-react";
-import { getPublicResource } from "@/features/library/service";
+import { getPublicResource, resourceFileReady } from "@/features/library/service";
 import { RESOURCE_TYPE_LABELS } from "@/lib/constants";
 import { ResourceViewer } from "@/components/library/ResourceViewer";
 import { CoverArt } from "@/components/library/CoverArt";
@@ -42,7 +42,10 @@ export default async function ResourcePage({
     { label: "اللغة", value: resource.language === "ar" ? "العربية" : resource.language },
   ].filter(Boolean) as { label: string; value: string }[];
 
-  const canDownload = resource.downloadable && (resource.hasFile || resource.hasAudio);
+  // سجلٌّ له ملف وقد يكون الملف قد مُسح من القرص مع نشرٍ سابق
+  const fileMissing = resource.hasFile && !(await resourceFileReady(resource.id));
+  const canDownload =
+    resource.downloadable && ((resource.hasFile && !fileMissing) || resource.hasAudio);
   const cover = coverSrc(resource);
 
   return (
@@ -99,6 +102,7 @@ export default async function ResourcePage({
               title={resource.title}
               type={resource.type}
               hasFile={resource.hasFile}
+              fileMissing={fileMissing}
               downloadable={resource.downloadable}
             />
           </div>

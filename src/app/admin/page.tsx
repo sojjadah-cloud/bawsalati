@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api";
+import { fileOnDisk } from "@/lib/storage";
+import { getProvider } from "@/lib/notifications/provider";
 import { Alert, PageHeading, StatCard } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
@@ -59,7 +61,55 @@ export default async function AdminHome() {
     prisma.guideDocument.findFirst({ where: { published: true }, select: { version: true } }),
   ]);
 
+  // ما لا يُرى من القاعدة وحدها: ملفات مُسحت، وأخصائيون بلا رقم إشعار،
+  // ومزوّد إشعارات غير مُعدّ، وتصنيفات لا يراها الطالب لأنها فارغة.
+  const [publishedFiles, specialistProfiles, emptyCategories] = await Promise.all([
+    prisma.libraryResource.findMany({
+      where: { published: true, archivedAt: null, fileId: { not: null } },
+      select: { title: true, file: { select: { storageKey: true } } },
+    }),
+    prisma.specialistProfile.findMany({
+      where: { user: { active: true } },
+      select: { notifyPhone: true, user: { select: { name: true } } },
+    }),
+    prisma.libraryCategory.findMany({
+      where: { active: true, resources: { none: { published: true, archivedAt: null } } },
+      select: { name: true },
+    }),
+  ]);
+
+  const missingFiles: string[] = [];
+  for (const r of publishedFiles) {
+    if (r.file && !(await fileOnDisk(r.file.storageKey))) missingFiles.push(r.title);
+  }
+
+  const withoutPhone = specialistProfiles
+    .filter((s) => !s.notifyPhone)
+    .map((s) => s.user.name);
+
+  const provider = getProvider();
+
   const warnings: string[] = [];
+  if (missingFiles.length > 0) {
+    warnings.push(
+      `${missingFiles.length} مورداً منشوراً ملفه مفقود من القرص (${missingFiles.slice(0, 3).join("، ")}${missingFiles.length > 3 ? "…" : ""}) — أعد رفعه أو ألغِ نشره.`
+    );
+  }
+  if (withoutPhone.length > 0) {
+    warnings.push(
+      `${withoutPhone.join("، ")} بلا رقم إشعار حجز — لن يصلهم تنبيه عند حجز طالب.`
+    );
+  }
+  if (provider.name === "disabled") {
+    warnings.push("مزوّد الإشعارات مُختار لكنه غير مُعدّ (ينقصه مفتاح) — لا تُرسل رسائل الحجز.");
+  } else if (provider.name === "console") {
+    warnings.push("الإشعارات في وضع التطوير: تُسجَّل ولا تُرسل. اضبط NOTIFY_PROVIDER للإرسال.");
+  }
+  if (emptyCategories.length > 0) {
+    warnings.push(
+      `تصنيفات بلا موارد لا تظهر للطلاب: ${emptyCategories.map((c) => c.name).join("، ")}.`
+    );
+  }
   if (specialists === 0) warnings.push("لا يوجد أخصائي فعّال — لن يتمكّن الطلاب من حجز موعد.");
   if (!activeAssessment) warnings.push("لا يوجد مقياس فعّال — شغّل تهيئة قاعدة البيانات.");
   if (!activeRuleSet || activeRuleSet._count.rules === 0) {

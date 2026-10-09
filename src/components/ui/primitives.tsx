@@ -112,16 +112,18 @@ export function Alert({
   tone = "info",
   title,
   children,
+  className = "",
 }: {
   tone?: keyof typeof ALERT_STYLES;
   title?: string;
   children?: ReactNode;
+  className?: string;
 }) {
   const { cls, Icon } = ALERT_STYLES[tone];
   return (
     <div
       role={tone === "danger" ? "alert" : "status"}
-      className={`flex gap-3 rounded-[var(--radius-md)] border p-4 text-sm ${cls}`}
+      className={`flex gap-3 rounded-[var(--radius-md)] border p-4 text-sm ${cls} ${className}`}
     >
       <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <div className="min-w-0">
