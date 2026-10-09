@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CalendarCheck, GraduationCap, Printer } from "lucide-react";
+import { ArrowRight, CalendarCheck, Download, GraduationCap, Printer } from "lucide-react";
 import { getResultByToken } from "@/features/assessment/service";
-import { GRADE_LABELS } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/time";
 import {
   ResultTables,
   ScoreTable,
   type ResultSectionData,
 } from "@/components/assessment/ResultView";
+import { ProfileChart } from "@/components/assessment/ProfileChart";
+import { GRADE_LABELS, SCALE_GUIDE_PATH } from "@/lib/constants";
 
 // نتيجة طالب — لا تُفهرس ولا تُخزَّن.
 export const metadata: Metadata = {
@@ -30,6 +31,20 @@ export default async function ResultPage({
   if (!data) notFound();
 
   const { session, result } = data;
+
+  // بيانات الطالب كما في كراسة الإجابة الرسمية
+  const student = [
+    { label: "الاسم", value: session.studentName },
+    { label: "الصف", value: GRADE_LABELS[session.grade] ?? session.grade },
+    { label: "الرقم", value: session.phone },
+    {
+      label: "تاريخ التطبيق",
+      value: session.submittedAt
+        ? formatArabicDate(session.submittedAt.toISOString().slice(0, 10))
+        : "—",
+    },
+  ];
+
   const sections = result.sections.map((s) => ({
     dimensionCode: s.dimensionCode,
     dimensionLabel: s.dimensionLabel,
@@ -38,6 +53,18 @@ export default async function ResultPage({
     percentile: s.percentile,
     cells: s.cells as unknown as ResultSectionData["cells"],
   }));
+
+  // المخطط يعرض البيئات بترتيبها الأصلي، والرتبة تُحسب من ترتيب الرتب المئينية
+  const byPercentile = [...sections].sort((a, b) => b.percentile - a.percentile);
+  const chartRows = [...sections]
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((s) => ({
+      code: s.dimensionCode,
+      label: s.dimensionLabel,
+      rawScore: s.rawScore,
+      percentile: s.percentile,
+      rank: byPercentile.findIndex((x) => x.dimensionCode === s.dimensionCode) + 1,
+    }));
 
   return (
     <div className="container-x py-10 sm:py-14">
@@ -66,6 +93,27 @@ export default async function ResultPage({
         </Link>
       </header>
 
+      <section className="mt-8" aria-labelledby="student-title">
+        <h2 id="student-title" className="sr-only">
+          بيانات الطالب
+        </h2>
+        <div className="table-wrap">
+          <table className="table">
+            <caption className="sr-only">بيانات الطالب كما سجّلها عند بدء المقياس</caption>
+            <tbody>
+              {student.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row" className="w-40 whitespace-nowrap">
+                    {row.label}
+                  </th>
+                  <td className="font-semibold text-slate-900">{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="mt-10" aria-labelledby="tables-title">
         <h2 id="tables-title" className="section-title">
           إجاباتك في البيئات الست
@@ -88,6 +136,19 @@ export default async function ResultPage({
         </p>
         <div className="mt-5">
           <ScoreTable sections={sections} />
+        </div>
+      </section>
+
+      {/* المخطط المهني — الخطوة السابعة في دليل تطبيق المقياس */}
+      <section className="mt-12" aria-labelledby="chart-title">
+        <h2 id="chart-title" className="section-title">
+          المخطط المهني
+        </h2>
+        <p className="section-lead">
+          رتبك المئينية في البيئات الست موصولةً بخط، كما في نموذج دليل تطبيق المقياس.
+        </p>
+        <div className="mt-5">
+          <ProfileChart rows={chartRows} />
         </div>
       </section>
 
@@ -124,6 +185,14 @@ export default async function ResultPage({
       ) : null}
 
       <div className="no-print mt-12 flex flex-wrap gap-3 border-t border-[var(--color-line)] pt-6">
+        <a
+          href={SCALE_GUIDE_PATH}
+          download="دليل تطبيق مقياس الميول المهنية.pdf"
+          className="btn-outline"
+        >
+          <Download className="h-5 w-5" aria-hidden="true" />
+          حمّل دليل تطبيق المقياس
+        </a>
         <Link href="/guide" className="btn-outline">
           <GraduationCap className="h-5 w-5" aria-hidden="true" />
           اقرأ دليل الطالب

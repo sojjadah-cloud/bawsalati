@@ -120,6 +120,42 @@ async function main() {
     );
   }
 
+  // آمن عند التكرار: يُستدعى في كل نشر، فلا يُنشأ إصدارٌ جديد بالقيم نفسها.
+  const active = await prisma.scoringRuleSet.findFirst({
+    where: { assessmentId: assessment.id, active: true },
+    select: {
+      version: true,
+      provisional: true,
+      rules: {
+        select: {
+          gradeBand: true,
+          gender: true,
+          rawScore: true,
+          percentile: true,
+          dimension: { select: { code: true } },
+        },
+      },
+    },
+  });
+
+  if (active && !active.provisional) {
+    const current = new Map(
+      active.rules.map((r) => [`${r.gradeBand}|${r.gender}|${r.dimension.code}|${r.rawScore}`, r.percentile])
+    );
+    const incoming = new Map(
+      rows.flatMap((row) =>
+        row.percentiles.map((p, raw) => [`${row.grade}|${row.gender}|${row.code}|${raw}`, p] as const)
+      )
+    );
+    const same =
+      current.size === incoming.size &&
+      [...incoming].every(([key, value]) => current.get(key) === value);
+    if (same) {
+      console.log(`↩︎ الإصدار ${active.version} يحمل الجداول نفسها — لا تغيير.`);
+      return;
+    }
+  }
+
   const latest = await prisma.scoringRuleSet.findFirst({
     where: { assessmentId: assessment.id },
     orderBy: { version: "desc" },

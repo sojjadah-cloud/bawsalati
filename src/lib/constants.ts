@@ -133,3 +133,9 @@ export const DELIVERY_STATUS_LABELS: Record<string, string> = {
 
 /** مدّة صلاحية رابط النتيجة. */
 export const RESULT_TOKEN_DAYS = 90;
+
+/**
+ * دليل تطبيق مقياس الميول المهنية — الوثيقة الرسمية التي تُشرح فيها خطوات
+ * التطبيق والتصحيح وجداول الرتب المئينية. تُقدَّم من ملفات المنصة العامة.
+ */
+export const SCALE_GUIDE_PATH = "/scale-guide.pdf";
