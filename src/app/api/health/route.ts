@@ -28,11 +28,23 @@ export async function GET(req: Request) {
       db = "down";
       // رسالة الخطأ قد تأتي فارغة، ورمز Prisma وحده يكفي للتشخيص:
       // P1001 القاعدة بعيدة · P1000 بيانات دخول خاطئة · P1017 أغلقت الاتصال
-      const err = e as { message?: string; name?: string; code?: string };
+      // P2010 يلفّ خطأ المحرّك الحقيقي في meta، وفيه الجواب: قاعدة غير موجودة،
+      // أو كلمة مرور خاطئة، أو اتصالات ممتلئة، أو شهادة SSL مطلوبة.
+      const err = e as {
+        message?: string;
+        name?: string;
+        code?: string;
+        meta?: Record<string, unknown>;
+        cause?: { message?: string; code?: string };
+      };
+      const meta = err.meta ? JSON.stringify(err.meta).slice(0, 300) : "";
+      const cause = err.cause?.message || err.cause?.code || "";
       detail = {
         code: err.code ?? "",
         name: err.name ?? "",
         error: (err.message ?? "").split("\n")[0].slice(0, 200),
+        meta,
+        cause: String(cause).slice(0, 200),
       };
       for (const key of Object.keys(detail)) if (!detail[key]) delete detail[key];
     }
