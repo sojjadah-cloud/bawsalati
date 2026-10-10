@@ -4,9 +4,12 @@
  *   npm run library:prune            # عرض ما سيُحذف فقط
  *   npm run library:prune -- --apply # الحذف فعلاً
  *
- * المورد الذي يحمل سجلّ ملف والملف غير موجود على القرص صفحةٌ ميتة: يفتحها
- * الطالب فلا يتصفّح ولا يُنزّل. ولا سبيل لاستعادته — قرص الخطة المجانية يُمسح
- * مع كل نشر، وما ليس في المستودع لا مصدر له — فيُحذف هو وسجلّات ملفاته.
+ * يُحذف ما لا يُفتح: مورد يحمل سجلّ ملف والملف غير موجود على القرص، ومورد
+ * منشور بلا ملف ولا صوت ولا رابط خارجي. كلاهما صفحةٌ ميتة يفتحها الطالب فلا
+ * يجد شيئاً، ولا سبيل لاستعادة الأول — قرص الخطة المجانية يُمسح مع كل نشر وما
+ * ليس في المستودع لا مصدر له.
+ *
+ * والمسوّدة غير المنشورة لا تُمسّ: عنوانٌ يُعدّه الأخصائي لرفع ملفه لاحقاً.
  *
  * يُشغَّل بعد library:import لا قبله: الاستيراد يعيد كتب content/library إلى
  * القرص أولاً، فلا يُحذف منها شيء.
@@ -27,6 +30,8 @@ async function main() {
     select: {
       id: true,
       title: true,
+      published: true,
+      externalUrl: true,
       category: { select: { name: true } },
       file: { select: { id: true, storageKey: true } },
       coverFile: { select: { id: true, storageKey: true } },
@@ -34,34 +39,54 @@ async function main() {
     },
   });
 
-  const dead: { id: string; title: string; category: string; fileIds: string[] }[] = [];
-  let noFile = 0;
+  const dead: { id: string; title: string; category: string; why: string; fileIds: string[] }[] =
+    [];
+  let drafts = 0;
 
   for (const r of resources) {
-    // مورد بلا سجلّ ملف أصلاً ليس عطلاً: عنوانٌ ينتظر رفع نسخته
-    if (!r.file) {
-      noFile++;
-      continue;
-    }
-    if (await fileOnDisk(r.file.storageKey)) continue;
-
-    const fileIds = [r.file.id, r.coverFile?.id, r.audioFile?.id].filter(
+    const fileIds = [r.file?.id, r.coverFile?.id, r.audioFile?.id].filter(
       (id): id is string => Boolean(id)
     );
-    dead.push({ id: r.id, title: r.title, category: r.category.name, fileIds });
+
+    if (r.file) {
+      if (await fileOnDisk(r.file.storageKey)) continue;
+      dead.push({
+        id: r.id,
+        title: r.title,
+        category: r.category.name,
+        why: "ملفه مفقود من القرص",
+        fileIds,
+      });
+      continue;
+    }
+
+    // بلا ملف ولا صوت ولا رابط: مسوّدة ما دامت غير منشورة، وصفحةٌ ميتة إن نُشرت
+    if (!r.audioFile && !r.externalUrl) {
+      if (!r.published) {
+        drafts++;
+        continue;
+      }
+      dead.push({
+        id: r.id,
+        title: r.title,
+        category: r.category.name,
+        why: "منشور بلا ما يُفتح",
+        fileIds,
+      });
+    }
   }
 
-  console.log(`\n🧹 موارد المكتبة: ${resources.length} (بلا ملف مرفوع: ${noFile})`);
+  console.log(`\n🧹 موارد المكتبة: ${resources.length} (مسوّدات بلا ملف: ${drafts})`);
 
   if (dead.length === 0) {
-    console.log("  ✔ لا مورد بملفٍ مفقود.\n");
+    console.log("  ✔ كل مورد منشور له ما يُفتح.\n");
     return;
   }
 
-  for (const d of dead) console.log(`  ✘ ${d.title} — ${d.category}`);
+  for (const d of dead) console.log(`  ✘ ${d.title} — ${d.category} (${d.why})`);
 
   if (!apply) {
-    console.log(`\n  ${dead.length} مورداً ملفه مفقود. للحذف: npm run library:prune -- --apply\n`);
+    console.log(`\n  ${dead.length} مورداً لا يُفتح. للحذف: npm run library:prune -- --apply\n`);
     return;
   }
 
