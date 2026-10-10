@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
 export default function GlobalError({
@@ -20,15 +21,21 @@ export default function GlobalError({
       <span className="flex h-16 w-16 items-center justify-center rounded-[var(--radius-lg)] bg-danger-50 text-danger-600">
         <AlertCircle className="h-8 w-8" aria-hidden="true" />
       </span>
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">حدث خطأ غير متوقع</h1>
-        <p className="mt-2 text-sm text-[var(--color-muted)]">
-          حاول تحديث الصفحة. إذا تكرر الخطأ تواصل مع إدارة المنصة.
+      <div className="max-w-md">
+        <h1 className="text-2xl font-extrabold text-slate-900">تعذّر تحميل هذه الصفحة</h1>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
+          قد تكون الخدمة تحت الصيانة أو تعذّر الوصول إلى البيانات الآن. حاول بعد قليل، وإن
+          تكرّر الأمر أبلغ أخصائي التوجيه المهني أو إدارة المنصة.
         </p>
       </div>
-      <button type="button" onClick={reset} className="btn-primary">
-        إعادة المحاولة
-      </button>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button type="button" onClick={reset} className="btn-primary">
+          إعادة المحاولة
+        </button>
+        <Link href="/" className="btn-outline">
+          العودة للرئيسية
+        </Link>
+      </div>
     </div>
   );
 }

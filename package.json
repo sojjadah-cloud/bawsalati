@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
+    "deploy:data": "tsx scripts/prepare-deploy.ts",
     "prisma:generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
