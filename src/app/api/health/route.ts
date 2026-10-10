@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   const checkDb = new URL(req.url).searchParams.has("db");
 
   let db: "up" | "down" | "skipped" = "skipped";
-  let error: string | undefined;
+  let detail: Record<string, string> = {};
 
   if (checkDb) {
     try {
@@ -26,12 +26,20 @@ export async function GET(req: Request) {
       db = "up";
     } catch (e) {
       db = "down";
-      error = e instanceof Error ? e.message.split("\n")[0].slice(0, 200) : "خطأ غير معروف";
+      // رسالة الخطأ قد تأتي فارغة، ورمز Prisma وحده يكفي للتشخيص:
+      // P1001 القاعدة بعيدة · P1000 بيانات دخول خاطئة · P1017 أغلقت الاتصال
+      const err = e as { message?: string; name?: string; code?: string };
+      detail = {
+        code: err.code ?? "",
+        name: err.name ?? "",
+        error: (err.message ?? "").split("\n")[0].slice(0, 200),
+      };
+      for (const key of Object.keys(detail)) if (!detail[key]) delete detail[key];
     }
   }
 
   return new Response(
-    JSON.stringify({ ok: true, db, at: new Date().toISOString(), ...(error ? { error } : {}) }),
+    JSON.stringify({ ok: true, db, at: new Date().toISOString(), ...detail }),
     {
       status: 200,
       headers: {
