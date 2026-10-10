@@ -3,6 +3,7 @@
 import type { Prisma, ResourceType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { fileOnDisk } from "@/lib/storage";
+import { restoreFromRepo } from "./restore";
 
 /** الحقول الآمنة للعرض العام. */
 const publicSelect = {
@@ -142,10 +143,14 @@ export async function getPublicResource(id: string): Promise<PublicResource | nu
 export async function resourceFileReady(id: string): Promise<boolean> {
   const row = await prisma.libraryResource.findFirst({
     where: { id },
-    select: { file: { select: { storageKey: true } } },
+    select: { title: true, file: { select: { storageKey: true } } },
   });
   if (!row?.file) return false;
-  return fileOnDisk(row.file.storageKey);
+  if (await fileOnDisk(row.file.storageKey)) return true;
+
+  // كتاب من المستودع يُستعاد عند الطلب، فهو جاهزٌ وإن غاب عن القرص الآن
+  const restored = await restoreFromRepo(row.title, "file", row.file.storageKey);
+  return restored !== null;
 }
 
 /** زيادة عدّاد المشاهدة دون إبطاء الاستجابة. */

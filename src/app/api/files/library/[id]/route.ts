@@ -2,6 +2,7 @@ import { errorResponse, ApiError } from "@/lib/api";
 import { getSession } from "@/lib/auth";
 import { readStoredFile, safeDownloadName } from "@/lib/storage";
 import { getResourceFile, touchResource } from "@/features/library/service";
+import { restoreFromRepo } from "@/features/library/restore";
 
 /**
  * تقديم ملف مورد من المكتبة.
@@ -32,7 +33,19 @@ export async function GET(
       throw new ApiError("تنزيل هذا المورد غير متاح", 403);
     }
 
-    const buffer = await readStoredFile(found.file.storageKey);
+    // الملف قد يكون مُسح مع نشرٍ جديد، وكتب المستودع تُستعاد عند أوّل طلب
+    let buffer: Buffer;
+    try {
+      buffer = await readStoredFile(found.file.storageKey);
+    } catch (e) {
+      const restored =
+        kind === "audio"
+          ? null
+          : await restoreFromRepo(found.resource.title, kind, found.file.storageKey);
+      if (!restored) throw e;
+      buffer = restored;
+    }
+
     if (mode === "view") touchResource(id);
 
     const ext = found.file.mimeType.split("/")[1] ?? "bin";
