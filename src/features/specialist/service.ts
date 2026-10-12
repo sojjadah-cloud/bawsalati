@@ -56,11 +56,11 @@ export async function getDashboardSummary(specialistId: string) {
   // وبلا مسمّى يظهر مكانه فراغٌ في صفحة الحجز.
   const profile = await prisma.specialistProfile.findUnique({
     where: { id: specialistId },
-    select: { notifyPhone: true, title: true, bio: true, bookable: true },
+    select: { notifyPhone: true, notifyEmail: true, title: true, bio: true, bookable: true },
   });
 
   const setup = {
-    missingPhone: !profile?.notifyPhone,
+    missingPhone: !profile?.notifyPhone && !profile?.notifyEmail,
     missingTitle: !profile?.title?.trim(),
     missingBio: !profile?.bio?.trim(),
     notBookable: profile ? !profile.bookable : false,

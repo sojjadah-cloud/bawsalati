@@ -93,3 +93,21 @@ services:
         sync: false
       - key: NOTIFY_SENDER_ID
         sync: false
+
+      # بريد إشعار الحجز — قناة مستقلّة تعمل مع الواتساب لا بدلاً منه.
+      # لجيميل: smtp.gmail.com والمنفذ 465، وSMTP_PASS كلمة مرور تطبيقات
+      # (من إعدادات أمان الحساب) لا كلمة مرور الحساب نفسها.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      # اسم المُرسِل وعنوانه كما يظهران للمستلم
+      - key: MAIL_FROM
+        sync: false
+      # نسخة إدارة المدرسة من كل حجز
+      - key: BOOKING_ALERT_EMAIL
+        sync: false

@@ -3,13 +3,16 @@
 import { prisma } from "../prisma";
 import { maskPhone } from "../audit";
 import { getProvider, type OutboundMessage } from "./provider";
+import { emailConfigured, isEmail, maskEmail, sendEmail } from "./email";
 
-export { getProvider };
+export { getProvider, emailConfigured, isEmail };
 export type { NotificationProvider, OutboundMessage, SendResult } from "./provider";
 
 export interface BookingNotice {
   appointmentId: string;
   specialistPhone: string | null;
+  /** بريد إشعار الأخصائي — قناةٌ ثانية مستقلّة عن الرقم */
+  specialistEmail?: string | null;
   studentName: string;
   date: string;
   time: string;
@@ -33,6 +36,16 @@ function composeBookingText(n: BookingNotice): string {
 
 export async function sendBookingNotification(n: BookingNotice): Promise<void> {
   const template = "APPOINTMENT_CREATED";
+
+  // البريد قناةٌ مستقلّة: تُجرَّب دائماً، ولو لم يكن للأخصائي رقم إشعار
+  await deliverEmail(
+    n.specialistEmail,
+    `حجز استشارة جديد — ${n.studentName}`,
+    composeBookingText(n),
+    template,
+    n.appointmentId
+  );
+
   if (!n.specialistPhone) {
     const provider = getProvider();
     await recordDelivery({
@@ -88,9 +101,49 @@ export function internationalPhone(raw: string): string {
  * بلا رقم مضبوط لا يُرسل شيئاً.
  */
 export async function sendBookingSummary(n: BookingSummary): Promise<void> {
+  const template = "APPOINTMENT_SUMMARY";
+  const text = composeBookingSummary(n);
+
+  // نسخة الإدارة بالبريد، إن ضُبط BOOKING_ALERT_EMAIL
+  await deliverEmail(
+    process.env.BOOKING_ALERT_EMAIL?.trim(),
+    `تأكيد حجز استشارة — ${n.studentName}`,
+    text,
+    template,
+    n.appointmentId
+  );
+
   const to = process.env.BOOKING_ALERT_PHONE?.trim();
   if (!to) return;
-  await deliver(internationalPhone(to), composeBookingSummary(n), "APPOINTMENT_SUMMARY", n.appointmentId);
+  await deliver(internationalPhone(to), text, template, n.appointmentId);
+}
+
+/**
+ * إرسال نسخة بالبريد وتسجيلها مستقلّةً عن قناة الرقم.
+ * بلا عنوانٍ صالح أو بلا إعداد SMTP لا يُسجَّل شيء: ليس عطلاً بل قناةً غير مطلوبة.
+ */
+async function deliverEmail(
+  to: string | null | undefined,
+  subject: string,
+  text: string,
+  template: string,
+  appointmentId: string
+): Promise<void> {
+  if (!isEmail(to) || !emailConfigured()) return;
+
+  const result = await sendEmail({ to, subject, text });
+
+  await recordDelivery({
+    channel: "email",
+    provider: "smtp",
+    recipientMasked: maskEmail(to),
+    template,
+    status: result.ok ? "SENT" : result.skipped ? "SKIPPED" : "FAILED",
+    lastError: result.ok ? null : (result.error ?? "فشل غير معروف"),
+    providerMessageId: result.messageId ?? null,
+    appointmentId,
+    attempts: 1,
+  });
 }
 
 async function deliver(to: string, text: string, template: string, appointmentId: string) {

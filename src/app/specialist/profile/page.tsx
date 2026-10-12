@@ -20,6 +20,7 @@ export default async function ProfilePage() {
       title: true,
       bio: true,
       notifyPhone: true,
+      notifyEmail: true,
       bookable: true,
       slotMinutes: true,
       user: { select: { name: true, email: true } },
@@ -56,6 +57,7 @@ export default async function ProfilePage() {
             title: profile.title,
             bio: profile.bio,
             notifyPhone: profile.notifyPhone ?? "",
+            notifyEmail: profile.notifyEmail ?? "",
             bookable: profile.bookable,
             slotMinutes: profile.slotMinutes,
           }}

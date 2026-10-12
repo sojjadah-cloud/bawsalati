@@ -70,6 +70,7 @@ export async function createAppointment(
     select: {
       id: true,
       notifyPhone: true,
+      notifyEmail: true,
       user: { select: { name: true } },
     },
   });
@@ -128,6 +129,7 @@ export async function createAppointment(
     sendBookingNotification({
       appointmentId: appointment.id,
       specialistPhone: specialist.notifyPhone,
+      specialistEmail: specialist.notifyEmail,
       studentName: input.studentName,
       date: formatArabicDate(input.date),
       time: formatArabicTime(appointment.startTime),

@@ -17,6 +17,7 @@ export interface ProfileValues {
   title: string;
   bio: string;
   notifyPhone: string;
+  notifyEmail: string;
   bookable: boolean;
   slotMinutes: number;
 }
@@ -44,6 +45,7 @@ export function ProfileForm({ initial }: { initial: ProfileValues }) {
         title: values.title.trim(),
         bio: values.bio.trim(),
         notifyPhone: values.notifyPhone.trim(),
+        notifyEmail: values.notifyEmail.trim(),
         bookable: values.bookable,
         slotMinutes: values.slotMinutes,
       });
@@ -54,6 +56,7 @@ export function ProfileForm({ initial }: { initial: ProfileValues }) {
         setErrors({
           title: err.fieldError("title"),
           notifyPhone: err.fieldError("notifyPhone"),
+          notifyEmail: err.fieldError("notifyEmail"),
         });
       }
       setFormError(messageOf(err));
@@ -93,6 +96,17 @@ export function ProfileForm({ initial }: { initial: ProfileValues }) {
         error={errors.notifyPhone}
         hint="بصيغة دولية بلا رمز +، مثال 96892000000. لا يظهر هذا الرقم للطلاب إطلاقاً."
         maxLength={15}
+      />
+
+      <TextField
+        label="بريد إشعار الحجز"
+        type="email"
+        dir="ltr"
+        value={values.notifyEmail}
+        onChange={(e) => set("notifyEmail", e.target.value.trim())}
+        error={errors.notifyEmail}
+        hint="يصلك عليه إشعار كل حجز جديد. لا يظهر للطلاب، ويعمل مع رقم الواتساب لا بدلاً منه."
+        maxLength={200}
       />
 
       <SelectField

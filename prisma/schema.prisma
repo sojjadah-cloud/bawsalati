@@ -99,6 +99,8 @@ model SpecialistProfile {
   photoUrl    String?
   /// رقم التواصل الذي يصله إشعار الحجز (خاص — لا يُرسل للواجهة العامة)
   notifyPhone String?
+  /// بريد يصله إشعار الحجز (خاص كذلك). قناةٌ مستقلّة عن الرقم تعمل معه.
+  notifyEmail String?
   /// يقبل حجوزات جديدة
   bookable    Boolean  @default(true)
   slotMinutes Int      @default(30)

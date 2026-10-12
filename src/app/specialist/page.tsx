@@ -34,7 +34,7 @@ export default async function SpecialistHome() {
 
   const setupNotes = [
     summary.setup.missingPhone
-      ? "لم تضبط رقم إشعار الحجز، فلا يصلك تنبيه عند حجز طالب."
+      ? "لم تضبط رقم إشعار الحجز ولا بريده، فلا يصلك تنبيه عند حجز طالب."
       : null,
     summary.setup.missingTitle ? "لم تكتب مسمّاك المهني، وهو يظهر للطلاب." : null,
     summary.setup.missingBio ? "لم تكتب نبذتك التعريفية." : null,

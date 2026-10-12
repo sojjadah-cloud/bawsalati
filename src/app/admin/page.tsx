@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api";
 import { fileOnDisk } from "@/lib/storage";
 import { getProvider } from "@/lib/notifications/provider";
+import { emailConfigured } from "@/lib/notifications/email";
 import { Alert, PageHeading, StatCard } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
@@ -70,7 +71,7 @@ export default async function AdminHome() {
     }),
     prisma.specialistProfile.findMany({
       where: { user: { active: true } },
-      select: { notifyPhone: true, user: { select: { name: true } } },
+      select: { notifyPhone: true, notifyEmail: true, user: { select: { name: true } } },
     }),
     prisma.libraryCategory.findMany({
       where: { active: true, resources: { none: { published: true, archivedAt: null } } },
@@ -84,7 +85,7 @@ export default async function AdminHome() {
   }
 
   const withoutPhone = specialistProfiles
-    .filter((s) => !s.notifyPhone)
+    .filter((s) => !s.notifyPhone && !s.notifyEmail)
     .map((s) => s.user.name);
 
   const provider = getProvider();
@@ -97,8 +98,11 @@ export default async function AdminHome() {
   }
   if (withoutPhone.length > 0) {
     warnings.push(
-      `${withoutPhone.join("، ")} بلا رقم إشعار حجز — لن يصلهم تنبيه عند حجز طالب.`
+      `${withoutPhone.join("، ")} بلا رقم إشعار ولا بريد — لن يصلهم تنبيه عند حجز طالب.`
     );
+  }
+  if (!emailConfigured()) {
+    warnings.push("بريد الإشعارات غير مُعدّ (SMTP) — لا تصل رسائل الحجز بالبريد.");
   }
   if (provider.name === "disabled") {
     warnings.push("مزوّد الإشعارات مُختار لكنه غير مُعدّ (ينقصه مفتاح) — لا تُرسل رسائل الحجز.");

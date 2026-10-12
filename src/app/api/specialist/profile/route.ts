@@ -12,6 +12,14 @@ const profileSchema = z.object({
     .regex(/^\d{8,15}$/u, "أدخل رقماً صحيحاً بصيغة دولية بلا رمز +")
     .optional()
     .or(z.literal("")),
+  /** قناة ثانية تعمل مع الرقم لا بدلاً منه */
+  notifyEmail: z
+    .string()
+    .trim()
+    .email("أدخل بريداً صحيحاً")
+    .max(200)
+    .optional()
+    .or(z.literal("")),
   bookable: z.boolean().optional(),
   slotMinutes: z.coerce.number().int().min(10).max(180).optional(),
 });
@@ -25,6 +33,7 @@ export async function GET() {
         title: true,
         bio: true,
         notifyPhone: true,
+        notifyEmail: true,
         bookable: true,
         slotMinutes: true,
         user: { select: { name: true, email: true } },
@@ -47,6 +56,7 @@ export async function PATCH(req: Request) {
         title: input.title,
         bio: input.bio || "",
         notifyPhone: input.notifyPhone || null,
+        notifyEmail: input.notifyEmail || null,
         bookable: input.bookable ?? true,
         slotMinutes: input.slotMinutes ?? 30,
       },
@@ -56,7 +66,10 @@ export async function PATCH(req: Request) {
     await audit("PROFILE_UPDATE", "SpecialistProfile", {
       actor: session,
       entityId: session.specialistId,
-      meta: { notifyPhoneChanged: !!input.notifyPhone },
+      meta: {
+        notifyPhoneChanged: !!input.notifyPhone,
+        notifyEmailChanged: !!input.notifyEmail,
+      },
       ip: clientIp(req),
     });
     return json({ ok: true });
