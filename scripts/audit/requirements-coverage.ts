@@ -41,7 +41,13 @@ for (const p of programs) {
       emptyWithSubjects.push({ code: p.code, name: p.name.slice(0, 50), subjects: named });
     }
   } else {
-    const named = SUBJECTS.filter((s) => p.requirements.includes(s));
+    // ذِكرُ «اللغة الإنجليزية» في سطر آيلتس شرطُ اختبارٍ عالمي لا شرطُ مادة
+    // مدرسية، فلا يُحسب نقصاً حين لا يدخل في القواعد.
+    const schoolLines = p.requirements
+      .split("\n")
+      .filter((l) => !/IELTS|TOEFL|ايلتس|توفل/iu.test(l))
+      .join("\n");
+    const named = SUBJECTS.filter((s) => schoolLines.includes(s));
     const dropped = named.filter((s) => !inRules.has(s));
     if (dropped.length > 0) {
       droppedSubjects.push({ code: p.code, page: p.page, subjects: dropped });

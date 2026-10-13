@@ -19,7 +19,6 @@ const ALIASES: Record<string, Subject> = {
   "الانجليزية": "اللغة الإنجليزية",
   "الإنجليزية": "اللغة الإنجليزية",
   "العربية": "اللغة العربية",
-  "الرياضيات": "الرياضيات المتقدمة",
   "المتقدمة": "الرياضيات المتقدمة",
   "الأساسية": "الرياضيات الأساسية",
   "الاحياء": "الأحياء",
@@ -51,6 +50,12 @@ export interface SubjectRule {
   anyOf: Subject[];
   /** كم مادة من القائمة يجب أن تتحقّق. «مادتين من» تجعلها 2. */
   count: number;
+  /**
+   * نسبةٌ خاصّة بمادةٍ بعينها حين يفرّق الدليل بين البدائل:
+   * «(85%) في الرياضيات المتقدمة أو (90%) في الرياضيات الأساسية».
+   * ما لم تُذكر المادة هنا فنسبتها `min`.
+   */
+  mins?: Partial<Record<Subject, number>>;
 }
 
 export interface ParsedRequirements {
@@ -71,6 +76,9 @@ function normalize(line: string): string {
     .trim();
 }
 
+/** صيغتا الرياضيات في خطة الحادي عشر — يختار الطالب واحدة منهما. */
+const MATH_EITHER: readonly Subject[] = ["الرياضيات المتقدمة", "الرياضيات الأساسية"];
+
 /** يحوّل نصّ مادة (أو عدّة مواد يفصلها «أو») إلى مواد معروفة. */
 export function readSubjects(text: string): Subject[] {
   // «أو» قد تصل مطبَّعة بلا همزة، والفصل يقبل الصيغتين
@@ -80,8 +88,18 @@ export function readSubjects(text: string): Subject[] {
     .filter(Boolean);
 
   const found: Subject[] = [];
+  const add = (s: Subject) => {
+    if (!found.includes(s)) found.push(s);
+  };
+
   for (const part of parts) {
     const norm = normalize(part);
+    // «الرياضيات» مجرّدةً: الدليل لم يحدّد أيّهما، فلا يُحدَّد عنه.
+    // تُقبل المتقدمة والأساسية معاً، ولا يُحرم طالبٌ لم يستثنه الدليل.
+    if (norm === "الرياضيات") {
+      MATH_EITHER.forEach(add);
+      continue;
+    }
     const direct = SUBJECTS.find((s) => normalize(s) === norm);
     if (direct) {
       if (!found.includes(direct)) found.push(direct);
@@ -98,6 +116,10 @@ export function readSubjects(text: string): Subject[] {
     }
     for (const [alias, subject] of Object.entries(ALIASES)) {
       if (norm.includes(normalize(alias)) && !found.includes(subject)) found.push(subject);
+    }
+    // «الرياضيات» داخل نصّ أطول لم تُعرَف منه مادة: تُقبل الصيغتان كما سبق
+    if (found.length === 0 && /الرياضيات/u.test(norm) && !/الرياضة/u.test(norm)) {
+      MATH_EITHER.forEach(add);
     }
   }
   return found;
@@ -239,6 +261,8 @@ export function parseRequirements(text: string): ParsedRequirements {
   for (const raw of text.split("\n")) {
     const line = raw.replace(/^[•\-\s]+/u, "").trim();
     if (!line) continue;
+    // سطرٌ بدأ بنقطة أو شَرطة هو بندٌ مستقل، لا كِسرةُ اسمٍ انقطع آخر سطره
+    const bulleted = /^\s*[•\-]/u.test(raw);
     const norm = normalize(line);
     const previousRule: SubjectRule | null = lastRuleFromPreviousLine;
     lastRuleFromPreviousLine = null;
@@ -323,6 +347,19 @@ export function parseRequirements(text: string): ParsedRequirements {
       continue;
     }
 
+    // «النجاح في اللغة الإنجليزية.» — شرطُ دراسةٍ ونجاحٍ بلا نسبة مسمّاة.
+    // بندٌ قائم بذاته، فلا يُلحق بالشرط الذي قبله بديلاً عنه.
+    if (!percent && /^النجاح\s/u.test(norm) && !NOT_A_RULE.test(norm)) {
+      const subjects = readSubjects(norm.replace(/^النجاح\s+(في\s+)?/u, " "));
+      if (subjects.length > 0) {
+        list = closed(list);
+        const rule = { min: 0, anyOf: subjects, count: 1 };
+        out.rules.push(rule);
+        lastRuleFromPreviousLine = rule;
+        continue;
+      }
+    }
+
     // ترويسة تكمل جملة النسبة في السطر السابق: «في ثلاث مواد من:»
     // ولا تكون تتمّةً إن ابتدأت بفعل: ذاك شرطٌ جديد لا بقيّة جملة.
     if (!percent && listHeader && lastPercent !== null && !list && !STARTS_CONDITION.test(norm)) {
@@ -342,16 +379,52 @@ export function parseRequirements(text: string): ParsedRequirements {
       continue;
     }
 
+    // «(85%) في الرياضيات المتقدمة أو (90%) في الرياضيات الأساسية» — بديلان
+    // لكلٍّ منهما نسبته. شرطٌ واحد تكفي إحدى مادتيه، كلٌّ بنسبتها هي.
+    if (percent && /(?:^|\s)او\s*\(?\s*\d{2,3}\s*[%٪]/u.test(norm)) {
+      const graded: { min: number; anyOf: Subject[] }[] = [];
+      for (const piece of norm.split(/(?=\(?\s*\d{2,3}\s*[%٪])/u)) {
+        const m = piece.match(PERCENT);
+        if (!m) continue;
+        const subjects = readSubjects(piece.slice(piece.indexOf(m[0]) + m[0].length));
+        if (subjects.length > 0) graded.push({ min: Number(m[1]), anyOf: subjects });
+      }
+      if (graded.length > 1) {
+        list = closed(list);
+        const mins: Partial<Record<Subject, number>> = {};
+        const anyOf: Subject[] = [];
+        for (const g of graded) {
+          for (const s of g.anyOf) {
+            if (!anyOf.includes(s)) anyOf.push(s);
+            // أدنى نسبةٍ ذُكرت للمادة، فلا تُشدَّد على الطالب بما لم يُشترط
+            mins[s] = Math.min(mins[s] ?? g.min, g.min);
+          }
+        }
+        const rule = { min: Math.min(...graded.map((g) => g.min)), anyOf, count: 1, mins };
+        out.rules.push(rule);
+        lastRuleFromPreviousLine = rule;
+        continue;
+      }
+    }
+
     // «(90%) في الرياضيات المتقدمة أو الفيزياء»
     if (percent) {
       const after = norm.slice(norm.indexOf(percent[0]) + percent[0].length);
       const tail = after.replace(/^\s*(كحد ادنى\s*)?في\s*/u, "");
-      const subjects = readSubjects(tail);
-      if (subjects.length > 0) {
+      // الواو عطفُ وجوب و«أو» بدائل: «(60%) في اللغة الإنجليزية والرياضيات
+      // المتقدمة أو الأساسية» شرطان لا شرطٌ من ثلاثة بدائل تكفي أحدها.
+      const groups = tail
+        .split(/[،,]|\s+و(?=[ا-ي])/u)
+        .map((part) => readSubjects(part))
+        .filter((g) => g.length > 0);
+      if (groups.length > 0) {
         list = closed(list);
-        const rule = { min: Number(percent[1]), anyOf: subjects, count: 1 };
-        out.rules.push(rule);
-        lastRuleFromPreviousLine = rule;
+        const min = Number(percent[1]);
+        for (const anyOf of groups) {
+          const rule = { min, anyOf, count: 1 };
+          out.rules.push(rule);
+          lastRuleFromPreviousLine = rule;
+        }
         continue;
       }
       // «الحصول على (55%) في :-» ترويسة لقائمة مواد تليها، أو اسم مادة انقطع
@@ -392,12 +465,35 @@ export function parseRequirements(text: string): ParsedRequirements {
       }
     }
 
-    // سطر مقطوع عن سابقه: «... في الرياضيات» ثم «المتقدمة أو الأساسية»
-    if (previousRule) {
-      const subjects = readSubjects(norm);
+    // سطرٌ يلي شرطاً ذا نسبة، وفيه حالتان لا تُخلطان:
+    //  • كِسرةُ سطرٍ انقطع اسم مادته: «... في الرياضيات» ثم «المتقدمة أو
+    //    الأساسية» — فتُضمّ المادة إلى بدائل الشرط نفسه.
+    //  • بندٌ جديد تحت النسبة نفسها: «(65%) في الرياضيات المتقدمة أو الأساسية.»
+    //    ثم «- اللغة الإنجليزية.» — فهو شرطٌ ثانٍ بالنسبة نفسها لا بديلٌ عن
+    //    الأول، وإلا كفت إحدى المادتين عن الأخرى وهذا ليس ما يقوله الدليل.
+    //  • واوُ عطفٍ تبتدئ السطر: «(60%) في اللغة الإنجليزية» ثم «والرياضيات
+    //    المتقدمة أو الأساسية» — عطفُ وجوبٍ كذلك، فالمادتان مطلوبتان معاً.
+    if (previousRule && !STARTS_CONDITION.test(norm) && !NOT_A_RULE.test(norm)) {
+      const conjunction = /^و[ا-ي]/u.test(norm);
+      const subjects = readSubjects(conjunction ? norm.replace(/^و/u, "") : norm);
       if (subjects.length > 0) {
-        for (const s of subjects) if (!previousRule.anyOf.includes(s)) previousRule.anyOf.push(s);
-        lastRuleFromPreviousLine = previousRule;
+        if (bulleted || conjunction) {
+          const rule = { min: previousRule.min, anyOf: subjects, count: 1 };
+          out.rules.push(rule);
+          lastRuleFromPreviousLine = rule;
+        } else {
+          // «... كحد أدنى في الرياضيات» ثم «المتقدمة.» — السطر التالي يحدّد
+          // أيّ رياضيات، فيُضيَّق الزوج المبهم إلى ما سمّاه الدليل ولا يُوسَّع.
+          const named = subjects.filter((s) => MATH_EITHER.includes(s));
+          const ambiguous = MATH_EITHER.every((m) => previousRule.anyOf.includes(m));
+          if (named.length === 1 && ambiguous && !continuesOr && !/^او\s/u.test(norm)) {
+            previousRule.anyOf = previousRule.anyOf.filter(
+              (s) => !MATH_EITHER.includes(s) || s === named[0]
+            );
+          }
+          for (const s of subjects) if (!previousRule.anyOf.includes(s)) previousRule.anyOf.push(s);
+          lastRuleFromPreviousLine = previousRule;
+        }
         continue;
       }
     }
@@ -410,6 +506,16 @@ export function parseRequirements(text: string): ParsedRequirements {
 
   list = closed(list);
   if (overalls.length > 0) out.minOverall = Math.max(...overalls);
+
+  // قاعدتان متطابقتان تنشآن حين يسمّي السطر الواحد مادةً بصيغتين
+  // («الهندسة الميكانيكية والرسم الهندسي» كلتاهما «الهندسة»)
+  const seen = new Set<string>();
+  out.rules = out.rules.filter((r) => {
+    const key = `${r.min}|${r.count}|${[...r.anyOf].sort().join("،")}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   return out;
 }
 
@@ -443,7 +549,8 @@ export function checkEligibility(
   const checks: RuleCheck[] = parsed.rules.map((rule) => {
     const matched = rule.anyOf.filter((s) => {
       const mark = marks[s];
-      return mark !== undefined && mark >= rule.min;
+      // لكل مادة نسبتها حين فرّق الدليل بين البدائل، وإلا فنسبة الشرط
+      return mark !== undefined && mark >= (rule.mins?.[s] ?? rule.min);
     });
     return { rule, met: matched.length >= rule.count, matched };
   });

@@ -23,6 +23,8 @@ interface SubjectRule {
   min: number;
   anyOf: Subject[];
   count: number;
+  /** نسبةٌ خاصّة ببديلٍ بعينه حين يفرّق الدليل بين البدائل */
+  mins?: Partial<Record<Subject, number>>;
 }
 
 interface ProgramMatch {
@@ -615,11 +617,14 @@ function MatchCard({ match, showCompetitive }: { match: ProgramMatch; showCompet
             ...match.unmetRules
               .filter((r) => !r.anyOf.every((s) => match.missingSubjects.includes(s)))
               // شرط بلا نسبة في الدليل: دراسة المادة فقط
-              .map((r) =>
-                r.min > 0
-                  ? `${r.min}٪ في ${r.anyOf.join(" أو ")}`
-                  : `دراسة ${r.anyOf.join(" أو ")}`
-              ),
+              .map((r) => {
+                if (r.min === 0) return `دراسة ${r.anyOf.join(" أو ")}`;
+                // نسبةٌ لكل بديل حين فرّق الدليل: «85٪ في المتقدمة أو 90٪ في الأساسية»
+                if (r.mins && r.anyOf.some((s) => r.mins?.[s] !== undefined)) {
+                  return r.anyOf.map((s) => `${r.mins?.[s] ?? r.min}٪ في ${s}`).join(" أو ");
+                }
+                return `${r.min}٪ في ${r.anyOf.join(" أو ")}`;
+              }),
           ]
             .filter(Boolean)
             .join("، ")}
