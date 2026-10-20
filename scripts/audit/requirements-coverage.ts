@@ -9,6 +9,8 @@
  *   1. أسطراً فيها مادة أو نسبة ولم تصر شرطاً (شرط أفلت).
  *   2. برامج لا شرط مواد لها مع ذكر مادة في نصّها.
  *   3. مواد ذُكرت في النصّ ولم ترد في أي شرط.
+ *   4. خلايا الدليل المدموجة: صفٌّ جاء شرطه أقصر بكثير من إخوته في الصفحة
+ *      نفسها وبلا شرط مواد — علامةُ أنّ نصّ الخانة المشتركة ضاع عند النقل.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -64,11 +66,48 @@ for (const p of programs) {
   }
 }
 
+/**
+ * خلايا الدليل المدموجة. هذه الرموز رُوجعت في ملف الدليل نفسه وثبت أنّ
+ * شرطها قصيرٌ حقاً لا ناقصاً: صفحة 237 لـBS276 وBS277، و239 لـDS012 وDS013،
+ * و107 لـDS020. ما عداها يُعرض للمراجعة.
+ */
+const VERIFIED_SHORT = new Set(["BS276", "BS277", "DS012", "DS013", "DS020"]);
+
+const byPage = new Map<number, Row[]>();
+for (const p of programs) {
+  if (p.page === null) continue;
+  byPage.set(p.page, [...(byPage.get(p.page) ?? []), p]);
+}
+
+const mergedCells: { code: string; page: number | null; name: string; own: string }[] = [];
+for (const list of byPage.values()) {
+  if (list.length < 2) continue;
+  const longest = Math.max(...list.map((p) => (p.requirements ?? "").length));
+  if (longest < 60) continue;
+  for (const p of list) {
+    if (VERIFIED_SHORT.has(p.code)) continue;
+    const own = p.requirements ?? "";
+    if (own.length >= longest / 3) continue;
+    if (parseRequirements(own).rules.length > 0) continue;
+    mergedCells.push({ code: p.code, page: p.page, name: p.name.slice(0, 44), own });
+  }
+}
+
 console.log(`\n📋 فحص قراءة الشروط — ${programs.length} برنامجاً\n`);
+console.log(`  خلايا مشتبهٌ بأنّ نصّها ضاع عند النقل: ${mergedCells.length}`);
 console.log(`  بلا شرط مواد مقروء: ${noRules}`);
 console.log(`  أسطر أفلتت من القراءة وفيها مادة أو نسبة: ${missed.length}`);
 console.log(`  برامج بلا شرط مع ذكر مادة في نصّها: ${emptyWithSubjects.length}`);
 console.log(`  مواد ذُكرت ولم ترد في أي شرط: ${droppedSubjects.length}\n`);
+
+if (mergedCells.length > 0) {
+  console.log("── خلايا يُرجَّح أنّ نصّها ضاع (راجعها في الدليل) ──");
+  for (const m of mergedCells) {
+    console.log(`  ${m.code} ص${m.page} ${m.name}`);
+    console.log(`     له وحده: ${JSON.stringify(m.own)}`);
+  }
+  console.log();
+}
 
 if (missed.length > 0) {
   console.log("── أسطر أفلتت ──");
@@ -91,6 +130,10 @@ if (droppedSubjects.length > 0) {
   }
 }
 
-const clean = missed.length === 0 && emptyWithSubjects.length === 0 && droppedSubjects.length === 0;
+const clean =
+  missed.length === 0 &&
+  emptyWithSubjects.length === 0 &&
+  droppedSubjects.length === 0 &&
+  mergedCells.length === 0;
 console.log(clean ? "\n✅ كل شرطٍ مذكورٍ مقروء.\n" : "\n⚠️  راجع ما سبق في الدليل.\n");
 process.exit(clean ? 0 : 1);

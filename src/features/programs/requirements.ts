@@ -475,24 +475,34 @@ export function parseRequirements(text: string): ParsedRequirements {
     //    المتقدمة أو الأساسية» — عطفُ وجوبٍ كذلك، فالمادتان مطلوبتان معاً.
     if (previousRule && !STARTS_CONDITION.test(norm) && !NOT_A_RULE.test(norm)) {
       const conjunction = /^و[ا-ي]/u.test(norm);
-      const subjects = readSubjects(conjunction ? norm.replace(/^و/u, "") : norm);
-      if (subjects.length > 0) {
-        if (bulleted || conjunction) {
-          const rule = { min: previousRule.min, anyOf: subjects, count: 1 };
+      // الواو داخل السطر تفصل شرطاً عن شرط هنا أيضاً: «أو الأساسية والأحياء»
+      // بديلٌ للرياضيات ثم مادةٌ مطلوبةٌ معها، لا ثلاثةُ بدائل تكفي إحداها.
+      const groups = (conjunction ? norm.replace(/^و/u, "") : norm)
+        .split(/[،,]|\s+و(?=[ا-ي])/u)
+        .map((part) => readSubjects(part))
+        .filter((g) => g.length > 0);
+      if (groups.length > 0) {
+        const sibling = (anyOf: Subject[]) => {
+          const rule = { min: previousRule.min, anyOf, count: 1 };
           out.rules.push(rule);
           lastRuleFromPreviousLine = rule;
+        };
+        if (bulleted || conjunction) {
+          groups.forEach(sibling);
         } else {
           // «... كحد أدنى في الرياضيات» ثم «المتقدمة.» — السطر التالي يحدّد
           // أيّ رياضيات، فيُضيَّق الزوج المبهم إلى ما سمّاه الدليل ولا يُوسَّع.
-          const named = subjects.filter((s) => MATH_EITHER.includes(s));
+          const [head, ...rest] = groups;
+          const named = head.filter((s) => MATH_EITHER.includes(s));
           const ambiguous = MATH_EITHER.every((m) => previousRule.anyOf.includes(m));
           if (named.length === 1 && ambiguous && !continuesOr && !/^او\s/u.test(norm)) {
             previousRule.anyOf = previousRule.anyOf.filter(
               (s) => !MATH_EITHER.includes(s) || s === named[0]
             );
           }
-          for (const s of subjects) if (!previousRule.anyOf.includes(s)) previousRule.anyOf.push(s);
+          for (const s of head) if (!previousRule.anyOf.includes(s)) previousRule.anyOf.push(s);
           lastRuleFromPreviousLine = previousRule;
+          rest.forEach(sibling);
         }
         continue;
       }
