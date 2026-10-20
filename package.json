@@ -42,7 +42,8 @@
     "programs:overrides": "tsx scripts/apply-program-overrides.ts",
     "programs:convert": "python scripts/xlsx-to-programs.py",
     "programs:verify": "python scripts/verify-programs.py",
-    "programs:text": "python scripts/audit/text-quality.py"
+    "programs:text": "python scripts/audit/text-quality.py",
+    "audit:guide": "tsx scripts/audit/guide-text.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
