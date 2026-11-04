@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   title: "دليل الطالب",
   description:
     "تصفّح التخصصات والبرامج الدراسية حسب المجال ونوع البرنامج والمؤسسة، أو ابحث برمز البرنامج مباشرة.",
+  alternates: { canonical: "/guide" },
 };
 
 export default async function GuidePage({

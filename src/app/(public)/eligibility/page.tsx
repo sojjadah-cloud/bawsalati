@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "اعرف تخصصك",
   description:
     "اختر صفّك وموادك ودرجاتك، لتعرف التخصصات التي تنطبق عليك شروطها ومعدّلك التنافسي في كل برنامج.",
+  alternates: { canonical: "/eligibility" },
 };
 
 export default async function EligibilityPage() {

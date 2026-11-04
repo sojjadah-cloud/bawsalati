@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "اسألني",
   description:
     "اسألني عن التخصصات والاختبار والمكتبة والمواعيد، واحصل على إجابة فورية أو تحويل إلى أخصائي التوجيه المهني.",
+  alternates: { canonical: "/ask" },
 };
 
 export default function AskPage() {

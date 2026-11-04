@@ -29,10 +29,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategory(slug);
-  if (!category) return { title: "التصنيف غير موجود" };
+  if (!category) return { title: "التصنيف غير موجود", robots: { index: false } };
+  const description =
+    category.description || `كتب ومراجع ${category.name} في المكتبة الرقمية لمنصة بوصلتي — قراءة وتحميل مجاناً.`;
   return {
     title: category.name,
-    description: category.description || `موارد ${category.name} في مكتبة بوصلتي الرقمية.`,
+    description,
+    alternates: { canonical: `/library/${category.slug}` },
+    openGraph: { title: category.name, description, url: `/library/${category.slug}` },
   };
 }
 

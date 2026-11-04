@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "حجز موعد",
   description:
     "احجز استشارة فردية مع أخصائي التوجيه المهني في أحد الأوقات المتاحة، واختر موضوع الاستشارة.",
+  alternates: { canonical: "/booking" },
 };
 
 export default async function BookingPage() {

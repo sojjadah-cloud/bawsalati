@@ -8,6 +8,7 @@ import { ResourceViewer } from "@/components/library/ResourceViewer";
 import { CoverArt } from "@/components/library/CoverArt";
 import { CoverImage } from "@/components/library/CoverImage";
 import { coverSrc } from "@/components/library/coverSrc";
+import { BookStructuredData, Breadcrumbs } from "@/components/seo/StructuredData";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const resource = await getPublicResource(id);
-  if (!resource) return { title: "المورد غير موجود" };
+  if (!resource) return { title: "المورد غير موجود", robots: { index: false } };
+
+  const by = resource.author ? ` — ${resource.author}` : "";
+  const description =
+    resource.description.replace(/\s+/gu, " ").slice(0, 200) ||
+    `${resource.title}${by} — من المكتبة الرقمية في منصة بوصلتي للتوجيه المهني.`;
+
   return {
-    title: resource.title,
-    description: resource.description.slice(0, 160) || undefined,
+    title: `${resource.title}${by}`,
+    description,
+    alternates: { canonical: `/library/resource/${resource.id}` },
+    openGraph: {
+      type: "article",
+      title: resource.title,
+      description,
+      url: `/library/resource/${resource.id}`,
+    },
   };
 }
 
@@ -50,6 +64,21 @@ export default async function ResourcePage({
 
   return (
     <div className="container-x py-10 sm:py-14">
+      <BookStructuredData
+        title={resource.title}
+        description={resource.description.replace(/\s+/gu, " ").slice(0, 400) || undefined}
+        author={resource.author || undefined}
+        year={resource.publishedYear}
+        path={`/library/resource/${resource.id}`}
+      />
+      <Breadcrumbs
+        trail={[
+          { name: "الرئيسة", path: "/" },
+          { name: "المكتبة الرقمية", path: "/library" },
+          { name: resource.category.name, path: `/library/${resource.category.slug}` },
+          { name: resource.title, path: `/library/resource/${resource.id}` },
+        ]}
+      />
       <Link
         href={`/library/${resource.category.slug}`}
         className="no-print mb-4 inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-md)] px-2 text-sm font-bold text-brand-800 transition-colors hover:bg-brand-50"

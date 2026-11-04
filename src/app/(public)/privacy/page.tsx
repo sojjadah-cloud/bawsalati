@@ -5,6 +5,7 @@ import { PageHero } from "@/components/public/PageHero";
 export const metadata: Metadata = {
   title: "إشعار الخصوصية",
   description: "ما الذي تجمعه بوصلتي من بيانات، ولماذا، ومن يطّلع عليها.",
+  alternates: { canonical: "/privacy" },
 };
 
 const SECTIONS = [

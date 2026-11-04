@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -8,6 +9,15 @@ import {
   ListChecks,
 } from "lucide-react";
 import { HeroBackdrop } from "@/components/public/HeroBackdrop";
+import { SiteStructuredData } from "@/components/seo/StructuredData";
+
+export const metadata: Metadata = {
+  // العنوان الكامل لا القالب: الصفحة الرئيسة تحمل اسم المنصة ووصفها
+  title: "بوصلتي — منصة التوجيه المهني لطلبة سلطنة عُمان",
+  description:
+    "منصة بوصلتي للتوجيه المهني: مقياس الميول المهنية، ودليل التخصصات وشروط القبول، ومكتبة رقمية، وحجز موعد مع أخصائي التوجيه المهني — مدرسة صحار للبنين.",
+  alternates: { canonical: "/" },
+};
 
 const SERVICES = [
   {
@@ -50,6 +60,7 @@ const SERVICES = [
 export default function HomePage() {
   return (
     <>
+      <SiteStructuredData />
       {/* قسم تعريفي — بلا أزرار. المداخل الفعلية في بطاقات الخدمات تحته. */}
       <section className="relative isolate overflow-hidden bg-brand-800 text-white">
         <HeroBackdrop />

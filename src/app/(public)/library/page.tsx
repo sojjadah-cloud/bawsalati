@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "المكتبة الرقمية",
   description: "كتب ومراجع ونشرات في التوجيه المهني وتنمية المهارات الشخصية.",
+  alternates: { canonical: "/library" },
 };
 
 export default async function LibraryPage() {

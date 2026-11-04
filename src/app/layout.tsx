@@ -33,16 +33,25 @@ export const metadata: Metadata = {
     "سلطنة عُمان",
   ],
   applicationName: BRAND.name,
+  // عنوانٌ معياري واحد لكل صفحة، فلا تتوزّع قيمتها على عناوين متكرّرة
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "ar_OM",
     siteName: BRAND.name,
+    url: "/",
+    title: `${BRAND.name} — ${BRAND.tagline}`,
+    description: BRAND.description,
+  },
+  twitter: {
+    card: "summary_large_image",
     title: `${BRAND.name} — ${BRAND.tagline}`,
     description: BRAND.description,
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
 };
 

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "مقياس السمات والميول المهنية",
   description:
     "اختبار ميول مهنية من 54 عبارة يساعدك على التعرّف على المجالات الأقرب إلى شخصيتك واهتماماتك.",
+  alternates: { canonical: "/assessment" },
 };
 
 async function getIntro() {

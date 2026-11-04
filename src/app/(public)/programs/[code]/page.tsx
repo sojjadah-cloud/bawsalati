@@ -6,6 +6,7 @@ import { getProgramByCode, relatedPrograms } from "@/features/programs/service";
 import { HeroBreadcrumb, PageHero } from "@/components/public/PageHero";
 import { ProgramCard, placeOfStudy } from "@/components/programs/ProgramCard";
 import { GUIDE_FIELD_PAGES } from "@/lib/constants";
+import { Breadcrumbs, ProgramStructuredData } from "@/components/seo/StructuredData";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +17,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { code } = await params;
   const program = await getProgramByCode(decodeURIComponent(code));
-  if (!program) return { title: "البرنامج غير موجود" };
+  if (!program) return { title: "البرنامج غير موجود", robots: { index: false } };
+
+  const where = program.institution ? ` في ${program.institution}` : "";
+  // وصفٌ يحمل ما يبحث عنه الطالب فعلاً: شروط القبول واسم المؤسسة والمجال
+  const description = `شروط القبول في ${program.name}${where} — ${program.field} · ${
+    program.programType
+  }. رمز البرنامج ${program.code} في دليل الطالب لعام 2026.`;
+
   return {
-    title: `${program.code} — ${program.name}`,
-    description: `${program.field} · ${program.programType}${
-      program.institution ? ` · ${program.institution}` : ""
-    }`,
+    title: `${program.name} (${program.code}) — شروط القبول`,
+    description: description.slice(0, 300),
+    alternates: { canonical: `/programs/${encodeURIComponent(program.code)}` },
+    openGraph: {
+      type: "article",
+      title: `${program.name} — شروط القبول`,
+      description: description.slice(0, 300),
+      url: `/programs/${encodeURIComponent(program.code)}`,
+    },
   };
 }
 
@@ -65,6 +78,21 @@ export default async function ProgramPage({
 
   return (
     <>
+      <ProgramStructuredData
+        name={program.name}
+        description={`${program.field} · ${program.programType}${
+          program.requirements ? ` — ${program.requirements.replace(/\s+/gu, " ").slice(0, 400)}` : ""
+        }`}
+        institution={program.institution || undefined}
+        path={`/programs/${encodeURIComponent(program.code)}`}
+      />
+      <Breadcrumbs
+        trail={[
+          { name: "الرئيسة", path: "/" },
+          { name: "دليل الطالب", path: "/guide" },
+          { name: program.name, path: `/programs/${encodeURIComponent(program.code)}` },
+        ]}
+      />
       <PageHero
         back={{ href: "/guide", label: "رجوع إلى دليل الطالب" }}
         title={program.name}
