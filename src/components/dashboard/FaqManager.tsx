@@ -4,11 +4,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
-import { api, ApiClientError, messageOf } from "@/lib/client";
+import { api, messageOf } from "@/lib/client";
 import { useToast } from "@/components/ui/Toast";
-import { ConfirmDialog, Dialog } from "@/components/ui/Dialog";
-import { Alert, Badge, EmptyState } from "@/components/ui/primitives";
-import { CheckboxField, SubmitButton, TextAreaField, TextField } from "@/components/ui/form";
+import { FaqEditorDialog, type FaqDraft } from "./FaqEditorDialog";
+import { ConfirmDialog } from "@/components/ui/Dialog";
+import { Badge, EmptyState } from "@/components/ui/primitives";
 
 export interface FaqRow {
   id: string;
@@ -26,16 +26,7 @@ export interface UnansweredRow {
   askCount: number;
 }
 
-interface Draft {
-  id?: string;
-  question: string;
-  answer: string;
-  keywords: string;
-  topic: string;
-  active: boolean;
-}
-
-const EMPTY: Draft = { question: "", answer: "", keywords: "", topic: "", active: true };
+const EMPTY: FaqDraft = { question: "", answer: "", keywords: "", topic: "", active: true };
 
 export function FaqManager({
   entries,
@@ -48,10 +39,7 @@ export function FaqManager({
   const toast = useToast();
 
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Draft>(EMPTY);
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState<FaqDraft>(EMPTY);
 
   const [confirmDelete, setConfirmDelete] = useState<FaqRow | null>(null);
   const [busy, setBusy] = useState(false);
@@ -65,54 +53,12 @@ export function FaqManager({
       topic: entry.topic,
       active: entry.active,
     });
-    setErrors({});
-    setFormError(null);
     setOpen(true);
   }
 
   function create(question = "") {
     setDraft({ ...EMPTY, question });
-    setErrors({});
-    setFormError(null);
     setOpen(true);
-  }
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    if (saving) return;
-    setErrors({});
-    setFormError(null);
-    setSaving(true);
-
-    const payload = {
-      question: draft.question.trim(),
-      answer: draft.answer.trim(),
-      keywords: draft.keywords.trim(),
-      topic: draft.topic.trim(),
-      active: draft.active,
-    };
-
-    try {
-      if (draft.id) {
-        await api.patch(`/api/specialist/faq/${draft.id}`, payload);
-        toast.success("حُدّث السؤال");
-      } else {
-        await api.post("/api/specialist/faq", payload);
-        toast.success("أُضيف السؤال");
-      }
-      setOpen(false);
-      router.refresh();
-    } catch (err) {
-      if (err instanceof ApiClientError && err.issues) {
-        setErrors({
-          question: err.fieldError("question"),
-          answer: err.fieldError("answer"),
-        });
-      }
-      setFormError(messageOf(err));
-    } finally {
-      setSaving(false);
-    }
   }
 
   async function remove() {
@@ -254,67 +200,15 @@ export function FaqManager({
         </div>
       )}
 
-      <Dialog
+      <FaqEditorDialog
         open={open}
+        draft={draft}
         onClose={() => setOpen(false)}
-        title={draft.id ? "تعديل السؤال" : "إضافة سؤال"}
-        size="lg"
-      >
-        <form onSubmit={save} noValidate className="space-y-5">
-          <TextField
-            label="السؤال"
-            required
-            value={draft.question}
-            onChange={(e) => setDraft({ ...draft, question: e.target.value })}
-            error={errors.question}
-            maxLength={300}
-          />
-
-          <TextAreaField
-            label="الجواب"
-            required
-            value={draft.answer}
-            onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
-            error={errors.answer}
-            maxLength={3000}
-            rows={6}
-          />
-
-          <TextAreaField
-            label="صيغ أخرى للسؤال"
-            value={draft.keywords}
-            onChange={(e) => setDraft({ ...draft, keywords: e.target.value })}
-            hint="صيغة في كل سطر. تساعد «اسألني» على التعرّف على السؤال مهما اختلفت كلماته."
-            maxLength={1000}
-            rows={4}
-          />
-
-          <TextField
-            label="الموضوع"
-            value={draft.topic}
-            onChange={(e) => setDraft({ ...draft, topic: e.target.value })}
-            hint="لتجميع الأسئلة المتقاربة، مثل: الاختبار، المكتبة، المواعيد."
-            maxLength={80}
-          />
-
-          <div className="rounded-[var(--radius-md)] bg-slate-50 p-4">
-            <CheckboxField
-              label="فعّال — يجيب به «اسألني» على الطلاب"
-              checked={draft.active}
-              onChange={(v) => setDraft({ ...draft, active: v })}
-            />
-          </div>
-
-          {formError ? <Alert tone="danger">{formError}</Alert> : null}
-
-          <div className="flex justify-end gap-2 border-t border-[var(--color-line)] pt-4">
-            <button type="button" className="btn-outline" onClick={() => setOpen(false)}>
-              إلغاء
-            </button>
-            <SubmitButton loading={saving}>{draft.id ? "حفظ" : "إضافة"}</SubmitButton>
-          </div>
-        </form>
-      </Dialog>
+        onSaved={() => {
+          setOpen(false);
+          router.refresh();
+        }}
+      />
 
       <ConfirmDialog
         open={!!confirmDelete}
