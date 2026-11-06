@@ -43,7 +43,8 @@
     "programs:convert": "python scripts/xlsx-to-programs.py",
     "programs:verify": "python scripts/verify-programs.py",
     "programs:text": "python scripts/audit/text-quality.py",
-    "audit:guide": "tsx scripts/audit/guide-text.ts"
+    "audit:guide": "tsx scripts/audit/guide-text.ts",
+    "visits:prune": "tsx scripts/prune-visits.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

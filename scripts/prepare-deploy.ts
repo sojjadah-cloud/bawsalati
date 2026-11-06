@@ -29,6 +29,7 @@ const STEPS: [string, string][] = [
   ["تنظيف ما لا يُفتح", "npm run library:prune -- --apply"],
   ["دليل التخصصات", "npm run programs:import"],
   ["أسئلة الدليل", "npm run faq:guide"],
+  ["بصمات الزوّار المنقضية", "npm run visits:prune"],
 ];
 
 /** رسالة الخطأ قد تأتي فارغة، فلا يُستدلّ على الوصول بوجود نصٍّ فيها. */

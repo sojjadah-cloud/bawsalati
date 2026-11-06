@@ -33,6 +33,8 @@ export async function proxy(req: NextRequest) {
 
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-nonce", nonce);
+  // مكوّنات الخادم لا تعرف المسار الجاري، فيُمرَّر إليها ليُحصى الزائر
+  requestHeaders.set("x-pathname", pathname);
 
   const protectedArea = pathname.startsWith("/specialist") || pathname.startsWith("/admin");
 

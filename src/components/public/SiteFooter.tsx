@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Compass, Mail, MapPin, Phone } from "lucide-react";
 import { BRAND } from "@/lib/constants";
+import { VisitorCounter } from "./VisitorCounter";
 
 const SERVICES = [
   { href: "/assessment", label: "مقياس السمات والميول" },
@@ -66,6 +67,7 @@ export function SiteFooter() {
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-2 border-t border-[var(--color-line)] pt-4 text-xs text-[var(--color-faint)]">
           <p>© {new Date().getFullYear()} {BRAND.name}</p>
+          <VisitorCounter />
           <div className="flex gap-5">
             <Link href="/privacy" className="transition-colors hover:text-brand-700">
               الخصوصية

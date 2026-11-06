@@ -395,34 +395,34 @@ model Program {
 /// دليل التخصصات والبرامج الدراسية كما ورد في دليل الطالب (صفحات 74–242).
 /// يُتصفَّح هرمياً: المجال الأكاديمي ← نوع البرنامج ← المؤسسة ← البرنامج.
 model StudyProgram {
-  id     String @id @default(cuid())
+  id            String   @id @default(cuid())
   /// رمز البرنامج في نظام القبول الموحد، فريد ويُبحث به مباشرة
-  code   String @unique
-  name   String
+  code          String   @unique
+  name          String
   /// المجال الأكاديمي: الصحة، الهندسة، تكنولوجيا المعلومات …
-  field  String
+  field         String
   /// نوع البرنامج المستخدم في التصفية: حكومي، بعثة خارجية، منحة …
   programType   String
   /// المسار أو جهة التمويل كما ورد في الدليل
-  track         String  @default("")
+  track         String   @default("")
   /// فئة الاستحقاق: جميع الطلبة، ضمان اجتماعي، دخل محدود، ذوو الإعاقة
-  eligibility   String  @default("")
+  eligibility   String   @default("")
   /// الحد الأدنى للتقدم والشروط، أسطراً كما وردت
-  requirements  String  @default("")
+  requirements  String   @default("")
   /// مواد المفاضلة وحسم التعادل
-  tieBreakers   String  @default("")
-  language      String  @default("")
-  country       String  @default("")
-  institution   String  @default("")
-  qualification String  @default("")
-  notes         String  @default("")
+  tieBreakers   String   @default("")
+  language      String   @default("")
+  country       String   @default("")
+  institution   String   @default("")
+  qualification String   @default("")
+  notes         String   @default("")
   /// صفحة الدليل التي أُخذ منها الصفّ، ليتحقّق الطالب بنفسه
   guidePage     Int?
   /// أدنى معدل عام مقروء من نصّ الشروط، أو null إن لم يُذكر
   minOverall    Int?
   /// شروط المواد مقروءةً: [{ min, anyOf: [مادة], count }]
-  subjectRules  Json    @default("[]")
-  active        Boolean @default(true)
+  subjectRules  Json     @default("[]")
+  active        Boolean  @default(true)
   /// عدد مرات فتح صفحة البرنامج — إحصاء فقط
   viewCount     Int      @default(0)
   createdAt     DateTime @default(now())
@@ -749,4 +749,36 @@ model AuditLog {
   @@index([entity, createdAt])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ─────────────────────── إحصاء الزيارات ───────────────────────
+//
+// يُعدّ الزوّار بلا أي بيان يعرّف أحداً: لا عنوان IP محفوظ، ولا كوكي،
+// ولا معرّف يدوم. البصمة اليومية دالّة تجزئة لعنوان الزائر ومتصفّحه
+// مع ملحٍ يتغيّر كل يوم، فيستحيل ربط زيارات اليوم بزيارات غده،
+// ويستحيل استخراج العنوان منها.
+
+/// مشاهدات صفحةٍ في يوم: الإجمالي وعدد الزوّار المختلفين.
+model PageView {
+  id       String   @id @default(cuid())
+  /// اليوم بتوقيت مسقط
+  day      DateTime @db.Date
+  path     String
+  views    Int      @default(0)
+  visitors Int      @default(0)
+
+  @@unique([day, path])
+  @@index([day])
+  @@map("page_views")
+}
+
+/// بصمة زائرٍ ليومٍ واحد — ليُعدّ مرةً لا مرّات. تُمحى بعد أسبوعين.
+model VisitorDay {
+  fingerprint String
+  day         DateTime @db.Date
+  createdAt   DateTime @default(now())
+
+  @@id([fingerprint, day])
+  @@index([day])
+  @@map("visitor_days")
 }
