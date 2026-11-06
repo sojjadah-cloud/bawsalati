@@ -13,8 +13,14 @@
  *
  * لا يطبع السكربت عنوان أي قاعدة ولا كلمة مرورها — المضيف وحده يظهر.
  */
+import { existsSync } from "node:fs";
+import { config as loadEnv } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+
+// عنوانا القاعدتين في ملفٍ مستقل مستثنى من المستودع، فلا يختلطان
+// بإعداد التطوير ولا يُرفعان سهواً.
+if (existsSync(".env.migrate")) loadEnv({ path: ".env.migrate", override: true });
 
 const APPLY = process.argv.includes("--apply");
 
@@ -76,12 +82,20 @@ const BATCH = 500;
 
 async function main() {
   const source = process.env.SOURCE_DATABASE_URL;
-  const target = process.env.TARGET_DATABASE_URL;
+  // الهدف افتراضاً قاعدة Neon المضبوطة في .env، فلا يُلصق عنوانٌ مرتين.
+  // المباشر لا المُجمَّع: النقل جلسةٌ طويلة، والمُجمِّع يقطعها.
+  const target =
+    process.env.TARGET_DATABASE_URL ||
+    process.env.NEON_DATABASE_URL_UNPOOLED ||
+    process.env.NEON_DATABASE_URL;
 
   if (!source || !target) {
     console.error(
-      "\n✘ يلزم SOURCE_DATABASE_URL وTARGET_DATABASE_URL.\n" +
-        "  ضعهما في ملف .env.migrate (لا يُرفع إلى المستودع) أو في سطر الأمر.\n"
+      "\n✘ يلزم SOURCE_DATABASE_URL على الأقل.\n" +
+        "  ضعه في ملف .env.migrate (مستثنى من المستودع):\n" +
+        '    SOURCE_DATABASE_URL="<عنوان القاعدة القديمة>"\n' +
+        "  والهدف يُقرأ من NEON_DATABASE_URL_UNPOOLED في .env، أو اضبط\n" +
+        "  TARGET_DATABASE_URL صراحةً.\n"
     );
     process.exit(1);
   }
