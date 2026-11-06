@@ -1,15 +1,21 @@
 # مخطّط نشر بوصلتي على Render
 # https://render.com/docs/blueprint-spec
 #
-# ينشئ خدمتين: تطبيق Next.js وقاعدة PostgreSQL مربوطة به تلقائياً.
+# ينشئ خدمة Next.js واحدة. قاعدة البيانات في Neon (انظر أدناه).
 # البناء يطبّق الترحيلات ثم يهيّئ بيانات المقياس، وكلاهما آمن عند التكرار.
 
-databases:
-  - name: bawsalati-db
-    databaseName: bawsalati
-    user: bawsalati
-    plan: free
-    region: frankfurt
+# قاعدة البيانات في Neon لا هنا.
+#
+# قواعد Render المجانية تُحذف بعد 30 يوماً من إنشائها. وNeon مجانيّتها
+# بلا أجل، فانتقلت المنصة إليها. عنوانها في DATABASE_URL بلوحة Render،
+# وخطوات النقل في docs/07-deployment.md.
+#
+# databases:
+#   - name: bawsalati-db
+#     databaseName: bawsalati
+#     user: bawsalati
+#     plan: free
+#     region: frankfurt
 
 services:
   - type: web
@@ -44,11 +50,16 @@ services:
       - key: NODE_VERSION
         value: "22"
 
-      # يُربط تلقائياً بقاعدة البيانات أعلاه
+      # يُضبط في لوحة Render لا هنا.
+      #
+      # كان مربوطاً بقاعدة Render المجانية أعلاه، وتلك **تُحذف بعد 30 يوماً
+      # من إنشائها** فتذهب الحجوزات والنتائج والحسابات — وقد حدث مرةً في
+      # أكتوبر 2026. فانتقلت المنصة إلى قاعدة دائمة في Neon.
+      #
+      # وعنوانها سرٌّ لا يُكتب في مستودعٍ عام، فيبقى sync: false: تضبطه
+      # مرةً في اللوحة، ولا يعيد المخطّطُ كتابته فوقه عند أي مزامنة.
       - key: DATABASE_URL
-        fromDatabase:
-          name: bawsalati-db
-          property: connectionString
+        sync: false
 
       # مفتاح توقيع الجلسات — تولّده Render ولا يظهر في المستودع
       - key: JWT_SECRET
