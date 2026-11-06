@@ -1,0 +1,42 @@
+# نبضة تُبقي المنصة مستيقظة.
+#
+# خدمة Render المجانية تنام بعد نحو ربع ساعة بلا زيارات، وأول زيارة
+# بعدها تنتظر من عشرين إلى خمسين ثانية — وهذا ما يراه الطالب أول ما
+# يفتح الموقع. زيارةٌ كل عشر دقائق تمنع النوم أصلاً.
+#
+# ولا تحتاج حساباً في خدمة مراقبة: المستودع عام، ودقائق GitHub Actions
+# فيه بلا حدّ. و/api/health مسارٌ خفيف لا يلمس قاعدة البيانات.
+#
+# الساعات المجانية في Render 750 شهرياً، وخدمةٌ واحدة تعمل الشهر كلّه
+# تستهلك نحو 730 — فالنبضة تبقى داخل الحدّ ما دامت الخدمة واحدة.
+
+name: إبقاء المنصة مستيقظة
+
+on:
+  schedule:
+    # كل عشر دقائق. جدولة GitHub تقريبية وقد تتأخّر، وهذا مقبول هنا.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+# تشغيلٌ واحد في كل وقت: نبضةٌ متأخّرة لا تتراكم مع التي بعدها
+concurrency:
+  group: keep-awake
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: نبضة على /api/health
+        run: |
+          # --max-time 90 لأنّ الخدمة النائمة تستيقظ في نحو خمسين ثانية
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 90 \
+            -H 'User-Agent: bawsalati-keepalive' \
+            https://www.bawsalati.com/api/health)
+          echo "استجابة الموقع: $code"
+          # 2xx و3xx مقبولة؛ ما عداها يُفشل التشغيل فيصل تنبيه
+          case "$code" in
+            2*|3*) exit 0 ;;
+            *) echo "::error::الموقع ردّ بـ$code"; exit 1 ;;
+          esac

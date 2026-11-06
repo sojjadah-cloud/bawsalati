@@ -14,7 +14,7 @@ import { prisma } from "@/lib/prisma";
 
 /** متصفّحات الفهرسة والمراقبة — زياراتها ليست زيارات طلاب. */
 const BOT =
-  /bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|discord|preview|monitor|uptime|curl|wget|python-requests|axios|headless|lighthouse|pingdom|semrush|ahrefs|dataprovider|phantomjs|node-fetch/i;
+  /bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|discord|preview|monitor|uptime|keepalive|curl|wget|python-requests|axios|headless|lighthouse|pingdom|semrush|ahrefs|dataprovider|phantomjs|node-fetch/i;
 
 /** مسارات لا تُحسب: الإدارة، وواجهات البيانات، والملفات. */
 const SKIP = /^\/(admin|specialist|login|api|_next)(\/|$)/u;

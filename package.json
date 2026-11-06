@@ -44,7 +44,8 @@
     "programs:verify": "python scripts/verify-programs.py",
     "programs:text": "python scripts/audit/text-quality.py",
     "audit:guide": "tsx scripts/audit/guide-text.ts",
-    "visits:prune": "tsx scripts/prune-visits.ts"
+    "visits:prune": "tsx scripts/prune-visits.ts",
+    "db:copy": "tsx scripts/copy-database.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
