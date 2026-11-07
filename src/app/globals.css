@@ -217,6 +217,17 @@
   .btn-outline {
     @apply border-[var(--color-line-strong)] bg-white text-slate-700 hover:border-brand-400 hover:text-brand-800;
   }
+  /*
+   * إجراء فوق شريطٍ داكن.
+   *
+   * btn-secondary لا يصلح هناك: لونه نعناعٌ باهت من لوحة الهوية نفسها
+   * فوق أخضرها الداكن، فيذوب في الشريط ويُقرأ زخرفةً لا زرّاً. الأبيض
+   * الصريح مع ظلٍّ يفصله عن الخلفية فيُرى من أول نظرة.
+   */
+  .btn-hero {
+    @apply bg-white text-brand-800 shadow-lg shadow-black/20 ring-1 ring-white/70
+      hover:bg-brand-50 hover:shadow-xl active:bg-brand-100;
+  }
   .btn-ghost {
     @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
   }

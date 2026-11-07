@@ -187,7 +187,9 @@ export function EligibilityWizard() {
     <div className="space-y-6">
       <StepBack
         label={STEP_LABELS[step - 1] ?? ""}
-        onBack={step > 1 && !loading ? () => setStep(step === 3 ? 2 : 1) : undefined}
+        // لا يُعطَّل أثناء الحساب: كان يتحوّل حينها إلى «رجوع إلى الرئيسية»
+        // فيخرج الطالب من المعالج ويفقد ما أدخله وهو يظنّه رجوعاً خطوة.
+        onBack={step > 1 ? () => setStep(step === 3 ? 2 : 1) : undefined}
         exit={{ href: "/", label: "الرئيسية" }}
       />
 
@@ -443,7 +445,12 @@ export function EligibilityWizard() {
       ) : null}
 
       {step === 3 && result ? (
-        <Results result={result} needsMarks={needsMarks} onRestart={restart} />
+        <Results
+          result={result}
+          needsMarks={needsMarks}
+          onRestart={restart}
+          onBack={() => setStep(2)}
+        />
       ) : null}
     </div>
   );
@@ -638,10 +645,13 @@ function Results({
   result,
   needsMarks,
   onRestart,
+  onBack,
 }: {
   result: MatchResult;
   needsMarks: boolean;
   onRestart: () => void;
+  /** رجوعٌ خطوةً إلى المواد والدرجات، بلا فقدان ما أُدخل */
+  onBack: () => void;
 }) {
   /** مجال واحد مختار: تُعرض برامجه وحدها بدل تصفّح القائمة كلها. */
   const [field, setField] = useState<string>("");
@@ -801,7 +811,13 @@ function Results({
             : null}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" onClick={onRestart} className="btn-outline">
+          {/* الرجوع أولاً: صفحة النتائج طويلة، ومن أراد تعديل مادة أو درجة
+              لا ينبغي أن يكون خياره الوحيد في آخرها «ابدأ من جديد». */}
+          <button type="button" onClick={onBack} className="btn-outline">
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            السابق — تعديل {needsMarks ? "المواد والدرجات" : "المواد"}
+          </button>
+          <button type="button" onClick={onRestart} className="btn-ghost">
             ابدأ من جديد
           </button>
           <Link href="/booking" className="btn-primary">

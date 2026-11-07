@@ -71,7 +71,15 @@ for (const p of programs) {
  * شرطها قصيرٌ حقاً لا ناقصاً: صفحة 237 لـBS276 وBS277، و239 لـDS012 وDS013،
  * و107 لـDS020. ما عداها يُعرض للمراجعة.
  */
-const VERIFIED_SHORT = new Set(["BS276", "BS277", "DS012", "DS013", "DS020"]);
+const VERIFIED_SHORT = new Set([
+  // شرطها في الدليل قصيرٌ حقاً لا ناقصاً — رُوجعت صفحةً صفحة:
+  "BS276", "BS277",   // ص237
+  "DS012", "DS013",   // ص239
+  "DS020",            // ص107
+  "BS282", "BS273",   // ص176 — التربية الفنية والرياضية: دبلوم ومادة واحدة
+  "BS315",            // ص180 — التربية الفنية: دبلوم والفنون التشكيلية
+  "IG007",            // ص132 — صفّ فئة الضمان الاجتماعي
+]);
 
 const byPage = new Map<number, Row[]>();
 for (const p of programs) {
@@ -84,11 +92,22 @@ for (const list of byPage.values()) {
   if (list.length < 2) continue;
   const longest = Math.max(...list.map((p) => (p.requirements ?? "").length));
   if (longest < 60) continue;
+  // أكثر ما قُرئ من شروط مواد في هذه الصفحة — مقياسُ ما تحمله خانتها
+  const richest = Math.max(...list.map((p) => parseRequirements(p.requirements ?? "").rules.length));
   for (const p of list) {
     if (VERIFIED_SHORT.has(p.code)) continue;
     const own = p.requirements ?? "";
-    if (own.length >= longest / 3) continue;
-    if (parseRequirements(own).rules.length > 0) continue;
+    const mine = parseRequirements(own).rules.length;
+
+    // خانةٌ ضاع نصّها كلّه: أقصر من ثلث أطول شرطٍ في الصفحة وبلا أي شرط
+    const empty = own.length < longest / 3 && mine === 0;
+
+    // أو ضاع بعضه: أقصر من نصف أطول شرط، وشروطه أقلّ من نصف ما لإخوته.
+    // هكذا ضاعت مواد SQ159 وSQ162 في صفحة 115 — بقي لهما شرطٌ واحد
+    // فأفلتا من الفحص الأول، وهما في خانةٍ مدموجة مع من قبلهما.
+    const partial = richest >= 3 && mine > 0 && mine * 2 <= richest && own.length < longest / 2;
+
+    if (!empty && !partial) continue;
     mergedCells.push({ code: p.code, page: p.page, name: p.name.slice(0, 44), own });
   }
 }

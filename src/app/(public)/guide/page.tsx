@@ -105,7 +105,7 @@ export default async function GuidePage({
               href="/api/files/guide"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary"
+              className="btn-hero btn-lg"
             >
               <ExternalLink className="h-5 w-5" aria-hidden="true" />
               افتح الدليل
