@@ -199,6 +199,7 @@
   .btn-primary,
   .btn-secondary,
   .btn-outline,
+  .btn-hero,
   .btn-ghost,
   .btn-danger {
     @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)]
@@ -221,12 +222,15 @@
    * إجراء فوق شريطٍ داكن.
    *
    * btn-secondary لا يصلح هناك: لونه نعناعٌ باهت من لوحة الهوية نفسها
-   * فوق أخضرها الداكن، فيذوب في الشريط ويُقرأ زخرفةً لا زرّاً. الأبيض
-   * الصريح مع ظلٍّ يفصله عن الخلفية فيُرى من أول نظرة.
+   * فوق أخضرها الداكن، فيذوب في الشريط ويُقرأ زخرفةً لا زرّاً. والأبيض
+   * الصريح يُرى لكنّه كتلةٌ ثقيلة تبتلع الشريط.
+   *
+   * فحدٌّ أبيضُ واضح مع زجاجٍ خفيف: يُرى زرّاً من أول نظرة، ويبقى
+   * الشريط شريطاً. والنصّ أبيض فوق الأخضر الداكن، وتباينه عالٍ.
    */
   .btn-hero {
-    @apply bg-white text-brand-800 shadow-lg shadow-black/20 ring-1 ring-white/70
-      hover:bg-brand-50 hover:shadow-xl active:bg-brand-100;
+    @apply border-white/70 bg-white/10 text-white backdrop-blur-sm
+      hover:border-white hover:bg-white/20 active:bg-white/25;
   }
   .btn-ghost {
     @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
