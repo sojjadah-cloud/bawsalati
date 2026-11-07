@@ -112,8 +112,52 @@ for (const list of byPage.values()) {
   }
 }
 
+/**
+ * نصٌّ مقطوعٌ من أعلاه — أدقّ بصمةٍ للخلية المدموجة.
+ *
+ * حين تُدمج خانة الشروط على عدّة برامج، ينقل ملف الإكسل النصّ كاملاً
+ * إلى الصفّ الأول ويقطع أوائله عمّن بعده. فتكون أسطر الصفّ المقطوع
+ * ذيلاً من أسطر جاره بالترتيب نفسه. وهكذا ضاعت شروطٌ في الصفحات
+ * 84 و114 و115 و136 و174 و197 و210.
+ *
+ * المقارنة بالأسطر لا بالأطوال: صفٌّ شرطه قصيرٌ حقاً لا تكون أسطره
+ * ذيلاً مرتّباً من أسطر غيره، فلا يُبلَّغ عنه.
+ */
+const reqLines = (text: string) =>
+  (text ?? "")
+    .split("\n")
+    .map((l) => l.replace(/^[•\-\s]+/u, "").replace(/\s+/gu, " ").trim())
+    .filter((l) => l.length > 3);
+
+const truncated: string[] = [];
+for (const list of byPage.values()) {
+  if (list.length < 2) continue;
+  for (const a of list) {
+    const la = reqLines(a.requirements);
+    if (la.length === 0) continue;
+    for (const b of list) {
+      if (a === b) continue;
+      const lb = reqLines(b.requirements);
+      if (lb.length <= la.length) continue;
+      const tail = lb.slice(lb.length - la.length);
+      if (!tail.every((l, i) => l === la[i])) continue;
+      const lost = lb.slice(0, lb.length - la.length).map((l) => l.slice(0, 46)).join(" | ");
+      truncated.push(
+        `ص${a.page} ${a.code} «${a.name.replace(/\s+/gu, " ").slice(0, 34)}» — ذيلٌ من ${b.code}، ضاع: ${lost}`
+      );
+      break;
+    }
+  }
+}
+
+if (truncated.length > 0) {
+  console.log("\n── نصٌّ مقطوعٌ من أعلاه (خانة مدموجة) ──");
+  for (const t of truncated) console.log(`  ⚠ ${t}`);
+}
+
 console.log(`\n📋 فحص قراءة الشروط — ${programs.length} برنامجاً\n`);
 console.log(`  خلايا مشتبهٌ بأنّ نصّها ضاع عند النقل: ${mergedCells.length}`);
+console.log(`  نصوصٌ مقطوعة من أعلاها: ${truncated.length}`);
 console.log(`  بلا شرط مواد مقروء: ${noRules}`);
 console.log(`  أسطر أفلتت من القراءة وفيها مادة أو نسبة: ${missed.length}`);
 console.log(`  برامج بلا شرط مع ذكر مادة في نصّها: ${emptyWithSubjects.length}`);
@@ -153,6 +197,7 @@ const clean =
   missed.length === 0 &&
   emptyWithSubjects.length === 0 &&
   droppedSubjects.length === 0 &&
-  mergedCells.length === 0;
+  mergedCells.length === 0 &&
+  truncated.length === 0;
 console.log(clean ? "\n✅ كل شرطٍ مذكورٍ مقروء.\n" : "\n⚠️  راجع ما سبق في الدليل.\n");
 process.exit(clean ? 0 : 1);
